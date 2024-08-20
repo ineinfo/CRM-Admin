@@ -155,22 +155,23 @@ export const paths = {
       details: (id) => `${ROOTS.DASHBOARD}/amenities/${id}`,
       edit: (id) => `${ROOTS.DASHBOARD}/amenities/${id}/edit`,
     },
-
     propertytype: {
       root: `${ROOTS.DASHBOARD}/propertytype`,
       new: `${ROOTS.DASHBOARD}/propertytype/new`,
       details: (id) => `${ROOTS.DASHBOARD}/propertytype/${id}`,
       edit: (id) => `${ROOTS.DASHBOARD}/propertytype/${id}/edit`,
     },
+    propertypage: {
+      root: `${ROOTS.DASHBOARD}/developers/list`,
+      new: `${ROOTS.DASHBOARD}/developers/new`,
+      details: (id) => `${ROOTS.DASHBOARD}/developers/${id}`,
+      edit: (id) => `${ROOTS.DASHBOARD}/developers/${id}/edit`,
+    },
     invoice: {
       root: `${ROOTS.DASHBOARD}/invoice`,
       new: `${ROOTS.DASHBOARD}/invoice/new`,
       details: (id) => `${ROOTS.DASHBOARD}/invoice/${id}`,
       edit: (id) => `${ROOTS.DASHBOARD}/invoice/${id}/edit`,
-      demo: {
-        details: `${ROOTS.DASHBOARD}/invoice/${MOCK_ID}`,
-        edit: `${ROOTS.DASHBOARD}/invoice/${MOCK_ID}/edit`,
-      },
     }
   },
 };

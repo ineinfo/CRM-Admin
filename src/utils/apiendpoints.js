@@ -19,3 +19,6 @@ export const CLIENTS_ROUTE = `${apiUrl}/clients`;
 
 // LEAD MODULE 
 export const LEADS_ROUTE = `${apiUrl}/leads`;
+
+// PROPERTY MASTER 
+export const PROPERTIES_ROUTE = `${apiUrl}/properties`;
