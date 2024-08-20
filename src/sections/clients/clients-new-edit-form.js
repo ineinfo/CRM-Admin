@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
-import { useMemo,useEffect } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -9,7 +9,7 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Unstable_Grid2';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Select, Checkbox,  MenuItem, InputLabel,  FormControl,  FormHelperText} from '@mui/material';
+import { Select, Checkbox, MenuItem, InputLabel, FormControl, FormHelperText, TextField, InputAdornment } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -19,10 +19,6 @@ import { createClient, updateClient } from 'src/api/clients';
 
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
-
-
-
-
 
 // ----------------------------------------------------------------------
 
@@ -37,6 +33,7 @@ export default function ClientNewEditForm({ currentClient }) {
     customer_email: Yup.string().required('Customer Email is required').email('Email must be a valid email address'),
     purchase_type: Yup.string().required('Purchase Type is required'),
     location: Yup.string().required('Location is required'),
+    number_of_bathrooms: Yup.string().required('Number of Bathrooms is required'),
     amenities: Yup.array().of(Yup.number()),
   });
 
@@ -47,6 +44,7 @@ export default function ClientNewEditForm({ currentClient }) {
       customer_email: currentClient?.customer_email || '',
       customer_address: currentClient?.customer_address || '',
       number_of_bedrooms: currentClient?.number_of_bedrooms || '',
+      number_of_bathrooms: currentClient?.number_of_bathrooms || '',
       price: currentClient?.price || '',
       purchase_type: currentClient?.purchase_type || 'cash',
       location: currentClient?.location || '',
@@ -54,6 +52,7 @@ export default function ClientNewEditForm({ currentClient }) {
       created: currentClient?.created || '',
       status: currentClient?.status || 1,
       amenities: currentClient?.amenities || [],
+      currency: currentClient?.currency || 'AED',
     }),
     [currentClient]
   );
@@ -68,6 +67,11 @@ export default function ClientNewEditForm({ currentClient }) {
     { value: 'mortgage', label: 'Mortgage' }
   ];
 
+  const CURRENCY_OPTIONS = [
+    { value: 'AED', label: 'AED' },
+    { value: 'GBP', label: 'Pound' }
+  ];
+
   const {
     reset,
     control,
@@ -80,7 +84,6 @@ export default function ClientNewEditForm({ currentClient }) {
   }, [currentClient, reset, defaultValues]);
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log('Data', data);
     try {
       if (currentClient) {
         await updateClient(currentClient.id, data);
@@ -91,7 +94,6 @@ export default function ClientNewEditForm({ currentClient }) {
       }
       router.push(paths.dashboard.clients.list);
       reset();
-
     } catch (error) {
       enqueueSnackbar((error.response?.data?.message || 'Unknown error'), { variant: 'error' });
     }
@@ -116,7 +118,46 @@ export default function ClientNewEditForm({ currentClient }) {
               <RHFTextField name="customer_email" label="Customer Email" />
               <RHFTextField name="customer_address" label="Customer Address" />
               <RHFTextField name="number_of_bedrooms" label="Number of Bedrooms" />
-              <RHFTextField name="price" label="Price" />
+              <RHFTextField name="number_of_bathrooms" label="Number of Bathrooms" />
+
+              <Controller
+                name="price"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Price"
+                    variant="outlined"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <FormControl sx={{ minWidth: 80 }}>
+                            <InputLabel id="currency-select-label">Currency</InputLabel>
+                            <Controller
+                              name="currency"
+                              control={control}
+                              render={({ field }) => (
+                                <Select
+                                  {...field}
+                                  labelId="currency-select-label"
+                                  label="Currency"
+                                >
+                                  {CURRENCY_OPTIONS.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>
+                                      {option.label}
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                              )}
+                            />
+                          </FormControl>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
+              />
+
               <FormControl fullWidth>
                 <InputLabel>Purchase Type</InputLabel>
                 <Controller
@@ -140,6 +181,7 @@ export default function ClientNewEditForm({ currentClient }) {
                   )}
                 />
               </FormControl>
+
               <Controller
                 name="amenities"
                 control={control}
@@ -168,7 +210,7 @@ export default function ClientNewEditForm({ currentClient }) {
                   </FormControl>
                 )}
               />
-              {/* Textarea with the same grid layout */}
+
               <RHFTextField
                 name="location"
                 label="Location"
@@ -190,7 +232,6 @@ export default function ClientNewEditForm({ currentClient }) {
         </Grid>
       </Grid>
     </FormProvider>
-
   );
 }
 

@@ -42,6 +42,7 @@ const ICONS = {
   property: icon('ic_property'),
   clients: icon('ic_clients'),  
   leads: icon('ic_leads'),
+  propertylogo: icon('ic_properties')
 };
 
 // ----------------------------------------------------------------------
@@ -106,15 +107,15 @@ export function useNavData() {
               { title: t('create'), path: paths.dashboard.user.new }
             ],
           },
-          {
-            title: t('Clients'),
-            path: paths.dashboard.clients.root,
-            icon: ICONS.clients,
-            children: [
-              { title: t('list'), path: paths.dashboard.clients.list },
-              { title: t('create'), path: paths.dashboard.clients.new }
-            ],
-          },
+          // {
+          //   title: t('Clients'),
+          //   path: paths.dashboard.clients.root,
+          //   icon: ICONS.clients,
+          //   children: [
+          //     { title: t('list'), path: paths.dashboard.clients.list },
+          //     { title: t('create'), path: paths.dashboard.clients.new }
+          //   ],
+          // },
           {
             title: t('Leads'),
             path: paths.dashboard.leads.root,
@@ -122,6 +123,15 @@ export function useNavData() {
             children: [
               { title: t('list'), path: paths.dashboard.leads.list },
               { title: t('create'), path: paths.dashboard.leads.new }
+            ],
+          },
+          {
+            title: t('Developers'),
+            path: paths.dashboard.propertypage.root,
+            icon: ICONS.propertylogo,
+            children: [
+              { title: t('list'), path: paths.dashboard.propertypage.root },
+              { title: t('create'), path: paths.dashboard.propertypage.new }
             ],
           }
         ],

@@ -30,6 +30,7 @@ import FormProvider, {
   RHFTextField,
   RHFUploadAvatar,
 } from 'src/components/hook-form';
+const DEFAULT_AVATAR_URL = '/logo/logo_single.png'; // Replace with the actual path to your default image
 
 // ----------------------------------------------------------------------
 
@@ -37,14 +38,15 @@ export default function UserNewEditForm({ currentUser }) {
   const router = useRouter();
   const { products: roles } = UsegetRoles();
   const { enqueueSnackbar } = useSnackbar();
-  const password = useBoolean();
+  // const password = useBoolean(); // Commenting out since we are removing the password field
 
   const NewUserSchema = Yup.object().shape({
     first_name: Yup.string().required('First Name is required'),
     last_name: Yup.string().required('Last Name is required'),
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: currentUser ? '' : Yup.string().required('Password is required'),
-    avatarurl: Yup.mixed()
+    mobile_number: Yup.string().required('Mobile Number is required'),
+    // password: currentUser ? '' : Yup.string().required('Password is required'), // Commenting out the password validation
+    avatarurl: Yup.mixed(),
   });
 
   const defaultValues = useMemo(
@@ -53,8 +55,9 @@ export default function UserNewEditForm({ currentUser }) {
       last_name: currentUser?.last_name || '',
       role_id: currentUser?.role_id || '',
       email: currentUser?.email || '',
-      password: currentUser?.password || '',
-      avatarurl: currentUser?.avatarurl || null
+      mobile_number: currentUser?.mobile_number || '',
+      // password: currentUser?.password || '', // Commenting out the password default value
+      avatarurl: currentUser?.avatarurl || DEFAULT_AVATAR_URL,
     }),
     [currentUser]
   );
@@ -63,7 +66,6 @@ export default function UserNewEditForm({ currentUser }) {
     resolver: yupResolver(NewUserSchema),
     defaultValues,
   });
-
 
   const {
     reset,
@@ -77,31 +79,6 @@ export default function UserNewEditForm({ currentUser }) {
     reset(defaultValues);
   }, [currentUser, reset, defaultValues]);
 
-  // const onSubmit = handleSubmit(async (data) => {
-  //   try {
-  //     const formData = new FormData();
-  //     for (const key in data) {
-  //       if (key === 'avatarurl' && data[key][0]) {
-  //         formData.append(key, data[key][0]); // Append the file
-  //       } else {
-  //         formData.append(key, data[key]); // Append other fields
-  //       }
-  //     }
-  //     if (currentUser) {
-  //       await updateUser(currentUser.id, formData);
-  //       enqueueSnackbar('User updated successfully!', { variant: 'success' });
-  //       router.push(paths.dashboard.user.list);
-  //     } else {
-  //       await createUser(formData);
-  //       enqueueSnackbar('User created successfully!', { variant: 'success' });
-  //       router.push(paths.dashboard.user.list);
-  //     }
-  //     reset();
-  //   } catch (error) {
-  //     enqueueSnackbar((error.response?.data?.message || 'Unknown error'), { variant: 'error' });
-  //   }
-  // });
-
   const onSubmit = handleSubmit(async (data) => {
     try {
       const formData = new FormData();
@@ -112,7 +89,7 @@ export default function UserNewEditForm({ currentUser }) {
           formData.append(key, value); // Append other fields
         }
       });
-  
+
       if (currentUser) {
         await updateUser(currentUser.id, formData);
         enqueueSnackbar('User updated successfully!', { variant: 'success' });
@@ -127,7 +104,7 @@ export default function UserNewEditForm({ currentUser }) {
       enqueueSnackbar((error.response?.data?.message || 'Unknown error'), { variant: 'error' });
     }
   });
-  
+
   const handleDrop = useCallback(
     (acceptedFiles) => {
       const file = acceptedFiles[0];
@@ -163,6 +140,7 @@ export default function UserNewEditForm({ currentUser }) {
                       textAlign: 'center',
                       color: 'text.disabled',
                     }}
+                    
                   >
                     Allowed *.jpeg, *.jpg, *.png, *.gif
                     <br /> max size of {fData(3145728)}
@@ -187,6 +165,7 @@ export default function UserNewEditForm({ currentUser }) {
               <RHFTextField name="first_name" label="First Name" />
               <RHFTextField name="last_name" label="Last Name" />
               <RHFTextField name="email" label="Email Address" />
+              <RHFTextField name="mobile_number" type='number' label="Mobile Number" />
               <Controller
                 name="role_id"
                 control={control}
@@ -208,7 +187,8 @@ export default function UserNewEditForm({ currentUser }) {
                   </FormControl>
                 )}
               />
-              <RHFTextField
+              {/* Commenting out the Password field */}
+              {/* <RHFTextField
                 name="password"
                 label="Password"
                 type={password.value ? 'text' : 'password'}
@@ -221,7 +201,7 @@ export default function UserNewEditForm({ currentUser }) {
                     </InputAdornment>
                   ),
                 }}
-              />
+              /> */}
             </Box>
 
             <Stack alignItems="flex-end" sx={{ mt: 3 }}>

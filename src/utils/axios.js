@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import { HOST_API } from 'src/config-global';
 
-import { USER_ROUTE, ROLES_ROUTE,LEADS_ROUTE, CLIENTS_ROUTE,  AMENITIES_ROUTE, PROPERTY_TYPE_ROUTE } from './apiendpoints';
+import { USER_ROUTE, ROLES_ROUTE,LEADS_ROUTE, CLIENTS_ROUTE,  AMENITIES_ROUTE, PROPERTY_TYPE_ROUTE, PROPERTIES_ROUTE } from './apiendpoints';
 
 // ----------------------------------------------------------------------
 
@@ -81,5 +81,10 @@ export const endpoints = {
     list: LEADS_ROUTE,
     create: LEADS_ROUTE,
     details: (id) => `${LEADS_ROUTE}/${id}`
+  },
+  propertypage: {
+    list: PROPERTIES_ROUTE,
+    create: PROPERTIES_ROUTE,
+    details: (id) => `${PROPERTIES_ROUTE}/${id}`
   },
 };
