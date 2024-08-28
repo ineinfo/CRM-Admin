@@ -136,9 +136,9 @@ export default function ClientNewEditForm({ currentClient }) {
                             <Controller
                               name="currency"
                               control={control}
-                              render={({ field }) => (
+                              render={({ fields }) => (
                                 <Select
-                                  {...field}
+                                  {...fields}
                                   labelId="currency-select-label"
                                   label="Currency"
                                 >

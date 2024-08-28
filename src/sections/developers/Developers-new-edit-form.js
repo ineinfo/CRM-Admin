@@ -13,6 +13,7 @@ import { Select, MenuItem, InputLabel, FormControl, FormHelperText, CircularProg
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
+import { useAuthContext } from 'src/auth/hooks';
 
 import { UsegetAmenities } from 'src/api/amenities';
 import { UsegetPropertiesType } from 'src/api/propertytype';
@@ -31,37 +32,42 @@ export default function PropertyForm({ currentProperty }) {
     developer_name: Yup.string().required('Developer Name is required'),
     location: Yup.string().required('Location is required'),
     starting_price: Yup.number().required('Starting Price is required').positive(),
-    bedrooms: Yup.string().required('Number of Bedrooms is required'),
-    property_type: Yup.string().required('Property Type is required'),
+    number_of_bathrooms: Yup.number().required('Number of Bedrooms is required'),
+    property_type_id: Yup.string().required('Property Type is required'),
     owner_name: Yup.string().required('Owner Name is required'),
     amenities: Yup.array().of(Yup.number()),
     handover_date: Yup.date().required('Handover Date is required'),
     sqft_starting_size: Yup.number().required('Sqft: Starting Size is required').positive(),
     parking: Yup.string().required('Parking status is required'),
     furnished: Yup.string().required('Furnishing status is required'),
-    leasehold_freehold: Yup.string().required('Leasehold/Freehold is required'),
-    leasehold_length: Yup.number().when('leasehold_freehold', {
-      is: 'Leasehold',
-      then: Yup.number().required('Leasehold Length is required').positive(),
-    }),
+    account_type: Yup.string().required('Leasehold/Freehold is required'),
+    // leasehold_length: Yup.number().when('account_type', {
+    //   is: 'Leasehold',
+    //   then: Yup.number().required('Leasehold Length is required').positive(),
+    // }),
     files: Yup.array().min(1, 'Images are required'),
   });
+
+
+  const { user } = useAuthContext();
+  // console.log("nedded",user.accessToken);
+  const Token = user.accessToken
 
   const defaultValues = useMemo(
     () => ({
       developer_name: currentProperty?.developer_name || '',
+      property_type_id: currentProperty?.property_type_id || '',
       location: currentProperty?.location || '',
       starting_price: currentProperty?.starting_price || '',
-      bedrooms: currentProperty?.bedrooms || '',
-      property_type: currentProperty?.property_type || '',
+      number_of_bathrooms: currentProperty?.number_of_bathrooms || '',
       owner_name: currentProperty?.owner_name || '',
-      amenities: currentProperty?.amenities || [],
       handover_date: currentProperty?.handover_date || '',
       sqft_starting_size: currentProperty?.sqft_starting_size || '',
       parking: currentProperty?.parking || 'No',
       furnished: currentProperty?.furnished || 'No',
-      leasehold_freehold: currentProperty?.leasehold_freehold || 'Freehold',
-      leasehold_length: currentProperty?.leasehold_length || '',
+      account_type: currentProperty?.account_type || 'Freehold',
+      leasehold_length: currentProperty?.leasehold_length || '455',
+      amenities: currentProperty?.amenities || [],
       files: (currentProperty?.files || []).map(imageFilename => ({
         preview: `${imageFilename}`,
       })),
@@ -87,30 +93,53 @@ export default function PropertyForm({ currentProperty }) {
 
   useEffect(() => {
     reset(defaultValues);
+    console.log('defaultValuesdefaultValues', defaultValues);
   }, [currentProperty, reset, defaultValues]);
 
   const onSubmit = handleSubmit(async (data) => {
+    // console.log("data", data);
+
+
     try {
+      // console.log('datadata', data);
       const formData = new FormData();
 
+      // Iterate over the data object and append key-value pairs
       Object.keys(data).forEach(key => {
         if (Array.isArray(data[key])) {
+          // Handle arrays
           data[key].forEach(value => formData.append(key, value));
+        } else if (key === 'handover_date' && data[key]) {
+          // Format the handover_date
+          const date = new Date(data[key]);
+          const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+          formData.append(key, formattedDate);
         } else {
+          // Append other key-value pairs
           formData.append(key, data[key]);
         }
       });
+
+
 
       const fileInputs = document.querySelector('input[type="file"]');
       if (fileInputs && fileInputs.files) {
         Array.from(fileInputs.files).forEach(file => formData.append('files', file));
       }
 
+
+      // Log FormData contents
+      // for (let pair of formData.entries()) {
+      //   console.log(`${pair[0]}: ${pair[1]}`);
+      // }
+
       if (currentProperty) {
         await UpdateProperty(currentProperty.id, formData);
         enqueueSnackbar('Property updated successfully!', { variant: 'success' });
       } else {
-        await CreateProperty(formData);
+        // console.log("=====>", formData);
+
+        await CreateProperty(formData, Token);
         enqueueSnackbar('Property created successfully!', { variant: 'success' });
       }
       router.push(paths.dashboard.propertypage.root);
@@ -135,17 +164,20 @@ export default function PropertyForm({ currentProperty }) {
   const handleDrop = useCallback(
     async (acceptedFiles) => {
       const files = values.files || [];
-      const newFiles = await Promise.all(acceptedFiles.map(async (file) => {
-        return Object.assign(file, {
-          preview: URL.createObjectURL(file),
-        });
-      }));
+      const newFiles = await Promise.all(
+        acceptedFiles.map(async (file) =>
+          Object.assign(file, {
+            preview: URL.createObjectURL(file),
+          })
+        )
+      );
       setTimeout(() => {
         setValue('files', [...files, ...newFiles], { shouldValidate: true });
       }, 10);
     },
     [setValue, values.files]
   );
+
 
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
@@ -164,23 +196,23 @@ export default function PropertyForm({ currentProperty }) {
               <RHFTextField name="developer_name" label="Developer Name" />
               <RHFTextField name="location" label="Location" />
               <RHFTextField name="starting_price" label="Starting Price" />
-              
+
               <FormControl fullWidth>
                 <InputLabel>Number of Bedrooms</InputLabel>
                 <Controller
-                  name="bedrooms"
+                  name="number_of_bathrooms"
                   control={control}
                   render={({ field, fieldState }) => (
                     <>
                       <Select {...field} label="Number of Bedrooms" error={!!fieldState.error}>
-                        <MenuItem value="Studio">Studio</MenuItem>
-                        <MenuItem value="1 bed">1 bed</MenuItem>
-                        <MenuItem value="2 bed">2 bed</MenuItem>
-                        <MenuItem value="3 bed">3 bed</MenuItem>
-                        <MenuItem value="4 bed">4 bed</MenuItem>
-                        <MenuItem value="5 bed">5 bed</MenuItem>
-                        <MenuItem value="6 bed">6 bed</MenuItem>
-                        <MenuItem value="7 bed">7 bed</MenuItem>
+                        <MenuItem value="0">Studio</MenuItem>
+                        <MenuItem value="1">1 bed</MenuItem>
+                        <MenuItem value="2">2 bed</MenuItem>
+                        <MenuItem value="3">3 bed</MenuItem>
+                        <MenuItem value="4">4 bed</MenuItem>
+                        <MenuItem value="5">5 bed</MenuItem>
+                        <MenuItem value="6">6 bed</MenuItem>
+                        <MenuItem value="7">7 bed</MenuItem>
                       </Select>
                       {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
                     </>
@@ -191,7 +223,7 @@ export default function PropertyForm({ currentProperty }) {
               <FormControl fullWidth>
                 <InputLabel>Property Type</InputLabel>
                 <Controller
-                  name="property_type"
+                  name="property_type_id"
                   control={control}
                   render={({ field, fieldState }) => (
                     <>
@@ -221,7 +253,7 @@ export default function PropertyForm({ currentProperty }) {
 
 
               <RHFTextField name="owner_name" label="Owner Name" />
-              <RHFTextField name="handover_date" label="Handover Date" />
+              <RHFTextField name="handover_date" type="date" label="Handover Date" />
               <RHFTextField name="sqft_starting_size" label="Sqft: Starting Size" />
 
               <FormControl fullWidth>
@@ -232,8 +264,8 @@ export default function PropertyForm({ currentProperty }) {
                   render={({ field, fieldState }) => (
                     <>
                       <Select {...field} label="Parking" error={!!fieldState.error}>
-                        <MenuItem value="Yes">Yes</MenuItem>
-                        <MenuItem value="No">No</MenuItem>
+                        <MenuItem value="yes">Yes</MenuItem>
+                        <MenuItem value="no">No</MenuItem>
                       </Select>
                       {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
                     </>
@@ -249,8 +281,8 @@ export default function PropertyForm({ currentProperty }) {
                   render={({ field, fieldState }) => (
                     <>
                       <Select {...field} label="Furnished" error={!!fieldState.error}>
-                        <MenuItem value="Yes">Yes</MenuItem>
-                        <MenuItem value="No">No</MenuItem>
+                        <MenuItem value="yes">Yes</MenuItem>
+                        <MenuItem value="no">No</MenuItem>
                       </Select>
                       {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
                     </>
@@ -261,7 +293,7 @@ export default function PropertyForm({ currentProperty }) {
               <FormControl fullWidth>
                 <InputLabel>Leasehold/Freehold</InputLabel>
                 <Controller
-                  name="leasehold_freehold"
+                  name="account_type"
                   control={control}
                   render={({ field, fieldState }) => (
                     <>
@@ -275,7 +307,7 @@ export default function PropertyForm({ currentProperty }) {
                 />
               </FormControl>
 
-              {values.leasehold_freehold === 'Leasehold' && (
+              {values.account_type === 'Leasehold' && (
                 <RHFTextField name="leasehold_length" label="Leasehold Length" />
               )}
 

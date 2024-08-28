@@ -30,6 +30,8 @@ import FormProvider, {
   RHFTextField,
   RHFUploadAvatar,
 } from 'src/components/hook-form';
+
+
 const DEFAULT_AVATAR_URL = '/logo/logo_single.png'; // Replace with the actual path to your default image
 
 // ----------------------------------------------------------------------
@@ -165,7 +167,6 @@ export default function UserNewEditForm({ currentUser }) {
               <RHFTextField name="first_name" label="First Name" />
               <RHFTextField name="last_name" label="Last Name" />
               <RHFTextField name="email" label="Email Address" />
-              <RHFTextField name="mobile_number" type='number' label="Mobile Number" />
               <Controller
                 name="role_id"
                 control={control}
@@ -187,6 +188,8 @@ export default function UserNewEditForm({ currentUser }) {
                   </FormControl>
                 )}
               />
+              <RHFTextField name="mobile_number" type='number' label="Mobile Number" />
+
               {/* Commenting out the Password field */}
               {/* <RHFTextField
                 name="password"

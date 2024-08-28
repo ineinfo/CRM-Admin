@@ -104,7 +104,7 @@ export function useNavData() {
             icon: ICONS.user,
             children: [
               { title: t('list'), path: paths.dashboard.user.list },
-              { title: t('create'), path: paths.dashboard.user.new }
+              { title: t('create new user'), path: paths.dashboard.user.new }
             ],
           },
           // {
@@ -122,7 +122,7 @@ export function useNavData() {
             icon: ICONS.leads,
             children: [
               { title: t('list'), path: paths.dashboard.leads.list },
-              { title: t('create'), path: paths.dashboard.leads.new }
+              { title: t('create new lead'), path: paths.dashboard.leads.new }
             ],
           },
           {
@@ -131,7 +131,7 @@ export function useNavData() {
             icon: ICONS.propertylogo,
             children: [
               { title: t('list'), path: paths.dashboard.propertypage.root },
-              { title: t('create'), path: paths.dashboard.propertypage.new }
+              { title: t('create new developer'), path: paths.dashboard.propertypage.new }
             ],
           }
         ],

@@ -47,7 +47,7 @@ export default function OverviewAnalyticsView() {
           <AnalyticsWidgetSummary
             title="Weekly Sales"
             total={714000}
-            icon={<Image alt="icon" src="/assets/icons/glass/ic_glass_bag.png" />}
+            icon={<Image alt="icon" src="/assets/icons/glass/ic_glass_bag.png" height={100} width={400} />}
           />
         </Grid>
 
@@ -56,7 +56,7 @@ export default function OverviewAnalyticsView() {
             title="New Users"
             total={1352831}
             color="info"
-            icon={<Image alt="icon" src="/assets/icons/glass/ic_glass_users.png" />}
+            icon={<Image alt="icon" src="/assets/icons/glass/ic_glass_users.png" height={100} width={400}  />}
           />
         </Grid>
 
@@ -65,7 +65,7 @@ export default function OverviewAnalyticsView() {
             title="Item Orders"
             total={1723315}
             color="warning"
-            icon={<Image alt="icon" src="/assets/icons/glass/ic_glass_buy.png" />}
+            icon={<Image alt="icon" src="/assets/icons/glass/ic_glass_buy.png" height={100} width={400} />}
           />
         </Grid>
 
@@ -74,7 +74,7 @@ export default function OverviewAnalyticsView() {
             title="Bug Reports"
             total={234}
             color="error"
-            icon={<Image alt="icon" src="/assets/icons/glass/ic_glass_message.png" />}
+            icon={<Image alt="icon" src="/assets/icons/glass/ic_glass_message.png" height={100} width={400} />}
           />
         </Grid>
 

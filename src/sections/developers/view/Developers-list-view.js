@@ -50,12 +50,13 @@ import UserTableFiltersResult from '../Developers-table-filters-result';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'customer_name', label: 'Property name', width: 180 },
-  { id: 'customer_mobile', label: 'Carpet area', width: 180 },
-  { id: 'purchase_type', label: 'Facing', width: 88 },
-  { id: 'no_of_bhk', label: 'Bhk', width: 88 },
-  { id: 'is_furnished', label: 'Furnished', width: 88 },
-  { id: 'amount_total', label: 'Amount', width: 180 },
+  { id: 'developer_name', label: 'Developer name', width: 150 },
+  { id: 'starting_price', label: 'Starting Price', width: 100 },
+  { id: 'parking', label: 'Parking', width: 50 },
+  { id: 'owner_name', label: 'Owner', width: 100 },
+  { id: 'handover_date', label: 'Handover Date', width: 100 },
+  { id: 'furnished', label: 'Furnished', width: 50 },
+  { id: 'sqft_starting_size', label: 'Sqft', width: 100 },
   { id: '', width: 88 },
 ];
 
@@ -86,6 +87,8 @@ export default function UserListView() {
     comparator: getComparator(table.order, table.orderBy),
     filters,
   });
+  console.log("======>1",dataFiltered.length);
+  
 
   const dataInPage = dataFiltered.slice(
     table.page * table.rowsPerPage,
@@ -113,7 +116,9 @@ export default function UserListView() {
     const fetchData = async () => {
       try {
         const response = await axios.get(endpoints.propertypage.list);
+        // console.log("========>",response.data.data);
         setTableData(response.data.data);
+        
       } catch (err) {
         console.log(err);
         enqueueSnackbar('Failed to load data', { variant: 'error' });

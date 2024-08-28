@@ -83,6 +83,8 @@ export default function ClientNewEditForm({ currentLead }) {
   }, [currentLead, reset, defaultValues]);
 
   const onSubmit = handleSubmit(async (data) => {
+    console.log("lead data",data);
+    
     try {
       if (currentLead) {
         await UpdateLead(currentLead.id, data);

@@ -17,6 +17,7 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 // ----------------------------------------------------------------------
 
+const DEFAULT_AVATAR_URL = '/logo/logo_single.png'; 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
   const { first_name, last_name, avatarurl,  email, role_name,  } = row;
 
@@ -32,7 +33,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         </TableCell>
 
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar alt={first_name} src={avatarurl} sx={{ mr: 2 }} />
+          <Avatar alt={first_name} src={avatarurl || DEFAULT_AVATAR_URL} sx={{ mr: 2 }} />
 
           <ListItemText
             primary={(first_name ? ` ${first_name}` : '') + (last_name ? ` ${last_name}` : '')}

@@ -51,6 +51,7 @@ export default function BankingInviteFriends({ img, price, title, description, s
 
         <InputBase
           fullWidth
+          style={{color:"black"}}
           placeholder="Email"
           endAdornment={
             <Button color="warning" variant="contained" size="small" sx={{ mr: 0.5 }}>

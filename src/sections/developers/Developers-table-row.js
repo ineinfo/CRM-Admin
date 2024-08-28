@@ -13,12 +13,15 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { formatDate } from '@fullcalendar/core';
 
 
 // ----------------------------------------------------------------------
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
-  const { property_name, customer_email, carpet_area, facing, no_of_bhk, is_furnished, amount_total } = row;
+  const { developer_name,location, starting_price, parking, owner_name,handover_date, furnished, sqft_starting_size } = row;
+  console.log("=====>2",row);
+  
   const confirm = useBoolean();
   const popover = usePopover();
 
@@ -30,8 +33,8 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         </TableCell>
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
           <ListItemText
-            primary={(property_name ? ` ${property_name}` : '')}
-            secondary={customer_email}
+            primary={(developer_name ? ` ${developer_name}` : '')}
+            secondary={location}
             primaryTypographyProps={{ typography: 'body2' }}
             secondaryTypographyProps={{
               component: 'span',
@@ -39,11 +42,12 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
             }}
           />
         </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{carpet_area}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{facing}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{no_of_bhk}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{is_furnished}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{amount_total}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{starting_price}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{parking}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{owner_name}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatDate(handover_date)}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{furnished}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{sqft_starting_size}</TableCell>
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
           <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />
