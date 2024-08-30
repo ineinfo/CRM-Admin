@@ -42,6 +42,9 @@ export default function ClientNewEditForm({ currentLead }) {
     }
   }, [getCountries.data]);
 
+  console.log("DESH", countries);
+
+
   useEffect(() => {
     if (selectedCountry) {
       const country = countries.find(c => c.name === selectedCountry);
@@ -105,8 +108,8 @@ export default function ClientNewEditForm({ currentLead }) {
   }, [currentLead, reset, defaultValues]);
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log("lead data",data);
-    
+    console.log("lead data", data);
+
     try {
       if (currentLead) {
         await UpdateLead(currentLead.id, data);
@@ -233,7 +236,7 @@ export default function ClientNewEditForm({ currentLead }) {
                       id="location"
                       options={countries}
                       getOptionLabel={(option) => option.name}
-                      value={countries.find((country) => country.name === selectedCountry) || selectedCountry}
+                      value={countries.find((country) => country.name === field.value) || null}
                       onChange={(event, newValue) => {
                         field.onChange(newValue ? newValue.name : '');
                         setSelectedCountry(newValue ? newValue.name : '');
@@ -245,7 +248,7 @@ export default function ClientNewEditForm({ currentLead }) {
                           variant="outlined"
                         />
                       )}
-                      isOptionEqualToValue={(option, value) => option.name === value.name}
+                      isOptionEqualToValue={(option, value) => option.name === value}
                     />
                   )}
                 />

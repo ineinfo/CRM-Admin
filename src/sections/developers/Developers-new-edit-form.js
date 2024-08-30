@@ -163,10 +163,10 @@ console.log("values",selectedDate);
         Array.from(fileInputs.files).forEach(file => formData.append('files', file));
       }
 
-      // Log FormData contents
-      for (let pair of formData.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
-      }
+      // // Log FormData contents
+      // for (let pair of formData.entries()) {
+      //   console.log(`${pair[0]}: ${pair[1]}`);
+      // }
 
 
       if (currentProperty) {
@@ -242,7 +242,7 @@ console.log("values",selectedDate);
                       id="location"
                       options={countries}
                       getOptionLabel={(option) => option.name}
-                      value={countries.find((country) => country.name === selectedCountry) || selectedCountry}
+                      value={countries.find((country) => country.name === field.value) || null}
                       onChange={(event, newValue) => {
                         field.onChange(newValue ? newValue.name : '');
                         setSelectedCountry(newValue ? newValue.name : '');

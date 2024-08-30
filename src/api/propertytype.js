@@ -87,10 +87,6 @@ export const deletePropertytype = async (id) => {
   return response.data;
 };
 
-
-
-
-//----------------------------------------------
 //Country Data
 
 export function useCountryData() {
