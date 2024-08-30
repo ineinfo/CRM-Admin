@@ -19,8 +19,7 @@ import { formatDate } from '@fullcalendar/core';
 // ----------------------------------------------------------------------
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
-  const { developer_name,location, starting_price, parking, owner_name,handover_date, furnished, sqft_starting_size } = row;
-  console.log("=====>2",row);
+  const { developer_name,location, starting_price, parking, owner_name,handover_date, furnished, sqft_starting_size, email } = row;
   
   const confirm = useBoolean();
   const popover = usePopover();
@@ -48,6 +47,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatDate(handover_date)}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{furnished}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{sqft_starting_size}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{email}</TableCell>
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
           <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />

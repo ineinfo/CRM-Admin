@@ -57,7 +57,8 @@ const TABLE_HEAD = [
   { id: 'handover_date', label: 'Handover Date', width: 100 },
   { id: 'furnished', label: 'Furnished', width: 50 },
   { id: 'sqft_starting_size', label: 'Sqft', width: 100 },
-  { id: '', width: 88 },
+  { id: 'email',label: 'Email', width: 88 },
+  { id: '',label: '', width: 88 },
 ];
 
 const defaultFilters = {
@@ -87,7 +88,6 @@ export default function UserListView() {
     comparator: getComparator(table.order, table.orderBy),
     filters,
   });
-  console.log("======>1",dataFiltered.length);
   
 
   const dataInPage = dataFiltered.slice(
@@ -248,7 +248,7 @@ export default function UserListView() {
                     .slice(
                       table.page * table.rowsPerPage,
                       table.page * table.rowsPerPage + table.rowsPerPage
-                    )
+                    ).reverse()
                     .map((row) => (
                       <UserTableRow
                         key={row.id}

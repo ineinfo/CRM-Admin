@@ -1,32 +1,64 @@
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
-import { useMemo, useEffect, useCallback } from 'react';
+import { useMemo, useEffect, useCallback, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import dayjs from 'dayjs';
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Unstable_Grid2';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Select, MenuItem, InputLabel, FormControl, FormHelperText, CircularProgress, Checkbox, ListItemText, Typography } from '@mui/material';
+import { formatDate } from '@fullcalendar/core';
+import { Select, MenuItem, InputLabel, FormControl, FormHelperText, CircularProgress, Checkbox, ListItemText, Typography, TextField, InputAdornment, Autocomplete } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 import { useAuthContext } from 'src/auth/hooks';
 
 import { UsegetAmenities } from 'src/api/amenities';
-import { UsegetPropertiesType } from 'src/api/propertytype';
+import { UsegetPropertiesType, useCountryData } from 'src/api/propertytype';
 import { CreateProperty, UpdateProperty } from 'src/api/properties';
 
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form';
 
 export default function PropertyForm({ currentProperty }) {
+
   const router = useRouter();
   const { products: amenities } = UsegetAmenities();
   const { products: propertyTypes, productsLoading: propertyTypesLoading } = UsegetPropertiesType();
   const { enqueueSnackbar } = useSnackbar();
+
+  const getCountries = useCountryData();
+  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [countries, setCountries] = useState([]);
+  const [selectedCurrency, setSelectedCurrency] = useState('AED');
+  const [selectedCountry, setSelectedCountry] = useState(currentProperty?.location);
+
+  useEffect(() => {
+    if (getCountries.data) {
+      setCountries(getCountries.data.data);
+    }
+  }, [getCountries.data]);
+
+  useEffect(() => {
+    if (selectedCountry) {
+      const country = countries.find(c => c.name === selectedCountry);
+      if (country) {
+        setSelectedCurrency(country.currency);
+      }
+    }
+  }, [selectedCountry, countries]);
+
+
+useEffect(()=>{
+  setSelectedDate(dayjs(currentProperty?.handover_date).format('YYYY-MM-DD'))
+},[selectedDate])
+
+console.log("values",selectedDate);
 
   const PropertySchema = Yup.object().shape({
     developer_name: Yup.string().required('Developer Name is required'),
@@ -36,7 +68,9 @@ export default function PropertyForm({ currentProperty }) {
     property_type_id: Yup.string().required('Property Type is required'),
     owner_name: Yup.string().required('Owner Name is required'),
     amenities: Yup.array().of(Yup.number()),
-    handover_date: Yup.date().required('Handover Date is required'),
+    email: Yup.string().email('Invalid email format').required('Email is required'),  // New validation
+    phone_number: Yup.string().required('Mobile number is required').matches(/^[0-9]{10,15}$/, 'Mobile number is not valid'), // New validation
+    // handover_date: Yup.date().required('Handover Date is required'),
     sqft_starting_size: Yup.number().required('Sqft: Starting Size is required').positive(),
     parking: Yup.string().required('Parking status is required'),
     furnished: Yup.string().required('Furnishing status is required'),
@@ -53,6 +87,8 @@ export default function PropertyForm({ currentProperty }) {
   // console.log("nedded",user.accessToken);
   const Token = user.accessToken
 
+
+
   const defaultValues = useMemo(
     () => ({
       developer_name: currentProperty?.developer_name || '',
@@ -61,12 +97,15 @@ export default function PropertyForm({ currentProperty }) {
       starting_price: currentProperty?.starting_price || '',
       number_of_bathrooms: currentProperty?.number_of_bathrooms || '',
       owner_name: currentProperty?.owner_name || '',
-      handover_date: currentProperty?.handover_date || '',
+      handover_date: dayjs(currentProperty?.handover_date).format('YYYY-MM-DD') || '',
+      email: currentProperty?.email || '',  // New field
+      phone_number: currentProperty?.phone_number || '',  // New field
+      currency: currentProperty?.currency || 'GBP',
       sqft_starting_size: currentProperty?.sqft_starting_size || '',
-      parking: currentProperty?.parking || 'No',
-      furnished: currentProperty?.furnished || 'No',
+      parking: currentProperty?.parking || 'no',
+      furnished: currentProperty?.furnished || 'no',
       account_type: currentProperty?.account_type || 'Freehold',
-      leasehold_length: currentProperty?.leasehold_length || '455',
+      leasehold_length: currentProperty?.leasehold_length || '0',
       amenities: currentProperty?.amenities || [],
       files: (currentProperty?.files || []).map(imageFilename => ({
         preview: `${imageFilename}`,
@@ -74,6 +113,9 @@ export default function PropertyForm({ currentProperty }) {
     }),
     [currentProperty]
   );
+
+  // console.log("date", selectedDate);
+
 
   const methods = useForm({
     resolver: yupResolver(PropertySchema),
@@ -97,48 +139,40 @@ export default function PropertyForm({ currentProperty }) {
   }, [currentProperty, reset, defaultValues]);
 
   const onSubmit = handleSubmit(async (data) => {
-    // console.log("data", data);
-
-
     try {
-      // console.log('datadata', data);
       const formData = new FormData();
 
-      // Iterate over the data object and append key-value pairs
       Object.keys(data).forEach(key => {
-        if (Array.isArray(data[key])) {
-          // Handle arrays
+        if (key === 'amenities') {
+          // Convert the amenities array into a string of comma-separated values
+          formData.append(key, JSON.stringify(data[key]));
+        } else if (Array.isArray(data[key])) {
           data[key].forEach(value => formData.append(key, value));
-        } else if (key === 'handover_date' && data[key]) {
-          // Format the handover_date
-          const date = new Date(data[key]);
-          const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+        } else if (key === 'handover_date' && (data[key])) {
+          const date = dayjs(data[key]);  // yeh format hona chahiye yyyy-mm-dd
+          const formattedDate = date.format('DD-MM-YYYY');
+
           formData.append(key, formattedDate);
         } else {
-          // Append other key-value pairs
           formData.append(key, data[key]);
         }
       });
-
-
 
       const fileInputs = document.querySelector('input[type="file"]');
       if (fileInputs && fileInputs.files) {
         Array.from(fileInputs.files).forEach(file => formData.append('files', file));
       }
 
-
       // Log FormData contents
-      // for (let pair of formData.entries()) {
-      //   console.log(`${pair[0]}: ${pair[1]}`);
-      // }
+      for (let pair of formData.entries()) {
+        console.log(`${pair[0]}: ${pair[1]}`);
+      }
+
 
       if (currentProperty) {
         await UpdateProperty(currentProperty.id, formData);
         enqueueSnackbar('Property updated successfully!', { variant: 'success' });
       } else {
-        // console.log("=====>", formData);
-
         await CreateProperty(formData, Token);
         enqueueSnackbar('Property created successfully!', { variant: 'success' });
       }
@@ -182,8 +216,12 @@ export default function PropertyForm({ currentProperty }) {
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
       <Grid container spacing={3}>
-        <Grid xs={12} md={12}>
-          <Card sx={{ p: 3 }}>
+        <Grid item xs={12}>
+          <Card sx={{ p: 4, boxShadow: 3, borderRadius: 2 }}>
+            <Typography variant="h6" sx={{ mb: 3 }}>
+              Property Details
+            </Typography>
+
             <Box
               rowGap={3}
               columnGap={2}
@@ -194,8 +232,68 @@ export default function PropertyForm({ currentProperty }) {
               }}
             >
               <RHFTextField name="developer_name" label="Developer Name" />
-              <RHFTextField name="location" label="Location" />
-              <RHFTextField name="starting_price" label="Starting Price" />
+              <FormControl fullWidth>
+                <Controller
+                  name="location"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      id="location"
+                      options={countries}
+                      getOptionLabel={(option) => option.name}
+                      value={countries.find((country) => country.name === selectedCountry) || selectedCountry}
+                      onChange={(event, newValue) => {
+                        field.onChange(newValue ? newValue.name : '');
+                        setSelectedCountry(newValue ? newValue.name : '');
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label='Location'
+                          variant="outlined"
+                        />
+                      )}
+                      isOptionEqualToValue={(option, value) => option.name === value.name}
+                    />
+                  )}
+                />
+              </FormControl>
+
+              <FormControl fullWidth>
+                <RHFTextField
+                  name="starting_price"
+                  label="Starting Price"
+                  variant="outlined"
+                  type="number"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <TextField
+                          select
+                          value={selectedCurrency}
+                          variant="standard"
+                          sx={{
+                            width: 'auto',
+                            minWidth: 60,
+                            '& .MuiSelect-root': { fontSize: '0.875rem' },
+                          }}
+                        >
+                          {countries.map((country) => (
+                            <MenuItem key={country.id} value={country.currency}>
+                              {country.currency}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      </InputAdornment>
+                    ),
+                  }}
+                  fullWidth
+                />
+              </FormControl>
+
+              <RHFTextField name="email" label="Email" />
+              <RHFTextField name="phone_number" label="Mobile Number" />
 
               <FormControl fullWidth>
                 <InputLabel>Number of Bedrooms</InputLabel>
@@ -204,7 +302,12 @@ export default function PropertyForm({ currentProperty }) {
                   control={control}
                   render={({ field, fieldState }) => (
                     <>
-                      <Select {...field} label="Number of Bedrooms" error={!!fieldState.error}>
+                      <Select
+                        {...field}
+                        label="Number of Bedrooms"
+                        error={!!fieldState.error}
+                        sx={{ transition: 'all 0.3s ease' }}
+                      >
                         <MenuItem value="0">Studio</MenuItem>
                         <MenuItem value="1">1 bed</MenuItem>
                         <MenuItem value="2">2 bed</MenuItem>
@@ -214,7 +317,9 @@ export default function PropertyForm({ currentProperty }) {
                         <MenuItem value="6">6 bed</MenuItem>
                         <MenuItem value="7">7 bed</MenuItem>
                       </Select>
-                      {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
+                      {fieldState.error && (
+                        <FormHelperText>{fieldState.error.message}</FormHelperText>
+                      )}
                     </>
                   )}
                 />
@@ -232,6 +337,7 @@ export default function PropertyForm({ currentProperty }) {
                         label="Property Type"
                         error={!!fieldState.error}
                         disabled={propertyTypesLoading}
+                        sx={{ transition: 'all 0.3s ease' }}
                       >
                         {propertyTypesLoading ? (
                           <MenuItem disabled>
@@ -245,15 +351,27 @@ export default function PropertyForm({ currentProperty }) {
                           ))
                         )}
                       </Select>
-                      {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
+                      {fieldState.error && (
+                        <FormHelperText>{fieldState.error.message}</FormHelperText>
+                      )}
                     </>
                   )}
                 />
               </FormControl>
 
-
               <RHFTextField name="owner_name" label="Owner Name" />
-              <RHFTextField name="handover_date" type="date" label="Handover Date" />
+
+              <RHFTextField
+                name="handover_date"
+                label="Handover Date"
+                type="date" // Keep the type as "date" to show the calendar
+                placeholder="dd-mm-yyyy"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+
+
               <RHFTextField name="sqft_starting_size" label="Sqft: Starting Size" />
 
               <FormControl fullWidth>
@@ -267,7 +385,9 @@ export default function PropertyForm({ currentProperty }) {
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </Select>
-                      {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
+                      {fieldState.error && (
+                        <FormHelperText>{fieldState.error.message}</FormHelperText>
+                      )}
                     </>
                   )}
                 />
@@ -284,7 +404,9 @@ export default function PropertyForm({ currentProperty }) {
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </Select>
-                      {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
+                      {fieldState.error && (
+                        <FormHelperText>{fieldState.error.message}</FormHelperText>
+                      )}
                     </>
                   )}
                 />
@@ -297,11 +419,17 @@ export default function PropertyForm({ currentProperty }) {
                   control={control}
                   render={({ field, fieldState }) => (
                     <>
-                      <Select {...field} label="Leasehold/Freehold" error={!!fieldState.error}>
+                      <Select
+                        {...field}
+                        label="Leasehold/Freehold"
+                        error={!!fieldState.error}
+                      >
                         <MenuItem value="Leasehold">Leasehold</MenuItem>
                         <MenuItem value="Freehold">Freehold</MenuItem>
                       </Select>
-                      {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
+                      {fieldState.error && (
+                        <FormHelperText>{fieldState.error.message}</FormHelperText>
+                      )}
                     </>
                   )}
                 />
@@ -320,7 +448,13 @@ export default function PropertyForm({ currentProperty }) {
                     <Select
                       {...field}
                       multiple
-                      renderValue={(selected) => selected.map(id => amenities.find(amenity => amenity.id === id)?.amenity_name).join(', ')}
+                      renderValue={(selected) =>
+                        selected
+                          .map((id) =>
+                            amenities.find((amenity) => amenity.id === id)?.amenity_name
+                          )
+                          .join(', ')
+                      }
                     >
                       {amenities.map((amenity) => (
                         <MenuItem key={amenity.id} value={amenity.id}>
@@ -329,7 +463,9 @@ export default function PropertyForm({ currentProperty }) {
                         </MenuItem>
                       ))}
                     </Select>
-                    {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
+                    {fieldState.error && (
+                      <FormHelperText>{fieldState.error.message}</FormHelperText>
+                    )}
                   </FormControl>
                 )}
               />
@@ -345,15 +481,28 @@ export default function PropertyForm({ currentProperty }) {
                   onRemoveAll={handleRemoveAllFiles}
                   onUpload={() => console.log('ON UPLOAD')}
                 />
-                <Typography variant="caption" sx={{ mt: 2, display: 'block', textAlign: 'center', color: 'text.secondary' }}>
+                <Typography
+                  variant="caption"
+                  sx={{ mt: 2, display: 'block', textAlign: 'center', color: 'text.secondary' }}
+                >
                   Allowed *.jpeg, *.jpg, *.png, *.gif
                   <br /> max size of 3MB
                 </Typography>
               </Box>
             </Box>
 
-            <Stack alignItems="flex-end" sx={{ mt: 3 }}>
-              <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+            <Stack alignItems="flex-end" sx={{ mt: 4 }}>
+              <LoadingButton
+                type="submit"
+                variant="contained"
+                loading={isSubmitting}
+                sx={{
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    boxShadow: 4,
+                  },
+                }}
+              >
                 {!currentProperty ? 'Create Property' : 'Save Changes'}
               </LoadingButton>
             </Stack>

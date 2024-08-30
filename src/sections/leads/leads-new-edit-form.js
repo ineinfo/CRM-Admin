@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
 import { format } from 'date-fns';
 import PropTypes from 'prop-types';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -10,14 +10,14 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Unstable_Grid2';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Select, Checkbox, MenuItem, InputLabel, FormControl, FormHelperText } from '@mui/material';
+import { Select, Checkbox, MenuItem, InputLabel, FormControl, FormHelperText, InputAdornment, TextField, Autocomplete } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
 import { UsegetAmenities } from 'src/api/amenities';
 import { CreateLead, UpdateLead } from 'src/api/leads';
-import { UsegetPropertiesType } from 'src/api/propertytype';
+import { useCountryData, UsegetPropertiesType } from 'src/api/propertytype';
 
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
@@ -26,9 +26,31 @@ import FormProvider, { RHFTextField } from 'src/components/hook-form';
 
 export default function ClientNewEditForm({ currentLead }) {
   const router = useRouter();
+
   const { products: amenities } = UsegetAmenities();
   const { products: PROPERTY_TYPE_OPTIONS } = UsegetPropertiesType();
   const { enqueueSnackbar } = useSnackbar();
+
+  const getCountries = useCountryData();
+  const [countries, setCountries] = useState([]);
+  const [selectedCurrency, setSelectedCurrency] = useState('AED');
+  const [selectedCountry, setSelectedCountry] = useState(currentLead?.location);
+
+  useEffect(() => {
+    if (getCountries.data) {
+      setCountries(getCountries.data.data);
+    }
+  }, [getCountries.data]);
+
+  useEffect(() => {
+    if (selectedCountry) {
+      const country = countries.find(c => c.name === selectedCountry);
+      if (country) {
+        setSelectedCurrency(country.currency);
+      }
+    }
+  }, [selectedCountry, countries]);
+
 
   const NewClientSchema = Yup.object().shape({
     first_name: Yup.string().required('First Name is required'),
@@ -119,7 +141,37 @@ export default function ClientNewEditForm({ currentLead }) {
               <RHFTextField name="email" label="Email" />
               <RHFTextField name="phone" label="Phone" />
               <RHFTextField name="number_of_bedrooms" label="Number of Bedrooms" />
-              <RHFTextField name="price" label="Price" />
+              <FormControl fullWidth>
+                <RHFTextField
+                  name="price"
+                  label="Price"
+                  variant="outlined"
+                  type="number"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <TextField
+                          select
+                          value={selectedCurrency}
+                          variant="standard"
+                          sx={{
+                            width: 'auto',
+                            minWidth: 60,
+                            '& .MuiSelect-root': { fontSize: '0.875rem' },
+                          }}
+                        >
+                          {countries.map((country) => (
+                            <MenuItem key={country.id} value={country.currency}>
+                              {country.currency}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      </InputAdornment>
+                    ),
+                  }}
+                  fullWidth
+                />
+              </FormControl>
               <FormControl fullWidth>
                 <InputLabel>Property Type</InputLabel>
                 <Controller
@@ -171,7 +223,33 @@ export default function ClientNewEditForm({ currentLead }) {
                   </FormControl>
                 )}
               />
-              <RHFTextField name="location" label="Location" />
+              <FormControl fullWidth>
+                <Controller
+                  name="location"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      {...field}
+                      id="location"
+                      options={countries}
+                      getOptionLabel={(option) => option.name}
+                      value={countries.find((country) => country.name === selectedCountry) || selectedCountry}
+                      onChange={(event, newValue) => {
+                        field.onChange(newValue ? newValue.name : '');
+                        setSelectedCountry(newValue ? newValue.name : '');
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label='Location'
+                          variant="outlined"
+                        />
+                      )}
+                      isOptionEqualToValue={(option, value) => option.name === value.name}
+                    />
+                  )}
+                />
+              </FormControl>
               <RHFTextField name="next_followup_date" label="Next Follow-up Date" type="date" InputLabelProps={{ shrink: true }} />
               <RHFTextField name="next_followup_time" label="Next Follow-up Time" type="time" InputLabelProps={{ shrink: true }} />
             </Box>
