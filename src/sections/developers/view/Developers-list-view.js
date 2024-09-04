@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 import isEqual from 'lodash/isEqual';
-import {useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
@@ -45,8 +45,6 @@ import UserTableRow from '../Developers-table-row';
 import UserTableToolbar from '../Developers-table-toolbar';
 import UserTableFiltersResult from '../Developers-table-filters-result';
 
-
-
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
@@ -57,8 +55,8 @@ const TABLE_HEAD = [
   { id: 'handover_date', label: 'Handover Date', width: 100 },
   { id: 'furnished', label: 'Furnished', width: 50 },
   { id: 'sqft_starting_size', label: 'Sqft', width: 100 },
-  { id: 'email',label: 'Email', width: 88 },
-  { id: '',label: '', width: 88 },
+  { id: 'email', label: 'Email', width: 88 },
+  { id: '', label: '', width: 88 },
 ];
 
 const defaultFilters = {
@@ -88,7 +86,6 @@ export default function UserListView() {
     comparator: getComparator(table.order, table.orderBy),
     filters,
   });
-  
 
   const dataInPage = dataFiltered.slice(
     table.page * table.rowsPerPage,
@@ -118,19 +115,17 @@ export default function UserListView() {
         const response = await axios.get(endpoints.propertypage.list);
         // console.log("========>",response.data.data);
         setTableData(response.data.data);
-        
       } catch (err) {
         console.log(err);
         enqueueSnackbar('Failed to load data', { variant: 'error' });
       }
     };
     fetchData();
-  }, [enqueueSnackbar]); 
+  }, [enqueueSnackbar]);
 
   const handleResetFilters = useCallback(() => {
     setFilters(defaultFilters);
   }, []);
-
 
   const handleDeleteRow = useCallback(
     async (id) => {
@@ -194,11 +189,7 @@ export default function UserListView() {
           }}
         />
         <Card>
-          <UserTableToolbar
-            filters={filters}
-            onFilters={handleFilters}
-            roleOptions={_roles}
-          />
+          <UserTableToolbar filters={filters} onFilters={handleFilters} roleOptions={_roles} />
           {canReset && (
             <UserTableFiltersResult
               filters={filters}
@@ -248,7 +239,7 @@ export default function UserListView() {
                     .slice(
                       table.page * table.rowsPerPage,
                       table.page * table.rowsPerPage + table.rowsPerPage
-                    ).reverse()
+                    )
                     .map((row) => (
                       <UserTableRow
                         key={row.id}

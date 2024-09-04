@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 import axios from 'axios';
 import { useEffect, useMemo, useState } from 'react';
-import { COUNTRY_ROUTE } from 'src/utils/apiendpoints';
+import { CITY_ROUTE, COUNTRY_ROUTE, STATE_ROUTE } from 'src/utils/apiendpoints';
 
 import { fetcher, endpoints } from 'src/utils/axios';
 
@@ -22,6 +22,43 @@ export function UsegetPropertiesType() {
     }),
     [data?.data, error, isLoading, isValidating]
   );
+  return memoizedValue;
+}
+
+// ----------------------------------------------------------------------
+
+export function UsegetParkingType() {
+  const URL = endpoints.parkingtype.list;
+
+  const { data } = useSWR(URL, fetcher);
+
+  const memoizedValue = useMemo(
+    () => ({
+      parking: data?.data || [],
+    }),
+    [data?.data]
+  );
+  return memoizedValue;
+}
+
+// ----------------------------------------------------------------------
+
+export function UsegetCouncil() {
+  const URL = endpoints.council.list;
+
+  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
+
+  const memoizedValue = useMemo(
+    () => ({
+      council: data?.data || [],
+      councilLoading: isLoading,
+      councilError: error,
+      councilValidating: isValidating,
+      councilEmpty: !isLoading && !data?.data.length,
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
   return memoizedValue;
 }
 
@@ -68,12 +105,10 @@ export function useSearchProperty(query) {
   return memoizedValue;
 }
 
-
 export const createProperty = async (data) => {
   const response = await axios.post(endpoints.propertytype.create, data);
   return response.data;
 };
-
 
 // Update role
 export const updateProperty = async (id, data) => {
@@ -109,12 +144,37 @@ export function useCountryData() {
     fetchCountryData();
   }, []); // Empty dependency array ensures this runs once on mount
 
-  const memoizedValue = useMemo(() => ({
-    data,
-    loading,
-    error,
-    empty: !loading && !data?.length,
-  }), [data, loading, error]); // Dependencies for memoization
+  const memoizedValue = useMemo(
+    () => ({
+      data,
+      loading,
+      error,
+      empty: !loading && !data?.length,
+    }),
+    [data, loading, error]
+  ); // Dependencies for memoization
 
   return memoizedValue;
 }
+
+//State Data
+
+export const useStateData = async (id = '101') => {
+  try {
+    const response = await axios.get(`${STATE_ROUTE}/${id}`);
+    return response.data || [];
+  } catch (err) {
+    return err;
+  }
+};
+
+//State Data
+
+export const useCityData = async (id = '4025') => {
+  try {
+    const response = await axios.get(`${CITY_ROUTE}/${id}`);
+    return response.data || [];
+  } catch (err) {
+    return err;
+  }
+};

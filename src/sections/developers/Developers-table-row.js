@@ -9,20 +9,47 @@ import IconButton from '@mui/material/IconButton';
 import ListItemText from '@mui/material/ListItemText';
 
 import { useBoolean } from 'src/hooks/use-boolean';
-
 import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import { formatDate } from '@fullcalendar/core';
-
+import { useCountryData } from 'src/api/propertytype';
+import { useEffect, useState } from 'react';
 
 // ----------------------------------------------------------------------
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
-  const { developer_name,location, starting_price, parking, owner_name,handover_date, furnished, sqft_starting_size, email } = row;
-  
+  const {
+    developer_name,
+    location, // This is your location value
+    starting_price,
+    parking,
+    owner_name,
+    handover_date,
+    furnished,
+    sqft_starting_size,
+    email,
+  } = row;
+
   const confirm = useBoolean();
   const popover = usePopover();
+  const { data: countriesData } = useCountryData();
+
+  // Extract country name based on location ID
+  const [countryName, setCountryName] = useState('');
+  console.log('countriesData', countriesData);
+
+  useEffect(() => {
+    // Ensure countriesData is an array and location is defined
+    if (location) {
+      const country = countriesData?.data.find((country) => country.id === location);
+      console.log('country', country);
+
+      setCountryName(country ? country.name : 'Country Data Not Available');
+    } else {
+      setCountryName('Country Data Not Available');
+    }
+  }, [countriesData, location]);
 
   return (
     <>
@@ -32,8 +59,8 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         </TableCell>
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
           <ListItemText
-            primary={(developer_name ? ` ${developer_name}` : '')}
-            secondary={location}
+            primary={developer_name ? ` ${developer_name}` : ''}
+            secondary={countryName}
             primaryTypographyProps={{ typography: 'body2' }}
             secondaryTypographyProps={{
               component: 'span',

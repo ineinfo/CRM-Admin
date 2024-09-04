@@ -9,9 +9,6 @@ import { fetcher, endpoints } from 'src/utils/axios';
 export function UsegetProperties() {
   const URL = endpoints.propertypage.list;
 
-  
-
-
   const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
 
   const memoizedValue = useMemo(
@@ -70,32 +67,31 @@ export function UseSearchProperty(query) {
   return memoizedValue;
 }
 
-
 export const CreateProperty = async (formData, token) => {
   try {
     console.log(formData, token);
-    
+
     const response = await axios.post(endpoints.propertypage.create, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
-    
+
     return response.data;
   } catch (error) {
     console.error('Error creating property:', error);
-    return null; 
+    return null;
   }
 };
 
-
 // Update role
-export const UpdateProperty = async (id, formData) => {
+export const UpdateProperty = async (id, formData, token) => {
   const response = await axios.put(endpoints.propertypage.details(id), formData, {
     headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+      'Content-Type': 'multipart/form-data',
+      Authorization: `Bearer ${token}`,
+    },
   });
   return response.data;
 };
