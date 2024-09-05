@@ -33,23 +33,6 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
   const confirm = useBoolean();
   const popover = usePopover();
-  const { data: countriesData } = useCountryData();
-
-  // Extract country name based on location ID
-  const [countryName, setCountryName] = useState('');
-  console.log('countriesData', countriesData);
-
-  useEffect(() => {
-    // Ensure countriesData is an array and location is defined
-    if (location) {
-      const country = countriesData?.data.find((country) => country.id === location);
-      console.log('country', country);
-
-      setCountryName(country ? country.name : 'Country Data Not Available');
-    } else {
-      setCountryName('Country Data Not Available');
-    }
-  }, [countriesData, location]);
 
   return (
     <>
@@ -60,7 +43,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
           <ListItemText
             primary={developer_name ? ` ${developer_name}` : ''}
-            secondary={countryName}
+            secondary={location}
             primaryTypographyProps={{ typography: 'body2' }}
             secondaryTypographyProps={{
               component: 'span',

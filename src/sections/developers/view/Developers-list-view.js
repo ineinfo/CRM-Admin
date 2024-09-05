@@ -44,6 +44,7 @@ import {
 import UserTableRow from '../Developers-table-row';
 import UserTableToolbar from '../Developers-table-toolbar';
 import UserTableFiltersResult from '../Developers-table-filters-result';
+import { useCountryData } from 'src/api/propertytype';
 
 // ----------------------------------------------------------------------
 
@@ -70,8 +71,10 @@ const defaultFilters = {
 export default function UserListView() {
   const { enqueueSnackbar } = useSnackbar();
   const table = useTable();
-
+  const CountryApi = useCountryData();
+  const CountryList = CountryApi.data?.data;
   const settings = useSettingsContext();
+  console.log('Cooooooooountries', CountryList);
 
   const router = useRouter();
 
@@ -108,6 +111,33 @@ export default function UserListView() {
     },
     [table]
   );
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(endpoints.propertypage.list);
+        let fetchedData = response.data.data;
+
+        // Replace location ID with the corresponding country name from CountryList
+        if (CountryList && CountryList.length) {
+          fetchedData = fetchedData.map((item) => {
+            const country = CountryList.find((c) => c.id === item.location);
+            if (country) {
+              return { ...item, location: country.name }; // Replace location ID with country name
+            }
+            return item; // If no match is found, return the item unchanged
+          });
+        }
+
+        setTableData(fetchedData);
+      } catch (err) {
+        console.log(err);
+        enqueueSnackbar('Failed to load data', { variant: 'error' });
+      }
+    };
+
+    fetchData();
+  }, [enqueueSnackbar, CountryList]);
 
   useEffect(() => {
     const fetchData = async () => {

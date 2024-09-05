@@ -37,6 +37,7 @@ import {
   UsegetCouncil,
   UsegetParkingType,
   UsegetPropertiesType,
+  UsegetPropertySatatus,
   useCityData,
   useCountryData,
   useStateData,
@@ -52,6 +53,7 @@ export default function PropertyForm({ currentProperty }) {
   const { products: propertyTypes, productsLoading: propertyTypesLoading } = UsegetPropertiesType();
   const { parking: parking, parkingLoading: parkingTypesLoading } = UsegetParkingType();
   const { council: councils } = UsegetCouncil();
+  const { propertyStatus: propertyStatus } = UsegetPropertySatatus();
   // console.log('Councils', councils);
 
   const { enqueueSnackbar } = useSnackbar();
@@ -109,7 +111,7 @@ export default function PropertyForm({ currentProperty }) {
 
   const { user } = useAuthContext();
   // console.log("nedded",user.accessToken);
-  const Token = user.accessToken;
+  const Token = user?.accessToken;
 
   const defaultValues = useMemo(() => {
     // Helper function to check if the file is an image
@@ -125,6 +127,7 @@ export default function PropertyForm({ currentProperty }) {
       parking_option: currentProperty?.parking_option || [],
       location: currentProperty?.location || '',
       state_id: currentProperty?.state_id || '',
+      city_id: currentProperty?.city_id || '',
       starting_price: currentProperty?.starting_price || '',
       number_of_bathrooms: currentProperty?.no_of_bathrooms || [],
       owner_name: currentProperty?.owner_name || '',
@@ -138,9 +141,10 @@ export default function PropertyForm({ currentProperty }) {
       account_type: currentProperty?.account_type || 'Freehold',
       leasehold_length: currentProperty?.leasehold_length || '0',
       note: currentProperty?.note || '',
-      range_min: currentProperty?.range_min || '',
-      range_max: currentProperty?.range_max || '',
+      range_min: currentProperty?.range_min || '0',
+      range_max: currentProperty?.range_max || '20000',
       council_tax_band: currentProperty?.council_tax_band || '',
+      property_status: currentProperty?.property_status || '',
       range_size: [currentProperty?.range_min || 0, currentProperty?.range_max || 20000],
       amenities: currentProperty?.amenities || [],
       files: (currentProperty?.files || [])
@@ -183,8 +187,9 @@ export default function PropertyForm({ currentProperty }) {
   useEffect(() => {
     if (currentProperty) {
       setId(currentProperty.location || '');
+      setSid(currentProperty.state_id || '');
     }
-  }, [currentProperty, id]);
+  }, [currentProperty, id, sid]);
 
   useEffect(() => {
     const fetchStates = async () => {
@@ -216,12 +221,13 @@ export default function PropertyForm({ currentProperty }) {
 
   useEffect(() => {
     if (currentProperty || selectedCountry) {
-      const country = countries.find((c) => c.name === selectedCountry);
+      const country =
+        countries.find((c) => c.id === currentProperty?.location) ||
+        countries.find((c) => c.name === selectedCountry);
       if (country) {
         setSelectedCurrency(country.currency);
         setSelectedPhonecode(country.phonecode);
         setId(country.id);
-        setValue('phone_number', `+${country.phonecode} `); // Update the phone number field value
       }
     }
   }, [selectedCountry, countries, setValue, currentProperty]);
@@ -268,7 +274,7 @@ export default function PropertyForm({ currentProperty }) {
           key === 'parking_option' ||
           key === 'property_type' ||
           key === 'amenities' ||
-          key === 'no_of_bathrooms'
+          key === 'number_of_bathrooms'
         ) {
           // Convert specific keys to JSON string if needed
           formData.append(key, JSON.stringify(data[key]));
@@ -409,7 +415,7 @@ export default function PropertyForm({ currentProperty }) {
                 </FormControl>
               )}
 
-              {/* {cities && cities.length > 0 && (
+              {cities && cities.length > 0 && (
                 <FormControl fullWidth>
                   <Controller
                     name="city_id"
@@ -426,14 +432,14 @@ export default function PropertyForm({ currentProperty }) {
                           setSelectedCity(newValue ? newValue.name : '');
                         }}
                         renderInput={(params) => (
-                          <TextField {...params} label="City" variant="outlined" />
+                          <TextField {...params} label="Area / City" variant="outlined" />
                         )}
                         isOptionEqualToValue={(option, value) => option.name === value.name}
                       />
                     )}
                   />
                 </FormControl>
-              )} */}
+              )}
 
               <RHFTextField name="pincode" label="Postcode" />
 
@@ -801,6 +807,38 @@ export default function PropertyForm({ currentProperty }) {
                   fullWidth
                 />
               </FormControl>
+
+              <Controller
+                name="property_status"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <FormControl fullWidth error={!!fieldState.error}>
+                    <InputLabel>Property Status</InputLabel>
+                    <Select
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(event) => field.onChange(event.target.value)}
+                      renderValue={(selected) => {
+                        const selectedPropertyStatus = propertyStatus.find(
+                          (property) => property.id === selected
+                        );
+                        return selectedPropertyStatus ? selectedPropertyStatus.title : '';
+                      }}
+                    >
+                      {propertyStatus &&
+                        propertyStatus.length > 0 &&
+                        propertyStatus.map((property) => (
+                          <MenuItem key={property.id} value={property.id}>
+                            {property.title}
+                          </MenuItem>
+                        ))}
+                    </Select>
+                    {fieldState.error && (
+                      <FormHelperText>{fieldState.error.message}</FormHelperText>
+                    )}
+                  </FormControl>
+                )}
+              />
 
               <Box sx={{ gridColumn: 'span 2' }}>
                 <RHFUpload

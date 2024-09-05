@@ -64,6 +64,27 @@ export function UsegetCouncil() {
 
 // ----------------------------------------------------------------------
 
+export function UsegetPropertySatatus() {
+  const URL = endpoints.propretyStatus.list;
+
+  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
+
+  const memoizedValue = useMemo(
+    () => ({
+      propertyStatus: data?.data || [],
+      propertyStatusLoading: isLoading,
+      propertyStatusError: error,
+      propertySatatusValidating: isValidating,
+      propertyStatuslEmpty: !isLoading && !data?.data.length,
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+
+// ----------------------------------------------------------------------
+
 export function UsegetPropertyType(productId) {
   const URL = productId ? endpoints.propertytype.details(productId) : null;
 
