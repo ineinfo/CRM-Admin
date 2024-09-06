@@ -11,6 +11,7 @@ export const PROPERTY_TYPE_ROUTE = `${apiUrl}/propertytype`;
 export const PARKING_TYPE_ROUTE = `${apiUrl}/parkingtype`;
 export const COUNCIL_TAX_BAND = `${apiUrl}/counciltaxband`;
 export const PROPERTY_STATUS = `${apiUrl}/propertystatus`;
+export const FINANCE = `${apiUrl}/leads/finance`;
 
 // USER ROUTE
 export const USER_ROUTE = `${apiUrl}/users`;

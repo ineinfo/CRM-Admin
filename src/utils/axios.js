@@ -13,6 +13,7 @@ import {
   PARKING_TYPE_ROUTE,
   COUNCIL_TAX_BAND,
   PROPERTY_STATUS,
+  FINANCE,
 } from './apiendpoints';
 
 // ----------------------------------------------------------------------
@@ -83,6 +84,9 @@ export const endpoints = {
   },
   council: {
     list: COUNCIL_TAX_BAND,
+  },
+  finance: {
+    list: FINANCE,
   },
   propretyStatus: {
     list: PROPERTY_STATUS,

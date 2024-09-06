@@ -64,20 +64,54 @@ export function UseSearchLead(query) {
   return memoizedValue;
 }
 
+// export const CreateLead = async (data) => {
+//   const response = await axios.post(endpoints.leads.create, data);
+//   return response.data;
+// };
 
-export const CreateLead = async (data) => {
-  const response = await axios.post(endpoints.leads.create, data);
-  return response.data;
+export const CreateLead = async (formData, token) => {
+  try {
+    console.log(formData, token);
+
+    const response = await axios.post(endpoints.leads.create, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error creating property:', error);
+    return null;
+  }
 };
-
 
 // Update user
-export const UpdateLead = async (id, data) => {
-  const response = await axios.put(endpoints.leads.details(id), data);
-  return response.data;
+// export const UpdateLead = async (id, data) => {
+//   const response = await axios.put(endpoints.leads.details(id), data);
+//   return response.data;
+// };
+
+export const UpdateLead = async (id, formData, token) => {
+  try {
+    console.log(formData, token);
+
+    const response = await axios.put(endpoints.leads.details(id), formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error update property:', error);
+    return null;
+  }
 };
 
-//  delete user 
+//  delete user
 export const DeleteLead = async (id) => {
   const response = await axios.delete(endpoints.leads.details(id));
   return response.data;

@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 import isEqual from 'lodash/isEqual';
-import { useState,useEffect, useCallback  } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
@@ -44,16 +44,13 @@ import {
 import UserTableRow from '../leads-table-row';
 import UserTableToolbar from '../leads-table-toolbar';
 import UserTableFiltersResult from '../leads-table-filters-result';
-
-
-
+import { useCountryData } from 'src/api/propertytype';
 
 const TABLE_HEAD = [
   { id: 'customer_name', label: 'Name', width: 180 },
   { id: 'customer_mobile', label: 'Phone', width: 180 },
-  { id: 'purchase_type', label: 'Bedrooms', width: 180 },
-  { id: 'price', label: 'Price', width: 180 },
-  { id: 'next_followup_date', label: 'Next follow Date', width: 180 },
+  { id: 'handover_date', label: 'Handover Date', width: 100 },
+  { id: 'email', label: 'Email', width: 88 },
   { id: '', width: 88 },
 ];
 
@@ -68,6 +65,9 @@ const defaultFilters = {
 export default function UserListView() {
   const { enqueueSnackbar } = useSnackbar();
   const table = useTable();
+
+  const CountryApi = useCountryData();
+  const CountryList = CountryApi.data?.data;
 
   const settings = useSettingsContext();
 
@@ -110,6 +110,33 @@ export default function UserListView() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const response = await axios.get(endpoints.leads.list);
+        let fetchedData = response.data.data;
+
+        // Replace location ID with the corresponding country name from CountryList
+        if (CountryList && CountryList.length) {
+          fetchedData = fetchedData.map((item) => {
+            const country = CountryList.find((c) => c.id === item.location);
+            if (country) {
+              return { ...item, location: country.name }; // Replace location ID with country name
+            }
+            return item; // If no match is found, return the item unchanged
+          });
+        }
+
+        setTableData(fetchedData);
+      } catch (err) {
+        console.log(err);
+        enqueueSnackbar('Failed to load data', { variant: 'error' });
+      }
+    };
+
+    fetchData();
+  }, [enqueueSnackbar, CountryList]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
         const response = await axios.get(endpoints.leads.list); // Update with your API endpoint
         setTableData(response.data.data);
       } catch (err) {
@@ -124,11 +151,10 @@ export default function UserListView() {
     setFilters(defaultFilters);
   }, []);
 
-
   const handleDeleteRow = useCallback(
     async (id) => {
       try {
-        await DeleteLead(id); 
+        await DeleteLead(id);
         const deleteRow = tableData.filter((row) => row.id !== id);
 
         enqueueSnackbar('Delete success!');
@@ -187,11 +213,7 @@ export default function UserListView() {
           }}
         />
         <Card>
-          <UserTableToolbar
-            filters={filters}
-            onFilters={handleFilters}
-            roleOptions={_roles}
-          />
+          <UserTableToolbar filters={filters} onFilters={handleFilters} roleOptions={_roles} />
           {canReset && (
             <UserTableFiltersResult
               filters={filters}

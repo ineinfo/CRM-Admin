@@ -7,7 +7,7 @@ import Checkbox from '@mui/material/Checkbox';
 import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 import ListItemText from '@mui/material/ListItemText';
-
+import { formatDate } from '@fullcalendar/core';
 import { useBoolean } from 'src/hooks/use-boolean';
 
 import { fDate } from 'src/utils/format-time';
@@ -16,11 +16,21 @@ import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
-
 // ----------------------------------------------------------------------
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
-  const { first_name, last_name, number_of_bedrooms, email, price, phone, next_followup_date } = row;
+  const {
+    developer_name,
+    location, // This is your location value
+    starting_price,
+    parking,
+    phone_number,
+    owner_name,
+    handover_date,
+    furnished,
+    sqft_starting_size,
+    email,
+  } = row;
   const confirm = useBoolean();
   const popover = usePopover();
 
@@ -32,8 +42,8 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         </TableCell>
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
           <ListItemText
-            primary={`${first_name || ''} ${last_name || ''}`}
-            secondary={email}
+            primary={developer_name ? ` ${developer_name}` : ''}
+            secondary={location}
             primaryTypographyProps={{ typography: 'body2' }}
             secondaryTypographyProps={{
               component: 'span',
@@ -41,20 +51,9 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
             }}
           />
         </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{phone}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{number_of_bedrooms}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{price}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          <ListItemText
-            primary={fDate(next_followup_date)}
-            // secondary={fTime(next_followup_time)}
-            primaryTypographyProps={{ typography: 'body2' }}
-            secondaryTypographyProps={{
-              component: 'span',
-              color: 'text.disabled',
-            }}
-          />
-        </TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{phone_number}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatDate(handover_date)}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{email}</TableCell>
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
           <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />

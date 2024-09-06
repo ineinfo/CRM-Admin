@@ -221,16 +221,14 @@ export default function PropertyForm({ currentProperty }) {
 
   useEffect(() => {
     if (currentProperty || selectedCountry) {
-      const country =
-        countries.find((c) => c.id === currentProperty?.location) ||
-        countries.find((c) => c.name === selectedCountry);
+      const country = countries.find((c) => c.name === selectedCountry);
       if (country) {
         setSelectedCurrency(country.currency);
         setSelectedPhonecode(country.phonecode);
         setId(country.id);
       }
     }
-  }, [selectedCountry, countries, setValue, currentProperty]);
+  }, [selectedCountry, countries, setValue]);
 
   useEffect(() => {
     setSelectedDate(dayjs(currentProperty?.handover_date).format('YYYY-MM-DD'));

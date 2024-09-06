@@ -64,6 +64,27 @@ export function UsegetCouncil() {
 
 // ----------------------------------------------------------------------
 
+export function UsegetFinance() {
+  const URL = endpoints.finance.list;
+
+  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
+
+  const memoizedValue = useMemo(
+    () => ({
+      finance: data?.data || [],
+      financeLoading: isLoading,
+      financeError: error,
+      financeValidating: isValidating,
+      financeEmpty: !isLoading && !data?.data.length,
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+
+// ----------------------------------------------------------------------
+
 export function UsegetPropertySatatus() {
   const URL = endpoints.propretyStatus.list;
 
