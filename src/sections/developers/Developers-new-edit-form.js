@@ -301,7 +301,7 @@ export default function PropertyForm({ currentProperty }) {
       }
 
       if (currentProperty) {
-        await UpdateProperty(currentProperty.id, formData);
+        await UpdateProperty(currentProperty.id, formData, Token);
         enqueueSnackbar('Property updated successfully!', { variant: 'success' });
       } else {
         await CreateProperty(formData, Token);

@@ -285,6 +285,11 @@ export default function PropertyForm({ currentLead }) {
         } else if (Array.isArray(data[key])) {
           // Handle array values by appending each item
           data[key].forEach((value) => formData.append(key, value));
+        } else if (key === 'handover_date' && data[key]) {
+          // Format date properly
+          const date = dayjs(data[key]); // Ensure date is in proper format if needed
+          const formattedDate = date.format('DD-MM-YYYY');
+          formData.append(key, formattedDate);
         } else {
           // Handle all other values
           formData.append(key, data[key]);
@@ -927,7 +932,7 @@ export default function PropertyForm({ currentLead }) {
                   },
                 }}
               >
-                {!currentLead ? 'Create Property' : 'Save Changes'}
+                {!currentLead ? 'Create Lead' : 'Save Changes'}
               </LoadingButton>
             </Stack>
           </Card>
