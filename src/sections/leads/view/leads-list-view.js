@@ -323,7 +323,7 @@ export default function UserListView() {
 // ----------------------------------------------------------------------
 
 function applyFilter({ inputData, comparator, filters }) {
-  const { first_name, last_name, status, role } = filters;
+  const { name, status, role } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 
@@ -335,15 +335,10 @@ function applyFilter({ inputData, comparator, filters }) {
 
   inputData = stabilizedThis.map((el) => el[0]);
 
-  // Filter by first name or last name
-  if (first_name) {
+  // Filter by name (assuming the 'developer_name' or 'owner_name' needs filtering by the 'name' filter)
+  if (name) {
     inputData = inputData.filter((user) =>
-      user.first_name.toLowerCase().includes(first_name.toLowerCase())
-    );
-  }
-  if (last_name) {
-    inputData = inputData.filter((user) =>
-      user.last_name.toLowerCase().includes(last_name.toLowerCase())
+      user.developer_name.toLowerCase().includes(name.toLowerCase())
     );
   }
 
@@ -354,7 +349,9 @@ function applyFilter({ inputData, comparator, filters }) {
 
   // Filter by role
   if (role.length) {
-    inputData = inputData.filter((user) => role.includes(user.role));
+    inputData = inputData.filter((user) =>
+      role.some((selectedRole) => user.role.includes(selectedRole))
+    );
   }
 
   return inputData;

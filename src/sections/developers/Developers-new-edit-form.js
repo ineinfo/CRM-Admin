@@ -78,7 +78,7 @@ export default function PropertyForm({ currentProperty }) {
   };
 
   const PropertySchema = Yup.object().shape({
-    // developer_name: Yup.string().required('Developer Name is required'),
+    developer_name: Yup.string().required('Developer Name is required'),
     // location: Yup.number().required('Location is required'),
     // // city_id: Yup.number().required('Location is required'),
     // state_id: Yup.number().required('Location is required'),
@@ -88,8 +88,8 @@ export default function PropertyForm({ currentProperty }) {
     // parking_option: Yup.array().of(Yup.number()),
     // owner_name: Yup.string().required('Owner Name is required'),
     // amenities: Yup.array().of(Yup.number()),
-    // email: Yup.string().email('Invalid email format').required('Email is required'), // New validation
-    // phone_number: Yup.string().required('Mobile number is required'),
+    email: Yup.string().email('Invalid email format').required('Email is required'), // New validation
+    phone_number: Yup.string().required('Mobile number is required'),
     // // handover_date: Yup.date().required('Handover Date is required'),
     // sqft_starting_size: Yup.number().required('Sqft: Starting Size is required').positive(),
     // parking: Yup.string().required('Parking status is required'),
@@ -104,7 +104,7 @@ export default function PropertyForm({ currentProperty }) {
     // service_charges: Yup.number().required('Service Charge is required').positive(),
     // range_min: Yup.number().required('Min range is required').positive(),
     // range_max: Yup.number().required('Max range is required').positive(),
-    // pincode: Yup.string().required('Pincode is required'),
+    // pincode: Yup.number().required('Pincode is required'),
     // council_tax_band: Yup.number().required('Council Tax Band is required'),
     // note: Yup.string(),
   });
@@ -217,7 +217,7 @@ export default function PropertyForm({ currentProperty }) {
     if (sid) {
       fetchStates();
     }
-  }, [sid, selectedCity, currentProperty]);
+  }, [sid, selectedCity, currentProperty, selectedCountry, id]);
 
   useEffect(() => {
     if (currentProperty || selectedCountry) {
@@ -226,6 +226,8 @@ export default function PropertyForm({ currentProperty }) {
         setSelectedCurrency(country.currency);
         setSelectedPhonecode(country.phonecode);
         setId(country.id);
+        setSid(0);
+        setValue('city_id', 0);
       }
     }
   }, [selectedCountry, countries, setValue]);
@@ -413,7 +415,7 @@ export default function PropertyForm({ currentProperty }) {
                 </FormControl>
               )}
 
-              {cities && cities.length > 0 && (
+              {states && states.length > 0 && cities && cities.length > 0 && (
                 <FormControl fullWidth>
                   <Controller
                     name="city_id"

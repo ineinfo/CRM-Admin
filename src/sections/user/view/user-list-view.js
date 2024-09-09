@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 import isEqual from 'lodash/isEqual';
-import { useState, useEffect,useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
@@ -43,7 +43,6 @@ import {
 import UserTableRow from '../user-table-row';
 import UserTableToolbar from '../user-table-toolbar';
 import UserTableFiltersResult from '../user-table-filters-result';
-
 
 // --------------------------------------------------------------------
 
@@ -95,7 +94,7 @@ export default function UserListView() {
 
   const handleFilters = useCallback(
     (name, value) => {
-      console.log("name, value",name, value)
+      console.log('name, value', name, value);
       table.onResetPage();
       setFilters((prevState) => ({
         ...prevState,
@@ -104,7 +103,6 @@ export default function UserListView() {
     },
     [table]
   );
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -122,7 +120,6 @@ export default function UserListView() {
   const handleResetFilters = useCallback(() => {
     setFilters(defaultFilters);
   }, []);
-
 
   const handleDeleteRow = useCallback(
     async (id) => {
@@ -187,10 +184,7 @@ export default function UserListView() {
         />
 
         <Card>
-          <UserTableToolbar
-            filters={filters}
-            onFilters={handleFilters}
-          />
+          <UserTableToolbar filters={filters} onFilters={handleFilters} />
 
           {canReset && (
             <UserTableFiltersResult
@@ -309,7 +303,7 @@ export default function UserListView() {
 // ----------------------------------------------------------------------
 
 function applyFilter({ inputData, comparator, filters }) {
-  const { first_name, status, role } = filters;
+  const { name, status, role } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 
@@ -321,10 +315,10 @@ function applyFilter({ inputData, comparator, filters }) {
 
   inputData = stabilizedThis.map((el) => el[0]);
 
-  // Filter by first name or last name
-  if (first_name) {
+  // Filter by name (searching in both first_name and last_name)
+  if (name) {
     inputData = inputData.filter((user) =>
-      user.first_name.toLowerCase().includes(first_name.toLowerCase())
+      `${user.first_name} ${user.last_name}`.toLowerCase().includes(name.toLowerCase())
     );
   }
 

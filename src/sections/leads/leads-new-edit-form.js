@@ -83,7 +83,7 @@ export default function PropertyForm({ currentLead }) {
   };
 
   const PropertySchema = Yup.object().shape({
-    // developer_name: Yup.string().required('Developer Name is required'),
+    developer_name: Yup.string().required('Developer Name is required'),
     // location: Yup.number().required('Location is required'),
     // // city_id: Yup.number().required('Location is required'),
     // state_id: Yup.number().required('Location is required'),
@@ -93,8 +93,8 @@ export default function PropertyForm({ currentLead }) {
     // parking_option: Yup.array().of(Yup.number()),
     // owner_name: Yup.string().required('Owner Name is required'),
     // amenities: Yup.array().of(Yup.number()),
-    // email: Yup.string().email('Invalid email format').required('Email is required'), // New validation
-    // phone_number: Yup.string().required('Mobile number is required'),
+    email: Yup.string().email('Invalid email format').required('Email is required'), // New validation
+    phone_number: Yup.string().required('Mobile number is required'),
     // // handover_date: Yup.date().required('Handover Date is required'),
     // sqft_starting_size: Yup.number().required('Sqft: Starting Size is required').positive(),
     // parking: Yup.string().required('Parking status is required'),
@@ -223,7 +223,7 @@ export default function PropertyForm({ currentLead }) {
     if (sid) {
       fetchStates();
     }
-  }, [sid, selectedCity, currentLead]);
+  }, [sid, selectedCity, currentLead, selectedCountry]);
 
   useEffect(() => {
     console.log('Selected Country:', selectedCountry); // Check if this is valid
@@ -235,6 +235,8 @@ export default function PropertyForm({ currentLead }) {
         setSelectedCurrency(country.currency);
         setSelectedPhonecode(country.phonecode);
         setId(country.id); // This line is responsible for setting the ID.
+        setSid(); // This line is responsible for setting the ID.
+        setValue('city_id', 0);
       }
     }
   }, [selectedCountry, countries, setValue]);
@@ -367,7 +369,7 @@ export default function PropertyForm({ currentLead }) {
                 sm: 'repeat(2, 1fr)',
               }}
             >
-              <RHFTextField name="developer_name" label="Developer Name" />
+              <RHFTextField name="developer_name" label="Lead Name" />
               <FormControl fullWidth>
                 <Controller
                   name="location"
@@ -419,7 +421,7 @@ export default function PropertyForm({ currentLead }) {
                 </FormControl>
               )}
 
-              {cities && cities.length > 0 && (
+              {selectedState && cities && cities.length > 0 && (
                 <FormControl fullWidth>
                   <Controller
                     name="city_id"
