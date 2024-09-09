@@ -4,12 +4,14 @@ import TextField from '@mui/material/TextField';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
+// Format number with commas
 const formatNumberWithCommas = (value) => {
   if (!value) return '';
   const stringValue = value.toString().replace(/\D/g, '');
   return stringValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 };
 
+// Format date as dd-mm-yyyy
 const formatDateToDDMMYYYY = (date) => {
   if (!date) return '';
   const day = String(date.getDate()).padStart(2, '0');
@@ -18,6 +20,7 @@ const formatDateToDDMMYYYY = (date) => {
   return `${day}-${month}-${year}`;
 };
 
+// Parse date from dd-mm-yyyy string
 const parseDateFromDDMMYYYY = (value) => {
   if (!value) return null;
   const [day, month, year] = value.split('-');
