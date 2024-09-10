@@ -52,6 +52,7 @@ const TABLE_HEAD = [
   { id: 'handover_date', label: 'Handover Date', width: 100 },
   { id: 'email', label: 'Email', width: 88 },
   { id: '', width: 88 },
+  { id: '', width: 88 },
 ];
 
 const defaultFilters = {

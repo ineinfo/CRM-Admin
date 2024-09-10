@@ -4,14 +4,12 @@ import TextField from '@mui/material/TextField';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-// Format number with commas
 const formatNumberWithCommas = (value) => {
   if (!value) return '';
   const stringValue = value.toString().replace(/\D/g, '');
   return stringValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 };
 
-// Format date as dd-mm-yyyy
 const formatDateToDDMMYYYY = (date) => {
   if (!date) return '';
   const day = String(date.getDate()).padStart(2, '0');
@@ -20,11 +18,12 @@ const formatDateToDDMMYYYY = (date) => {
   return `${day}-${month}-${year}`;
 };
 
-// Parse date from dd-mm-yyyy string
 const parseDateFromDDMMYYYY = (value) => {
-  if (!value) return null;
-  const [day, month, year] = value.split('-');
-  return new Date(year, month - 1, day); // Month is zero-based in JS Date
+  if (!value) return new Date(); // Return today's date if no value is provided
+  console.log('value', value);
+
+  const [day, month, year] = value?.split('-');
+  return new Date(`${year}-${month}-${day}`); // Use ISO format for Date parsing
 };
 
 export default function RHFTextField({ name, helperText, type, ...other }) {
@@ -37,11 +36,12 @@ export default function RHFTextField({ name, helperText, type, ...other }) {
       render={({ field, fieldState: { error } }) =>
         type === 'date' ? (
           <DatePicker
-            selected={field.value ? parseDateFromDDMMYYYY(field.value) : null}
+            selected={field.value ? parseDateFromDDMMYYYY(field.value) : null} // Keep null to show placeholder
             onChange={(date) => field.onChange(date ? formatDateToDDMMYYYY(date) : '')}
             dateFormat="dd-MM-yyyy"
             customInput={<TextField {...other} fullWidth />}
-            placeholderText="dd-mm-yyyy"
+            placeholderText="DD-MM-YYYY" // Show this when no date is selected
+            isClearable
           />
         ) : (
           <TextField

@@ -63,10 +63,12 @@ export default function PropertyForm({ currentLead }) {
 
   const { enqueueSnackbar } = useSnackbar();
   const [id, setId] = useState(0);
-  const [sid, setSid] = useState(0);
+  const [sid, setSid] = useState(currentLead?.state_id || 0);
   const getCountries = useCountryData();
+  const [error, setError] = useState(false); // Define the error state
 
   const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [serviceCharge, setServiceCharge] = useState(currentLead?.service_charges || '0');
   const [selectedPhonecode, setSelectedPhonecode] = useState();
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
@@ -81,6 +83,18 @@ export default function PropertyForm({ currentLead }) {
     const value = event.target.value;
     setShowParkingType(value === 'yes');
   };
+
+  if (currentLead) {
+    const defaultdate = () => {
+      const dateString = currentLead?.handover_date;
+      const date = new Date(dateString);
+
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+      const year = date.getFullYear();
+      return `${day}-${month}-${year}`;
+    };
+  }
 
   const PropertySchema = Yup.object().shape({
     developer_name: Yup.string().required('Developer Name is required'),
@@ -112,6 +126,7 @@ export default function PropertyForm({ currentLead }) {
     // pincode: Yup.string().required('Pincode is required'),
     // council_tax_band: Yup.number().required('Council Tax Band is required'),
     // note: Yup.string(),
+    lead_type: Yup.number().positive().required('Lead is required'),
   });
 
   const { user } = useAuthContext();
@@ -126,21 +141,21 @@ export default function PropertyForm({ currentLead }) {
 
     return {
       developer_name: currentLead?.developer_name || '',
-      pincode: currentLead?.pincode || '',
-      service_charges: currentLead?.service_charges || '',
+      pincode: currentLead?.pincode || '0',
+      service_charges: currentLead?.service_charges || '0',
       property_type: currentLead?.property_type || [],
       parking_option: currentLead?.parking_option || [],
-      location: currentLead?.location || '',
-      state_id: currentLead?.state_id || '',
-      city_id: currentLead?.city_id || '',
-      starting_price: currentLead?.starting_price || '',
+      location: currentLead?.location || '0',
+      state_id: currentLead?.state_id || '0',
+      city_id: currentLead?.city_id || '0',
+      starting_price: currentLead?.starting_price || '0',
       number_of_bathrooms: currentLead?.no_of_bathrooms || [],
       owner_name: currentLead?.owner_name || '',
-      handover_date: dayjs(currentLead?.handover_date).format('YYYY-MM-DD') || '',
+      handover_date: dayjs(currentLead?.handover_date).format('DD-MM-YYYY') || '',
       email: currentLead?.email || '', // New field
       phone_number: currentLead?.phone_number || '', // New field
       currency: currentLead?.currency || 'GBP',
-      sqft_starting_size: Number(currentLead?.sqft_starting_size) || '',
+      sqft_starting_size: Number(currentLead?.sqft_starting_size) || '0',
       parking: currentLead?.parking || 'no',
       furnished: currentLead?.furnished || 'no',
       account_type: currentLead?.account_type || 'Freehold',
@@ -148,9 +163,10 @@ export default function PropertyForm({ currentLead }) {
       note: currentLead?.note || '',
       range_min: currentLead?.range_min || '0',
       range_max: currentLead?.range_max || '20000',
-      council_tax_band: currentLead?.council_tax_band || '',
-      finance: currentLead?.finance || '',
-      property_status: currentLead?.property_status || '',
+      council_tax_band: currentLead?.council_tax_band || '0',
+      lead_type: currentLead?.lead_type || 0,
+      finance: currentLead?.finance || '0',
+      property_status: currentLead?.property_status || '0',
       range_size: [currentLead?.range_min || 0, currentLead?.range_max || 20000],
       amenities: currentLead?.amenities || [],
       files: (currentLead?.files || [])
@@ -197,6 +213,15 @@ export default function PropertyForm({ currentLead }) {
   //   }
   // }, [currentLead, id, sid]);
 
+  const handleServiceChargeChange = (e) => {
+    let value = e.target.value;
+    // Remove leading zero if it's not a single zero
+    if (value.startsWith('0') && value.length > 1) {
+      value = value.replace(/^0+/, '');
+    }
+    setServiceCharge(value);
+  };
+
   useEffect(() => {
     const fetchStates = async () => {
       try {
@@ -227,7 +252,7 @@ export default function PropertyForm({ currentLead }) {
 
   useEffect(() => {
     console.log('Selected Country:', selectedCountry); // Check if this is valid
-    if (currentLead || selectedCountry) {
+    if (selectedCountry) {
       const country = countries.find((c) => c.name === selectedCountry);
 
       if (country) {
@@ -239,10 +264,22 @@ export default function PropertyForm({ currentLead }) {
         setValue('city_id', 0);
       }
     }
+    if (currentLead) {
+      const country = countries.find((c) => c.id === selectedCountry);
+      console.log('=====>', country);
+
+      if (country) {
+        console.log('Matched Country:', country); // Check if the country is found
+        setSelectedCurrency(country.currency);
+        setSelectedPhonecode(country.phonecode);
+        setId(country.id); // This line is responsible for setting the ID.
+      }
+    }
   }, [selectedCountry, countries, setValue]);
-  useEffect(() => {
-    setSelectedDate(dayjs(currentLead?.handover_date).format('YYYY-MM-DD'));
-  }, [selectedDate]);
+
+  // useEffect(() => {
+  //   setSelectedDate(dayjs(currentLead?.handover_date).format('YYYY-MM-DD'));
+  // }, [selectedDate]);
 
   useEffect(() => {
     reset(defaultValues);
@@ -251,14 +288,28 @@ export default function PropertyForm({ currentLead }) {
 
   const handleDropPdf = useCallback(
     async (acceptedFiles) => {
+      // Filter out non-PDF files
+      const pdfFiles = acceptedFiles.filter((file) => file.type === 'application/pdf');
+
+      // Handle invalid files
+      if (acceptedFiles.length !== pdfFiles.length) {
+        setError(true); // Set error if there are non-PDF files
+        return;
+      }
+
+      setError(false); // Clear error if all files are PDFs
+
+      // Process PDF files
       const files = values.documents || [];
       const newFiles = await Promise.all(
-        acceptedFiles.map(async (file) =>
+        pdfFiles.map(async (file) =>
           Object.assign(file, {
             preview: URL.createObjectURL(file),
           })
         )
       );
+
+      // Update state with valid PDF files
       setValue('documents', [...files, ...newFiles], { shouldValidate: true });
     },
     [setValue, values.documents]
@@ -272,7 +323,17 @@ export default function PropertyForm({ currentLead }) {
     [setValue, values.pdfFiles]
   );
 
+  const formatDate = (dateString) => {
+    const dateParts = dateString.split('-');
+    const year = dateParts[0];
+    const month = dateParts[1];
+    const day = dateParts[2];
+    return `${day}-${month}-${year}`;
+  };
+
   const onSubmit = handleSubmit(async (data) => {
+    console.log('date', data.handover_date);
+
     try {
       const formData = new FormData();
       Object.keys(data).forEach((key) => {
@@ -282,16 +343,15 @@ export default function PropertyForm({ currentLead }) {
           key === 'amenities' ||
           key === 'number_of_bathrooms'
         ) {
-          // Convert specific keys to JSON string if needed
           formData.append(key, JSON.stringify(data[key]));
         } else if (Array.isArray(data[key])) {
-          // Handle array values by appending each item
           data[key].forEach((value) => formData.append(key, value));
         } else {
-          // Handle all other values
           formData.append(key, data[key]);
         }
       });
+
+      formData.set('service_charges', serviceCharge);
 
       // Handling file inputs
       const fileInputs = document.querySelector('input[type="file"]');
@@ -353,7 +413,7 @@ export default function PropertyForm({ currentLead }) {
         <Grid item xs={12}>
           <Card sx={{ p: 4, boxShadow: 3, borderRadius: 2 }}>
             <Typography variant="h6" sx={{ mb: 3 }}>
-              Property Details
+              Property Requirements
             </Typography>
 
             <Box
@@ -417,7 +477,7 @@ export default function PropertyForm({ currentLead }) {
                 </FormControl>
               )}
 
-              {selectedState && cities && cities.length > 0 && (
+              {cities && cities.length > 0 && (
                 <FormControl fullWidth>
                   <Controller
                     name="city_id"
@@ -474,6 +534,34 @@ export default function PropertyForm({ currentLead }) {
                     ),
                   }}
                   fullWidth
+                />
+              </FormControl>
+
+              <FormControl fullWidth>
+                <InputLabel id="lead-type-label">Lead Type</InputLabel>
+                <Controller
+                  name="lead_type"
+                  control={control}
+                  rules={{ required: 'Lead type is required' }} // Add required rule
+                  render={({ field, fieldState: { error } }) => (
+                    <>
+                      <Select
+                        {...field}
+                        labelId="lead-type-label"
+                        value={field.value || ''} // Default to empty string if no value is selected
+                        onChange={(event) => {
+                          field.onChange(event.target.value);
+                        }}
+                        error={!!error} // Display error styling if validation fails
+                      >
+                        <MenuItem value="1">Buyer</MenuItem>
+                        <MenuItem value="2">Seller</MenuItem>
+                      </Select>
+                      {error && (
+                        <FormHelperText error>Lead Type is Required</FormHelperText> // Show error message if validation fails
+                      )}
+                    </>
+                  )}
                 />
               </FormControl>
 
@@ -564,13 +652,14 @@ export default function PropertyForm({ currentLead }) {
                     <InputLabel>Finance</InputLabel>
                     <Select
                       {...field}
-                      value={field.value || ''}
-                      onChange={(event) => field.onChange(event.target.value)}
+                      value={field.value || ''} // Ensure default is empty string if undefined
+                      onChange={(event) => field.onChange(event.target.value)} // Properly set the selected value
                       renderValue={(selected) => {
-                        const selectedFinance =
-                          finances[0] &&
-                          Object.entries(finances[0]).find(([key]) => key === selected);
-                        return selectedFinance ? selectedFinance[1] : '';
+                        // Ensure selected value maps to the correct finance item
+                        const selectedFinance = finances[0]
+                          ? finances[0][selected] // directly access the selected value
+                          : '';
+                        return selectedFinance || 'Select Finance'; // Default display if not selected
                       }}
                     >
                       {finances[0] &&
@@ -586,6 +675,7 @@ export default function PropertyForm({ currentLead }) {
                   </FormControl>
                 )}
               />
+
               <Controller
                 name="council_tax_band"
                 control={control}
@@ -616,15 +706,17 @@ export default function PropertyForm({ currentLead }) {
                 )}
               />
 
-              <RHFTextField
-                name="handover_date"
-                label="Handover Date"
-                type="date"
-                placeholder="dd-mm-yyyy"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
+              <FormControl fullWidth>
+                <RHFTextField
+                  name="handover_date"
+                  label="Handover Date"
+                  type="date"
+                  placeholder="dd-mm-yyyy"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </FormControl>
 
               <FormControl fullWidth>
                 <Controller
@@ -762,8 +854,8 @@ export default function PropertyForm({ currentLead }) {
                   render={({ field, fieldState }) => (
                     <>
                       <Select {...field} label="Leasehold/Freehold" error={!!fieldState.error}>
-                        <MenuItem value="Leasehold">Leasehold</MenuItem>
                         <MenuItem value="Freehold">Freehold</MenuItem>
+                        <MenuItem value="Leasehold">Leasehold</MenuItem>
                       </Select>
                       {fieldState.error && (
                         <FormHelperText>{fieldState.error.message}</FormHelperText>
@@ -807,17 +899,20 @@ export default function PropertyForm({ currentLead }) {
               />
 
               <FormControl fullWidth>
-                <RHFTextField
+                <TextField
                   name="service_charges"
                   label="Service Charge psqft"
                   variant="outlined"
                   type="number"
+                  value={serviceCharge}
+                  onChange={handleServiceChargeChange}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
                         <TextField
                           select
                           value={selectedCurrency}
+                          onChange={(e) => setSelectedCurrency(e.target.value)}
                           variant="standard"
                           sx={{
                             width: 'auto',
@@ -901,6 +996,26 @@ export default function PropertyForm({ currentLead }) {
                   onRemoveAll={() => setValue('documents', [])}
                   onUpload={() => console.log('ON UPLOAD')}
                 />
+
+                {error && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      p: 1,
+                      textAlign: 'center',
+                      color: 'red',
+                      backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    Only PDF files are allowed
+                  </Typography>
+                )}
+
                 <Typography
                   variant="caption"
                   sx={{ mt: 2, display: 'block', textAlign: 'center', color: 'text.secondary' }}

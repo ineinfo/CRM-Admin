@@ -116,3 +116,9 @@ export const DeleteLead = async (id) => {
   const response = await axios.delete(endpoints.leads.details(id));
   return response.data;
 };
+
+//  Match Lead
+export const MatchLead = async (id) => {
+  const response = await axios.get(endpoints.leads.match(id));
+  return response.data;
+};

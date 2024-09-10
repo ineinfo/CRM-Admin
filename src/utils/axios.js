@@ -105,6 +105,7 @@ export const endpoints = {
     list: LEADS_ROUTE,
     create: LEADS_ROUTE,
     details: (id) => `${LEADS_ROUTE}/${id}`,
+    match: (id) => `${LEADS_ROUTE}/matchproperty/${id}`,
   },
   propertypage: {
     list: PROPERTIES_ROUTE,
