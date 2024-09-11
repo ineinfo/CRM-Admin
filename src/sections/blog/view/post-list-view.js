@@ -88,7 +88,7 @@ export default function PostListView() {
           },
           {
             name: 'Blog',
-            href: paths.dashboard.post.root,
+            href: paths.dashboard.post?.root,
           },
           {
             name: 'List',
@@ -97,7 +97,7 @@ export default function PostListView() {
         action={
           <Button
             component={RouterLink}
-            href={paths.dashboard.post.new}
+            href={paths.dashboard.post?.new}
             variant="contained"
             startIcon={<Iconify icon="mingcute:add-line" />}
           >

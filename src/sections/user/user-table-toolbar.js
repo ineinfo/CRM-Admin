@@ -17,13 +17,10 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 // ----------------------------------------------------------------------
 
-export default function UserTableToolbar({
-  filters,
-  onFilters,
-}) {
+export default function UserTableToolbar({ filters, onFilters }) {
   const popover = usePopover();
 
-  const roleOptions = ["Administrator", "Agent"]
+  const roleOptions = ['Administrator', 'Agent'];
 
   const handleFilterName = useCallback(
     (event) => {
@@ -31,12 +28,11 @@ export default function UserTableToolbar({
     },
     [onFilters]
   );
-
   const handleFilterRole = useCallback(
     (event) => {
       onFilters(
         'role',
-        typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value
+        Array.isArray(event.target.value) ? event.target.value : event.target.value.split(',')
       );
     },
     [onFilters]
@@ -145,5 +141,5 @@ export default function UserTableToolbar({
 
 UserTableToolbar.propTypes = {
   filters: PropTypes.object,
-  onFilters: PropTypes.func
+  onFilters: PropTypes.func,
 };

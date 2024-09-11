@@ -26,11 +26,7 @@ import { createUser, updateUser } from 'src/api/users';
 
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
-import FormProvider, {
-  RHFTextField,
-  RHFUploadAvatar,
-} from 'src/components/hook-form';
-
+import FormProvider, { RHFTextField, RHFUploadAvatar } from 'src/components/hook-form';
 
 const DEFAULT_AVATAR_URL = '/logo/logo_single.png'; // Replace with the actual path to your default image
 
@@ -103,7 +99,7 @@ export default function UserNewEditForm({ currentUser }) {
       }
       reset();
     } catch (error) {
-      enqueueSnackbar((error.response?.data?.message || 'Unknown error'), { variant: 'error' });
+      enqueueSnackbar(error.response?.data?.message || 'Unknown error', { variant: 'error' });
     }
   });
 
@@ -142,7 +138,6 @@ export default function UserNewEditForm({ currentUser }) {
                       textAlign: 'center',
                       color: 'text.disabled',
                     }}
-                    
                   >
                     Allowed *.jpeg, *.jpg, *.png, *.gif
                     <br /> max size of {fData(3145728)}
@@ -188,7 +183,7 @@ export default function UserNewEditForm({ currentUser }) {
                   </FormControl>
                 )}
               />
-              <RHFTextField name="mobile_number" type='number' label="Mobile Number" />
+              <RHFTextField name="mobile_number" label="Mobile Number" />
 
               {/* Commenting out the Password field */}
               {/* <RHFTextField

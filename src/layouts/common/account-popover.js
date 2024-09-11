@@ -24,6 +24,7 @@ export default function AccountPopover() {
   const router = useRouter();
 
   const { user } = useMockedUser();
+  console.log('User', user);
 
   const { logout } = useAuthContext();
 
@@ -40,6 +41,16 @@ export default function AccountPopover() {
       console.error(error);
       enqueueSnackbar('Unable to logout!', { variant: 'error' });
     }
+  };
+
+  const handleProfile = async () => {
+    popover.onClose();
+    router.push('/dashboard/profile');
+  };
+
+  const handleChangepassword = async () => {
+    popover.onClose();
+    router.push('/dashboard/profile/changepassword');
   };
   return (
     <>
@@ -83,6 +94,18 @@ export default function AccountPopover() {
           </Typography>
         </Box>
         <Divider sx={{ borderStyle: 'dashed' }} />
+        {/* <MenuItem
+          onClick={handleProfile}
+          sx={{ m: 1, fontWeight: 'fontWeightBold', color: 'Menu' }}
+        >
+          Profile
+        </MenuItem>
+        <MenuItem
+          onClick={handleChangepassword}
+          sx={{ m: 1, fontWeight: 'fontWeightBold', color: 'Menu' }}
+        >
+          Change Password
+        </MenuItem> */}
         <MenuItem
           onClick={handleLogout}
           sx={{ m: 1, fontWeight: 'fontWeightBold', color: 'error.main' }}

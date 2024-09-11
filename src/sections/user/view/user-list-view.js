@@ -48,7 +48,7 @@ import UserTableFiltersResult from '../user-table-filters-result';
 
 const TABLE_HEAD = [
   { id: 'name', label: 'Name', width: 180 },
-  { id: 'role', label: 'Role', width: 180 },
+  { id: 'role_id', label: 'Role', width: 180 },
   { id: 'phoneNumber', label: 'E-mail', width: 180 },
   { id: '', width: 88 },
 ];
@@ -305,6 +305,12 @@ export default function UserListView() {
 function applyFilter({ inputData, comparator, filters }) {
   const { name, status, role } = filters;
 
+  // Mapping role_id to role names
+  const roleMap = {
+    1: 'Administrator',
+    2: 'Agent',
+  };
+
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
@@ -329,7 +335,7 @@ function applyFilter({ inputData, comparator, filters }) {
 
   // Filter by role
   if (role.length) {
-    inputData = inputData.filter((user) => role.includes(user.role_name));
+    inputData = inputData.filter((user) => role.includes(roleMap[user.role_id]));
   }
 
   return inputData;
