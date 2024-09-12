@@ -14,12 +14,13 @@ import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import PropertyDetailsModal from './PropertyDetailsModal'; // Adjust the path as needed
-import { MatchLead } from 'src/api/leads';
+import { MatchLead, SelectedLead } from 'src/api/leads';
 import { enqueueSnackbar } from 'notistack';
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [matchedData, setMatchedData] = useState([]);
+  const [selectedData, setSelectedData] = useState([]);
   const confirm = useBoolean();
   const popover = usePopover();
 
@@ -34,10 +35,14 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
     furnished,
     sqft_starting_size,
     email,
+    id,
   } = row;
 
   const handleMatchPropertyClick = async () => {
     try {
+      const selected = await SelectedLead(id);
+      console.log('Selected lead', selected);
+      setSelectedData(selected.data);
       const Data = await MatchLead(row?.id);
       setMatchedData(Data.data);
       setModalOpen(true);
@@ -123,7 +128,13 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         }
       />
 
-      <PropertyDetailsModal open={modalOpen} onClose={handleCloseModal} row={matchedData} />
+      <PropertyDetailsModal
+        open={modalOpen}
+        onClose={handleCloseModal}
+        row={matchedData}
+        id={id}
+        selected={selectedData}
+      />
     </>
   );
 }

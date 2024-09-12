@@ -16,10 +16,10 @@ export default function HomeView() {
 
   router.push('/dashboard');
 
-  return (
-    <MainLayout>
-      <ScrollProgress scrollYProgress={scrollYProgress} />
-      <HomeHero />
-    </MainLayout>
-  );
+  // return (
+  //   <MainLayout>
+  //     <ScrollProgress scrollYProgress={scrollYProgress} />
+  //     <HomeHero />
+  //   </MainLayout>
+  // );
 }

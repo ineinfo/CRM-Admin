@@ -122,3 +122,21 @@ export const MatchLead = async (id) => {
   const response = await axios.get(endpoints.leads.match(id));
   return response.data;
 };
+
+//  Select Lead
+export const SelectLead = async (id, data) => {
+  try {
+    const response = await axios.post(endpoints.leads.select(id), data);
+
+    return response.data;
+  } catch (error) {
+    console.error('Error update property:', error);
+    return null;
+  }
+};
+
+// Getting  Selected Lead
+export const SelectedLead = async (id) => {
+  const response = await axios.get(endpoints.leads.select(id));
+  return response.data;
+};

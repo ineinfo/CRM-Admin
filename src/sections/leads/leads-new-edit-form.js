@@ -226,6 +226,7 @@ export default function PropertyForm({ currentLead }) {
     const fetchStates = async () => {
       try {
         const data = await useStateData(id);
+        console.log('States Data:', data.data); // Log state data for debugging
         setStates(data.data);
       } catch (error) {
         console.error('Error fetching states:', error);
@@ -234,21 +235,22 @@ export default function PropertyForm({ currentLead }) {
     if (id) {
       fetchStates();
     }
-  }, [id, selectedCountry]);
+  }, [id]);
 
   useEffect(() => {
-    const fetchStates = async () => {
+    const fetchCities = async () => {
       try {
         const data = await useCityData(sid);
+        console.log('Cities Data:', data.data); // Log city data for debugging
         setCities(data.data);
       } catch (error) {
-        console.error('Error fetching states:', error);
+        console.error('Error fetching cities:', error);
       }
     };
     if (sid) {
-      fetchStates();
+      fetchCities();
     }
-  }, [sid, selectedCity, currentLead, selectedCountry]);
+  }, [sid]);
 
   useEffect(() => {
     console.log('Selected Country:', selectedCountry); // Check if this is valid
@@ -292,35 +294,37 @@ export default function PropertyForm({ currentLead }) {
       const pdfFiles = acceptedFiles.filter((file) => file.type === 'application/pdf');
 
       // Handle invalid files
-      if (acceptedFiles.length !== pdfFiles.length) {
+      if (acceptedFiles.length > pdfFiles.length) {
         setError(true); // Set error if there are non-PDF files
-        return;
+      } else {
+        setError(false); // Clear error if all files are PDFs
       }
 
-      setError(false); // Clear error if all files are PDFs
+      // Process PDF files only if valid
+      if (pdfFiles.length > 0) {
+        const files = values.documents || [];
+        const newFiles = await Promise.all(
+          pdfFiles.map(async (file) =>
+            Object.assign(file, {
+              preview: URL.createObjectURL(file),
+            })
+          )
+        );
 
-      // Process PDF files
-      const files = values.documents || [];
-      const newFiles = await Promise.all(
-        pdfFiles.map(async (file) =>
-          Object.assign(file, {
-            preview: URL.createObjectURL(file),
-          })
-        )
-      );
-
-      // Update state with valid PDF files
-      setValue('documents', [...files, ...newFiles], { shouldValidate: true });
+        // Update state with valid PDF files
+        setValue('documents', [...files, ...newFiles], { shouldValidate: true });
+      }
     },
     [setValue, values.documents]
   );
 
   const handleRemovePdf = useCallback(
     (inputFile) => {
-      const filtered = values.pdfFiles.filter((file) => file.preview !== inputFile.preview);
-      setValue('pdfFiles', filtered);
+      // Ensure `pdfFiles` is correctly defined and `file.preview` matches the `inputFile.preview`
+      const filtered = values.documents.filter((file) => file.preview !== inputFile.preview);
+      setValue('documents', filtered);
     },
-    [setValue, values.pdfFiles]
+    [setValue, values.documents]
   );
 
   const formatDate = (dateString) => {
@@ -444,12 +448,11 @@ export default function PropertyForm({ currentLead }) {
                       renderInput={(params) => (
                         <TextField {...params} label="Location" variant="outlined" />
                       )}
-                      isOptionEqualToValue={(option, value) => option.name === value.name}
+                      isOptionEqualToValue={(option, value) => option.id === value}
                     />
                   )}
                 />
               </FormControl>
-
               {states && states.length > 0 && (
                 <FormControl fullWidth>
                   <Controller
@@ -470,13 +473,12 @@ export default function PropertyForm({ currentLead }) {
                         renderInput={(params) => (
                           <TextField {...params} label="State / City" variant="outlined" />
                         )}
-                        isOptionEqualToValue={(option, value) => option.name === value.name}
+                        isOptionEqualToValue={(option, value) => option.id === value}
                       />
                     )}
                   />
                 </FormControl>
               )}
-
               {cities && cities.length > 0 && (
                 <FormControl fullWidth>
                   <Controller
@@ -496,15 +498,13 @@ export default function PropertyForm({ currentLead }) {
                         renderInput={(params) => (
                           <TextField {...params} label="Area / City" variant="outlined" />
                         )}
-                        isOptionEqualToValue={(option, value) => option.name === value.name}
+                        isOptionEqualToValue={(option, value) => option.id === value}
                       />
                     )}
                   />
                 </FormControl>
               )}
-
               <RHFTextField name="pincode" label="Postcode" />
-
               <FormControl fullWidth>
                 <RHFTextField
                   name="starting_price"
@@ -533,10 +533,8 @@ export default function PropertyForm({ currentLead }) {
                       </InputAdornment>
                     ),
                   }}
-                  fullWidth
                 />
               </FormControl>
-
               <FormControl fullWidth>
                 <InputLabel id="lead-type-label">Lead Type</InputLabel>
                 <Controller
@@ -564,7 +562,6 @@ export default function PropertyForm({ currentLead }) {
                   )}
                 />
               </FormControl>
-
               <RHFTextField name="email" label="Email" />
               <FormControl fullWidth>
                 <RHFTextField
@@ -578,13 +575,12 @@ export default function PropertyForm({ currentLead }) {
                       </InputAdornment>
                     ),
                   }}
-                  value={values.phone_number.replace(`+${selectedPhonecode} `, '')} // Remove the country code from the value
+                  value={values.phone_number.replace(`+${selectedPhonecode} `, '')}
                   onChange={(e) => {
                     setValue('phone_number', `${e.target.value}`);
                   }}
                 />
               </FormControl>
-
               <FormControl fullWidth>
                 <InputLabel id="number-of-bathrooms-label">Number of Bathrooms</InputLabel>
                 <Controller
@@ -611,7 +607,6 @@ export default function PropertyForm({ currentLead }) {
                   )}
                 />
               </FormControl>
-
               <Controller
                 name="property_type"
                 control={control}
@@ -643,7 +638,6 @@ export default function PropertyForm({ currentLead }) {
                   </FormControl>
                 )}
               />
-
               <Controller
                 name="finance"
                 control={control}
@@ -675,7 +669,6 @@ export default function PropertyForm({ currentLead }) {
                   </FormControl>
                 )}
               />
-
               <Controller
                 name="council_tax_band"
                 control={control}
@@ -705,7 +698,6 @@ export default function PropertyForm({ currentLead }) {
                   </FormControl>
                 )}
               />
-
               <FormControl fullWidth>
                 <RHFTextField
                   name="handover_date"
@@ -717,7 +709,6 @@ export default function PropertyForm({ currentLead }) {
                   }}
                 />
               </FormControl>
-
               <FormControl fullWidth>
                 <Controller
                   name="range_size"
@@ -751,7 +742,6 @@ export default function PropertyForm({ currentLead }) {
                   )}
                 />
               </FormControl>
-
               <FormControl>
                 {' '}
                 <Controller
@@ -779,7 +769,6 @@ export default function PropertyForm({ currentLead }) {
                   )}
                 />
               </FormControl>
-
               {showParkingType && (
                 <FormControl fullWidth>
                   <InputLabel>Parking Type</InputLabel>
@@ -826,7 +815,6 @@ export default function PropertyForm({ currentLead }) {
                   />
                 </FormControl>
               )}
-
               <FormControl fullWidth>
                 <InputLabel>Furnished</InputLabel>
                 <Controller
@@ -845,7 +833,6 @@ export default function PropertyForm({ currentLead }) {
                   )}
                 />
               </FormControl>
-
               <FormControl fullWidth>
                 <InputLabel>Leasehold/Freehold</InputLabel>
                 <Controller
@@ -864,11 +851,9 @@ export default function PropertyForm({ currentLead }) {
                   )}
                 />
               </FormControl>
-
               {values.account_type === 'Leasehold' && (
                 <RHFTextField name="leasehold_length" label="Leasehold Length" />
               )}
-
               <Controller
                 name="amenities"
                 control={control}
@@ -897,7 +882,6 @@ export default function PropertyForm({ currentLead }) {
                   </FormControl>
                 )}
               />
-
               <FormControl fullWidth>
                 <TextField
                   name="service_charges"
@@ -932,7 +916,6 @@ export default function PropertyForm({ currentLead }) {
                   fullWidth
                 />
               </FormControl>
-
               <Controller
                 name="property_status"
                 control={control}
@@ -964,7 +947,6 @@ export default function PropertyForm({ currentLead }) {
                   </FormControl>
                 )}
               />
-
               <Box sx={{ gridColumn: 'span 2' }}>
                 <RHFUpload
                   multiple
@@ -984,8 +966,7 @@ export default function PropertyForm({ currentLead }) {
                   <br /> max size of 3MB
                 </Typography>
               </Box>
-
-              <Box sx={{ gridColumn: 'span 2' }}>
+              <Box sx={{ gridColumn: 'span 2', position: 'relative' }}>
                 <RHFUpload
                   multiple
                   name="documents" // Ensure this matches your form field name
@@ -1002,7 +983,7 @@ export default function PropertyForm({ currentLead }) {
                     variant="caption"
                     sx={{
                       position: 'absolute',
-                      top: 0,
+                      bottom: '-24px', // Adjust this value based on your design
                       left: 0,
                       right: 0,
                       p: 1,
@@ -1010,6 +991,7 @@ export default function PropertyForm({ currentLead }) {
                       color: 'red',
                       backgroundColor: 'rgba(255, 0, 0, 0.1)',
                       borderRadius: '4px',
+                      fontSize: '0.75rem', // Adjust font size if needed
                     }}
                   >
                     Only PDF files are allowed
@@ -1024,7 +1006,6 @@ export default function PropertyForm({ currentLead }) {
                   <br /> max size of 5MB
                 </Typography>
               </Box>
-
               <Box sx={{ gridColumn: 'span 2' }}>
                 <Typography variant="h6" sx={{ mb: 1 }}>
                   Note

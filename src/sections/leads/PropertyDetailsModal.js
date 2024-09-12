@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -14,27 +14,63 @@ import {
   Button,
 } from '@mui/material';
 import { useCountryData } from 'src/api/propertytype';
+import { SelectLead } from 'src/api/leads';
+import { enqueueSnackbar } from 'notistack';
 
-const PropertyDetailsModal = ({ open, onClose, row }) => {
+const PropertyDetailsModal = ({ open, onClose, row, id, selected }) => {
   const CountryApi = useCountryData();
   const CountryList = CountryApi.data?.data;
   const [selectedRows, setSelectedRows] = useState([]);
+
+  useEffect(() => {
+    if (row && selected) {
+      // Match developer_id with property.id
+      const initiallySelectedRows = row
+        .filter((property) => selected.some((sel) => sel.developer_id === property.id))
+        .map((property) => property.id);
+
+      setSelectedRows(initiallySelectedRows);
+    }
+  }, [row, selected]);
+
+  // Create a map of country ID to name for quick lookup
+  const countryMap = React.useMemo(() => {
+    const map = new Map();
+    CountryList?.forEach((country) => {
+      map.set(country.id, country.name); // assuming country object has id and name properties
+    });
+    return map;
+  }, [CountryList]);
 
   if (!row) return null;
 
   // Handle checkbox toggle
   const handleSelectRow = (property) => {
-    const isSelected = selectedRows.some((selectedRow) => selectedRow === property);
+    const isSelected = selectedRows.includes(property.id);
+
     if (isSelected) {
-      setSelectedRows(selectedRows.filter((selectedRow) => selectedRow !== property));
+      // If selected, remove the property id from the selectedRows array
+      setSelectedRows(selectedRows.filter((selectedId) => selectedId !== property.id));
     } else {
-      setSelectedRows([...selectedRows, property]);
+      // If not selected, add the property id to the selectedRows array
+      setSelectedRows([...selectedRows, property.id]);
     }
   };
 
-  // Handle log selected rows to console
-  const handleLogSelectedRows = () => {
-    console.log('Selected Rows:', selectedRows);
+  // Handle logging selected rows and create FormData
+  const handleLogSelectedRows = async () => {
+    // Create JSON object
+    const data = {
+      developer_id: selectedRows,
+    };
+    console.log('devs', id, data);
+
+    try {
+      await SelectLead(id, data);
+      onClose();
+    } catch (error) {
+      enqueueSnackbar(error.response?.data?.message || 'Unknown error', { variant: 'error' });
+    }
   };
 
   return (
@@ -66,12 +102,12 @@ const PropertyDetailsModal = ({ open, onClose, row }) => {
                 <TableRow key={index}>
                   <TableCell>
                     <Checkbox
-                      checked={selectedRows.includes(property)}
+                      checked={selectedRows.includes(property.id)}
                       onChange={() => handleSelectRow(property)}
                     />
                   </TableCell>
                   <TableCell>{property.developer_name}</TableCell>
-                  <TableCell>{property.location}</TableCell>
+                  <TableCell>{countryMap.get(property.location) || 'Unknown Country'}</TableCell>
                   <TableCell>{property.state_id}</TableCell>
                   <TableCell>{property.parking}</TableCell>
                   <TableCell>{property.range_min}</TableCell>
