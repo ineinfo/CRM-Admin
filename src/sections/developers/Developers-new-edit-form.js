@@ -257,7 +257,7 @@ export default function PropertyForm({ currentProperty }) {
       }
       setValue(
         'setShowParkingType',
-        currentLead?.parking === 'yes' ? setShowParkingType(true) : ''
+        currentProperty?.parking === 'yes' ? setShowParkingType(true) : ''
       );
     }
   }, [currentProperty, countries, setValue]);
