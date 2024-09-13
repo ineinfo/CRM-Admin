@@ -586,7 +586,8 @@ export default function PropertyForm({ currentLead }) {
                   }}
                   value={values.phone_number.replace(`+${selectedPhonecode} `, '')}
                   onChange={(e) => {
-                    setValue('phone_number', `${e.target.value}`);
+                    const onlyNumbers = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
+                    setValue('phone_number', onlyNumbers);
                   }}
                 />
               </FormControl>

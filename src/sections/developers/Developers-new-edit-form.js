@@ -495,12 +495,14 @@ export default function PropertyForm({ currentProperty }) {
                   fullWidth
                 />
               </FormControl>
+
               <RHFTextField name="email" label="Email" />
+
               <FormControl fullWidth>
                 <RHFTextField
                   name="phone_number"
                   label="Mobile Number"
-                  type={'mobile'}
+                  type="tel"
                   variant="outlined"
                   InputProps={{
                     startAdornment: (
@@ -509,12 +511,14 @@ export default function PropertyForm({ currentProperty }) {
                       </InputAdornment>
                     ),
                   }}
-                  value={values.phone_number.replace(`+${selectedPhonecode} `, '')} // Remove the country code from the value
+                  value={values.phone_number.replace(`+${selectedPhonecode} `, '')}
                   onChange={(e) => {
-                    setValue('phone_number', `${e.target.value}`);
+                    const onlyNumbers = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
+                    setValue('phone_number', onlyNumbers);
                   }}
                 />
               </FormControl>
+
               <FormControl fullWidth>
                 <InputLabel id="number-of-bathrooms-label">Number of Bathrooms</InputLabel>{' '}
                 {/* Added labelId */}

@@ -49,7 +49,7 @@ import { UsegetRoles } from 'src/api/roles';
 const TABLE_HEAD = [
   { id: 'name', label: 'Name', width: 180 },
   { id: 'role_id', label: 'Role', width: 180 },
-  { id: 'phoneNumber', label: 'E-mail', width: 180 },
+  { id: 'mobile_number', label: 'mobile_number', width: 180 },
   { id: '', width: 88 },
 ];
 
