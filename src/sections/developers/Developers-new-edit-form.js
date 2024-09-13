@@ -26,6 +26,7 @@ import {
   InputAdornment,
   Autocomplete,
   Slider,
+  FormLabel,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
@@ -70,11 +71,13 @@ export default function PropertyForm({ currentProperty }) {
   const [selectedState, setSelectedState] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedCountry, setSelectedCountry] = useState(currentProperty?.location);
-  const [showParkingType, setShowParkingType] = useState(currentProperty?.parking === 'yes');
+  const [showParkingType, setShowParkingType] = useState(false);
 
   const handleParkingChange = (event) => {
     const value = event.target.value;
-    setShowParkingType(value === 'yes');
+    if (value === 'yes') {
+      setShowParkingType(true);
+    }
   };
 
   const PropertySchema = Yup.object().shape({
@@ -121,21 +124,21 @@ export default function PropertyForm({ currentProperty }) {
 
     return {
       developer_name: currentProperty?.developer_name || '',
-      pincode: currentProperty?.pincode || '',
-      service_charges: currentProperty?.service_charges || '',
+      pincode: currentProperty?.pincode || '0',
+      service_charges: currentProperty?.service_charges || '0',
       property_type: currentProperty?.property_type || [],
       parking_option: currentProperty?.parking_option || [],
-      location: currentProperty?.location || '',
-      state_id: currentProperty?.state_id || '',
-      city_id: currentProperty?.city_id || '',
-      starting_price: currentProperty?.starting_price || '',
+      location: currentProperty?.location || '0',
+      state_id: currentProperty?.state_id || '0',
+      city_id: currentProperty?.city_id || '0',
+      starting_price: currentProperty?.starting_price || '0',
       number_of_bathrooms: currentProperty?.no_of_bathrooms || [],
       owner_name: currentProperty?.owner_name || '',
-      handover_date: dayjs(currentProperty?.handover_date).format('YYYY-MM-DD') || '',
+      handover_date: dayjs(currentProperty?.handover_date).format('DD-MM-YYYY') || '',
       email: currentProperty?.email || '', // New field
       phone_number: currentProperty?.phone_number || '', // New field
       currency: currentProperty?.currency || 'GBP',
-      sqft_starting_size: Number(currentProperty?.sqft_starting_size) || '',
+      sqft_starting_size: Number(currentProperty?.sqft_starting_size) || '0',
       parking: currentProperty?.parking || 'no',
       furnished: currentProperty?.furnished || 'no',
       account_type: currentProperty?.account_type || 'Freehold',
@@ -143,8 +146,8 @@ export default function PropertyForm({ currentProperty }) {
       note: currentProperty?.note || '',
       range_min: currentProperty?.range_min || '0',
       range_max: currentProperty?.range_max || '20000',
-      council_tax_band: currentProperty?.council_tax_band || '',
-      property_status: currentProperty?.property_status || '',
+      council_tax_band: currentProperty?.council_tax_band || '0',
+      property_status: currentProperty?.property_status || '0',
       range_size: [currentProperty?.range_min || 0, currentProperty?.range_max || 20000],
       amenities: currentProperty?.amenities || [],
       files: (currentProperty?.files || [])
@@ -219,21 +222,48 @@ export default function PropertyForm({ currentProperty }) {
     }
   }, [sid, selectedCity, currentProperty, selectedCountry, id]);
 
+  // Handles when the user manually selects a country
   useEffect(() => {
-    if (currentProperty || selectedCountry) {
+    if (selectedCountry) {
       const country = countries.find((c) => c.name === selectedCountry);
       if (country) {
         setSelectedCurrency(country.currency);
         setSelectedPhonecode(country.phonecode);
         setId(country.id);
-        setSid(0);
-        setValue('city_id', 0);
+        setValue('state_id', 0); // Reset city ID when country changes
+        setValue('pincode', 0); // Reset city ID when country changes
+
+        setValue('city_id', 0); // Reset city ID when country changes
       }
     }
   }, [selectedCountry, countries, setValue]);
 
+  // Handles when the current property is loaded
   useEffect(() => {
-    setSelectedDate(dayjs(currentProperty?.handover_date).format('YYYY-MM-DD'));
+    if (currentProperty) {
+      const locationId = currentProperty?.location; // Get location ID from currentProperty
+      if (locationId) {
+        const matchedCountry = countries.find((country) => country.id === locationId);
+        if (matchedCountry) {
+          console.log('Matched Country:1', matchedCountry); // Verify the matched country
+          setSelectedCountry(matchedCountry.name); // Set the country based on location ID
+          setSelectedCurrency(matchedCountry.currency);
+          setSelectedPhonecode(matchedCountry.phonecode);
+          // setId(matchedCountry.id); // Set the country ID
+          setValue('city_id', currentProperty?.city_id);
+          setValue('state_id', currentProperty?.state_id);
+          setValue('pincode', currentProperty?.pincode);
+        }
+      }
+      setValue(
+        'setShowParkingType',
+        currentLead?.parking === 'yes' ? setShowParkingType(true) : ''
+      );
+    }
+  }, [currentProperty, countries, setValue]);
+
+  useEffect(() => {
+    setSelectedDate(dayjs(currentProperty?.handover_date).format('DD-MM-YYYY'));
   }, [selectedDate]);
 
   useEffect(() => {
@@ -281,11 +311,6 @@ export default function PropertyForm({ currentProperty }) {
         } else if (Array.isArray(data[key])) {
           // Handle array values by appending each item
           data[key].forEach((value) => formData.append(key, value));
-        } else if (key === 'handover_date' && data[key]) {
-          // Format date properly
-          const date = dayjs(data[key]); // Ensure date is in proper format if needed
-          const formattedDate = date.format('DD-MM-YYYY');
-          formData.append(key, formattedDate);
         } else {
           // Handle all other values
           formData.append(key, data[key]);
@@ -387,7 +412,6 @@ export default function PropertyForm({ currentProperty }) {
                   )}
                 />
               </FormControl>
-
               {states && states.length > 0 && (
                 <FormControl fullWidth>
                   <Controller
@@ -414,7 +438,6 @@ export default function PropertyForm({ currentProperty }) {
                   />
                 </FormControl>
               )}
-
               {states && states.length > 0 && cities && cities.length > 0 && (
                 <FormControl fullWidth>
                   <Controller
@@ -440,9 +463,7 @@ export default function PropertyForm({ currentProperty }) {
                   />
                 </FormControl>
               )}
-
               <RHFTextField name="pincode" label="Postcode" />
-
               <FormControl fullWidth>
                 <RHFTextField
                   name="starting_price"
@@ -474,12 +495,12 @@ export default function PropertyForm({ currentProperty }) {
                   fullWidth
                 />
               </FormControl>
-
               <RHFTextField name="email" label="Email" />
               <FormControl fullWidth>
                 <RHFTextField
                   name="phone_number"
                   label="Mobile Number"
+                  type={'mobile'}
                   variant="outlined"
                   InputProps={{
                     startAdornment: (
@@ -494,16 +515,18 @@ export default function PropertyForm({ currentProperty }) {
                   }}
                 />
               </FormControl>
-
               <FormControl fullWidth>
-                <InputLabel id="number-of-bathrooms-label">Number of Bathrooms</InputLabel>
+                <InputLabel id="number-of-bathrooms-label">Number of Bathrooms</InputLabel>{' '}
+                {/* Added labelId */}
                 <Controller
                   name="number_of_bathrooms"
                   control={control}
                   render={({ field }) => (
                     <Select
                       {...field}
-                      labelId="number-of-bathrooms-label"
+                      labelId="number-of-bathrooms-label" // Link InputLabel with Select
+                      id="number-of-bathrooms-select" // Optional id for select
+                      label="Number of Bathrooms" // Add label prop
                       multiple
                       value={field.value || []} // Ensure value is an array
                       onChange={(event) => {
@@ -521,15 +544,18 @@ export default function PropertyForm({ currentProperty }) {
                   )}
                 />
               </FormControl>
-
               <Controller
                 name="property_type"
                 control={control}
                 render={({ field, fieldState }) => (
                   <FormControl fullWidth error={!!fieldState.error}>
-                    <InputLabel>Property Type</InputLabel>
+                    <InputLabel id="property-type-label">Property Type</InputLabel>{' '}
+                    {/* Added labelId */}
                     <Select
                       {...field}
+                      labelId="property-type-label" // Link InputLabel with Select
+                      id="property-type-select" // Optional id for select
+                      label="Property Type" // Add label prop
                       multiple
                       renderValue={(selected) =>
                         selected
@@ -553,17 +579,19 @@ export default function PropertyForm({ currentProperty }) {
                   </FormControl>
                 )}
               />
-
               <RHFTextField name="owner_name" label="Owner Name" />
-
               <Controller
                 name="council_tax_band"
                 control={control}
                 render={({ field, fieldState }) => (
                   <FormControl fullWidth error={!!fieldState.error}>
-                    <InputLabel>Council Tax Band</InputLabel>
+                    <InputLabel id="council-tax-band-label">Council Tax Band</InputLabel>{' '}
+                    {/* Added labelId */}
                     <Select
                       {...field}
+                      labelId="council-tax-band-label" // Link InputLabel with Select
+                      id="council-tax-band-select" // Optional id for select
+                      label="Council Tax Band" // Add label prop
                       value={field.value || ''}
                       onChange={(event) => field.onChange(event.target.value)}
                       renderValue={(selected) => {
@@ -586,15 +614,15 @@ export default function PropertyForm({ currentProperty }) {
                 )}
               />
 
-              <RHFTextField
-                name="handover_date"
-                label="Handover Date"
-                type="date"
-                placeholder="dd-mm-yyyy"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
+              <FormControl fullWidth>
+                {' '}
+                <RHFTextField
+                  name="handover_date"
+                  label="Handover Date"
+                  type="date"
+                  placeholder="DD-MM-YYYY"
+                />
+              </FormControl>
 
               <FormControl fullWidth>
                 <Controller
@@ -629,7 +657,6 @@ export default function PropertyForm({ currentProperty }) {
                   )}
                 />
               </FormControl>
-
               <FormControl>
                 {' '}
                 <Controller
@@ -657,7 +684,6 @@ export default function PropertyForm({ currentProperty }) {
                   )}
                 />
               </FormControl>
-
               {showParkingType && (
                 <FormControl fullWidth>
                   <InputLabel>Parking Type</InputLabel>
@@ -704,7 +730,6 @@ export default function PropertyForm({ currentProperty }) {
                   />
                 </FormControl>
               )}
-
               <FormControl fullWidth>
                 <InputLabel>Furnished</InputLabel>
                 <Controller
@@ -723,7 +748,6 @@ export default function PropertyForm({ currentProperty }) {
                   )}
                 />
               </FormControl>
-
               <FormControl fullWidth>
                 <InputLabel>Leasehold/Freehold</InputLabel>
                 <Controller
@@ -742,19 +766,20 @@ export default function PropertyForm({ currentProperty }) {
                   )}
                 />
               </FormControl>
-
               {values.account_type === 'Leasehold' && (
-                <RHFTextField name="leasehold_length" label="Leasehold Length" />
+                <RHFTextField name="leasehold_length" label="Leasehold Length" type={'number'} />
               )}
-
               <Controller
                 name="amenities"
                 control={control}
                 render={({ field, fieldState }) => (
                   <FormControl fullWidth error={!!fieldState.error}>
-                    <InputLabel>Amenities</InputLabel>
+                    <InputLabel id="amenities-label">Amenities</InputLabel> {/* Added labelId */}
                     <Select
                       {...field}
+                      labelId="amenities-label" // Link InputLabel with Select
+                      id="amenities-select" // Optional id for select
+                      label="Amenities" // Add label prop
                       multiple
                       renderValue={(selected) =>
                         selected
@@ -775,7 +800,6 @@ export default function PropertyForm({ currentProperty }) {
                   </FormControl>
                 )}
               />
-
               <FormControl fullWidth>
                 <RHFTextField
                   name="service_charges"
@@ -807,15 +831,18 @@ export default function PropertyForm({ currentProperty }) {
                   fullWidth
                 />
               </FormControl>
-
               <Controller
                 name="property_status"
                 control={control}
                 render={({ field, fieldState }) => (
                   <FormControl fullWidth error={!!fieldState.error}>
-                    <InputLabel>Property Status</InputLabel>
+                    <InputLabel id="property-status-label">Property Status</InputLabel>{' '}
+                    {/* Added labelId */}
                     <Select
                       {...field}
+                      labelId="property-status-label" // Link InputLabel with Select
+                      id="property-status-select" // Optional id for select
+                      label="Property Status" // Add label prop
                       value={field.value || ''}
                       onChange={(event) => field.onChange(event.target.value)}
                       renderValue={(selected) => {
@@ -839,47 +866,53 @@ export default function PropertyForm({ currentProperty }) {
                   </FormControl>
                 )}
               />
-
               <Box sx={{ gridColumn: 'span 2' }}>
-                <RHFUpload
-                  multiple
-                  thumbnail
-                  name="files"
-                  maxSize={3145728}
-                  onDrop={handleDrop}
-                  onRemove={handleRemoveFile}
-                  onRemoveAll={handleRemoveAllFiles}
-                  onUpload={() => console.log('ON UPLOAD')}
-                />
-                <Typography
-                  variant="caption"
-                  sx={{ mt: 2, display: 'block', textAlign: 'center', color: 'text.secondary' }}
-                >
-                  Allowed *.jpeg, *.jpg, *.png, *.gif
-                  <br /> max size of 3MB
-                </Typography>
+                <FormControl fullWidth>
+                  <FormLabel sx={{ fontSize: '1.2rem', color: 'white', mb: 1 }}>Images</FormLabel>
+                  <RHFUpload
+                    multiple
+                    thumbnail
+                    name="files"
+                    maxSize={3145728}
+                    onDrop={handleDrop}
+                    onRemove={handleRemoveFile}
+                    onRemoveAll={handleRemoveAllFiles}
+                    onUpload={() => console.log('ON UPLOAD')}
+                  />
+                  <Typography
+                    variant="caption"
+                    sx={{ mt: 2, display: 'block', textAlign: 'center', color: 'text.secondary' }}
+                  >
+                    Allowed *.jpeg, *.jpg, *.png, *.gif
+                    <br /> max size of 3MB
+                  </Typography>
+                </FormControl>
               </Box>
 
               <Box sx={{ gridColumn: 'span 2' }}>
-                <RHFUpload
-                  multiple
-                  name="documents" // Ensure this matches your form field name
-                  maxSize={5242880} // 5MB limit for PDFs
-                  accept="application/pdf"
-                  onDrop={handleDropPdf}
-                  onRemove={handleRemovePdf}
-                  onRemoveAll={() => setValue('documents', [])}
-                  onUpload={() => console.log('ON UPLOAD')}
-                />
-                <Typography
-                  variant="caption"
-                  sx={{ mt: 2, display: 'block', textAlign: 'center', color: 'text.secondary' }}
-                >
-                  Allowed *.pdf
-                  <br /> max size of 5MB
-                </Typography>
+                <FormControl fullWidth>
+                  <FormLabel sx={{ fontSize: '1.2rem', color: 'white', mb: 1 }}>
+                    Documents
+                  </FormLabel>
+                  <RHFUpload
+                    multiple
+                    name="documents" // Ensure this matches your form field name
+                    maxSize={5242880} // 5MB limit for PDFs
+                    accept="application/pdf"
+                    onDrop={handleDropPdf}
+                    onRemove={handleRemovePdf}
+                    onRemoveAll={() => setValue('documents', [])}
+                    onUpload={() => console.log('ON UPLOAD')}
+                  />
+                  <Typography
+                    variant="caption"
+                    sx={{ mt: 2, display: 'block', textAlign: 'center', color: 'text.secondary' }}
+                  >
+                    Allowed *.pdf
+                    <br /> max size of 5MB
+                  </Typography>
+                </FormControl>
               </Box>
-
               <Box sx={{ gridColumn: 'span 2' }}>
                 <Typography variant="h6" sx={{ mb: 1 }}>
                   Note

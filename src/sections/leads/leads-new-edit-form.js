@@ -26,6 +26,7 @@ import {
   InputAdornment,
   Autocomplete,
   Slider,
+  FormLabel,
 } from '@mui/material';
 
 import { paths } from 'src/routes/paths';
@@ -68,7 +69,6 @@ export default function PropertyForm({ currentLead }) {
   const [error, setError] = useState(false); // Define the error state
 
   const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [serviceCharge, setServiceCharge] = useState(currentLead?.service_charges || '0');
   const [selectedPhonecode, setSelectedPhonecode] = useState();
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
@@ -77,24 +77,26 @@ export default function PropertyForm({ currentLead }) {
   const [selectedState, setSelectedState] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedCountry, setSelectedCountry] = useState(currentLead?.location);
-  const [showParkingType, setShowParkingType] = useState(currentLead?.parking === 'yes');
+  const [showParkingType, setShowParkingType] = useState(false);
 
   const handleParkingChange = (event) => {
     const value = event.target.value;
-    setShowParkingType(value === 'yes');
+    if (value === 'yes') {
+      setShowParkingType(true);
+    }
   };
 
-  if (currentLead) {
-    const defaultdate = () => {
-      const dateString = currentLead?.handover_date;
-      const date = new Date(dateString);
+  // if (currentLead) {
+  //   const defaultdate = () => {
+  //     const dateString = currentLead?.handover_date;
+  //     const date = new Date(dateString);
 
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-      const year = date.getFullYear();
-      return `${day}-${month}-${year}`;
-    };
-  }
+  //     const day = String(date.getDate()).padStart(2, '0');
+  //     const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  //     const year = date.getFullYear();
+  //     return `${day}-${month}-${year}`;
+  //   };
+  // }
 
   const PropertySchema = Yup.object().shape({
     developer_name: Yup.string().required('Developer Name is required'),
@@ -151,7 +153,7 @@ export default function PropertyForm({ currentLead }) {
       starting_price: currentLead?.starting_price || '0',
       number_of_bathrooms: currentLead?.no_of_bathrooms || [],
       owner_name: currentLead?.owner_name || '',
-      handover_date: dayjs(currentLead?.handover_date).format('DD-MM-YYYY') || '',
+      handover_date: dayjs(currentLead?.handover_date).format('DD-MM-YYYY') || null,
       email: currentLead?.email || '', // New field
       phone_number: currentLead?.phone_number || '', // New field
       currency: currentLead?.currency || 'GBP',
@@ -206,21 +208,12 @@ export default function PropertyForm({ currentLead }) {
     }
   }, [getCountries.data]);
 
-  // useEffect(() => {
-  //   if (currentLead) {
-  //     setId(currentLead.location || '');
-  //     setSid(currentLead.state_id || '');
-  //   }
-  // }, [currentLead, id, sid]);
-
-  const handleServiceChargeChange = (e) => {
-    let value = e.target.value;
-    // Remove leading zero if it's not a single zero
-    if (value.startsWith('0') && value.length > 1) {
-      value = value.replace(/^0+/, '');
+  useEffect(() => {
+    if (currentLead) {
+      setId(currentLead.location || '');
+      setSid(currentLead.state_id || '');
     }
-    setServiceCharge(value);
-  };
+  }, [currentLead, id, sid]);
 
   useEffect(() => {
     const fetchStates = async () => {
@@ -253,31 +246,43 @@ export default function PropertyForm({ currentLead }) {
   }, [sid]);
 
   useEffect(() => {
-    console.log('Selected Country:', selectedCountry); // Check if this is valid
     if (selectedCountry) {
       const country = countries.find((c) => c.name === selectedCountry);
-
       if (country) {
-        console.log('Matched Country:', country); // Check if the country is found
         setSelectedCurrency(country.currency);
         setSelectedPhonecode(country.phonecode);
-        setId(country.id); // This line is responsible for setting the ID.
-        setSid(); // This line is responsible for setting the ID.
-        setValue('city_id', 0);
-      }
-    }
-    if (currentLead) {
-      const country = countries.find((c) => c.id === selectedCountry);
-      console.log('=====>', country);
+        setId(country.id);
+        setValue('state_id', 0); // Reset city ID when country changes
+        setValue('pincode', 0); // Reset city ID when country changes
 
-      if (country) {
-        console.log('Matched Country:', country); // Check if the country is found
-        setSelectedCurrency(country.currency);
-        setSelectedPhonecode(country.phonecode);
-        setId(country.id); // This line is responsible for setting the ID.
+        setValue('city_id', 0); // Reset city ID when country changes
       }
     }
   }, [selectedCountry, countries, setValue]);
+
+  // Handles when the current property is loaded
+  useEffect(() => {
+    if (currentLead) {
+      const locationId = currentLead?.location; // Get location ID from currentLead
+      if (locationId) {
+        const matchedCountry = countries.find((country) => country.id === locationId);
+        if (matchedCountry) {
+          console.log('Matched Country:1', matchedCountry); // Verify the matched country
+          setSelectedCountry(matchedCountry.name); // Set the country based on location ID
+          setSelectedCurrency(matchedCountry.currency);
+          setSelectedPhonecode(matchedCountry.phonecode);
+          // setId(matchedCountry.id); // Set the country ID
+          setValue('city_id', currentLead?.city_id);
+          setValue('state_id', currentLead?.state_id);
+          setValue('pincode', currentLead?.pincode);
+        }
+      }
+      setValue(
+        'setShowParkingType',
+        currentLead?.parking === 'yes' ? setShowParkingType(true) : ''
+      );
+    }
+  }, [currentLead, countries, setValue]);
 
   // useEffect(() => {
   //   setSelectedDate(dayjs(currentLead?.handover_date).format('YYYY-MM-DD'));
@@ -354,8 +359,6 @@ export default function PropertyForm({ currentLead }) {
           formData.append(key, data[key]);
         }
       });
-
-      formData.set('service_charges', serviceCharge);
 
       // Handling file inputs
       const fileInputs = document.querySelector('input[type="file"]');
@@ -535,17 +538,21 @@ export default function PropertyForm({ currentLead }) {
                   }}
                 />
               </FormControl>
+
               <FormControl fullWidth>
-                <InputLabel id="lead-type-label">Lead Type</InputLabel>
                 <Controller
                   name="lead_type"
                   control={control}
                   rules={{ required: 'Lead type is required' }} // Add required rule
                   render={({ field, fieldState: { error } }) => (
                     <>
+                      <InputLabel id="lead-type-label">Lead Type</InputLabel>{' '}
+                      {/* Ensure labelId matches */}
                       <Select
                         {...field}
-                        labelId="lead-type-label"
+                        labelId="lead-type-label" // Link to InputLabel
+                        id="lead-type-select" // Optional id for the select component
+                        label="Lead Type" // Add label prop
                         value={field.value || ''} // Default to empty string if no value is selected
                         onChange={(event) => {
                           field.onChange(event.target.value);
@@ -562,11 +569,13 @@ export default function PropertyForm({ currentLead }) {
                   )}
                 />
               </FormControl>
+
               <RHFTextField name="email" label="Email" />
               <FormControl fullWidth>
                 <RHFTextField
                   name="phone_number"
                   label="Mobile Number"
+                  type={'mobile'}
                   variant="outlined"
                   InputProps={{
                     startAdornment: (
@@ -581,40 +590,51 @@ export default function PropertyForm({ currentLead }) {
                   }}
                 />
               </FormControl>
+
               <FormControl fullWidth>
-                <InputLabel id="number-of-bathrooms-label">Number of Bathrooms</InputLabel>
                 <Controller
                   name="number_of_bathrooms"
                   control={control}
                   render={({ field }) => (
-                    <Select
-                      {...field}
-                      labelId="number-of-bathrooms-label"
-                      multiple
-                      value={field.value || []} // Ensure value is an array
-                      onChange={(event) => {
-                        field.onChange(event.target.value);
-                      }}
-                      renderValue={(selected) => selected.join(', ')}
-                    >
-                      {Array.from({ length: 10 }, (_, index) => (
-                        <MenuItem key={index + 1} value={index + 1}>
-                          <Checkbox checked={field.value.includes(index + 1)} />
-                          <ListItemText primary={index + 1} />
-                        </MenuItem>
-                      ))}
-                    </Select>
+                    <>
+                      <InputLabel id="number-of-bathrooms-label">Number of Bathrooms</InputLabel>
+
+                      <Select
+                        {...field}
+                        labelId="number-of-bathrooms-label" // Link to InputLabel
+                        id="number-of-bathrooms-select" // Optional id for select
+                        label="Number of Bathrooms" // Add label prop
+                        multiple
+                        value={field.value || []} // Ensure value is an array
+                        onChange={(event) => {
+                          field.onChange(event.target.value);
+                        }}
+                        renderValue={(selected) => selected.join(', ')} // Display selected values
+                      >
+                        {Array.from({ length: 10 }, (_, index) => (
+                          <MenuItem key={index + 1} value={index + 1}>
+                            <Checkbox checked={field.value.includes(index + 1)} />
+                            <ListItemText primary={index + 1} />
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </>
                   )}
                 />
               </FormControl>
+
               <Controller
                 name="property_type"
                 control={control}
                 render={({ field, fieldState }) => (
                   <FormControl fullWidth error={!!fieldState.error}>
-                    <InputLabel>Property Type</InputLabel>
+                    <InputLabel id="property-type-label">Property Type</InputLabel>{' '}
+                    {/* Added labelId */}
                     <Select
                       {...field}
+                      labelId="property-type-label" // Link InputLabel with Select
+                      id="property-type-select" // Optional id for select
+                      label="Property Type" // Add label prop
                       multiple
                       renderValue={(selected) =>
                         selected
@@ -638,14 +658,18 @@ export default function PropertyForm({ currentLead }) {
                   </FormControl>
                 )}
               />
+
               <Controller
                 name="finance"
                 control={control}
                 render={({ field, fieldState }) => (
                   <FormControl fullWidth error={!!fieldState.error}>
-                    <InputLabel>Finance</InputLabel>
+                    <InputLabel id="finance-label">Finance</InputLabel> {/* Added labelId */}
                     <Select
                       {...field}
+                      labelId="finance-label" // Link InputLabel with Select
+                      id="finance-select" // Optional id for select
+                      label="Finance" // Add label prop
                       value={field.value || ''} // Ensure default is empty string if undefined
                       onChange={(event) => field.onChange(event.target.value)} // Properly set the selected value
                       renderValue={(selected) => {
@@ -669,14 +693,19 @@ export default function PropertyForm({ currentLead }) {
                   </FormControl>
                 )}
               />
+
               <Controller
                 name="council_tax_band"
                 control={control}
                 render={({ field, fieldState }) => (
                   <FormControl fullWidth error={!!fieldState.error}>
-                    <InputLabel>Council Tax Band</InputLabel>
+                    <InputLabel id="council-tax-band-label">Council Tax Band</InputLabel>{' '}
+                    {/* Added labelId */}
                     <Select
                       {...field}
+                      labelId="council-tax-band-label" // Link InputLabel with Select
+                      id="council-tax-band-select" // Optional id for select
+                      label="Council Tax Band" // Add label prop
                       value={field.value || ''}
                       onChange={(event) => field.onChange(event.target.value)}
                       renderValue={(selected) => {
@@ -698,17 +727,16 @@ export default function PropertyForm({ currentLead }) {
                   </FormControl>
                 )}
               />
+
               <FormControl fullWidth>
                 <RHFTextField
                   name="handover_date"
                   label="Handover Date"
                   type="date"
-                  placeholder="dd-mm-yyyy"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
+                  placeholder="DD-MM-YYYY"
                 />
               </FormControl>
+
               <FormControl fullWidth>
                 <Controller
                   name="range_size"
@@ -852,16 +880,20 @@ export default function PropertyForm({ currentLead }) {
                 />
               </FormControl>
               {values.account_type === 'Leasehold' && (
-                <RHFTextField name="leasehold_length" label="Leasehold Length" />
+                <RHFTextField name="leasehold_length" label="Leasehold Length" type={'number'} />
               )}
+
               <Controller
                 name="amenities"
                 control={control}
                 render={({ field, fieldState }) => (
                   <FormControl fullWidth error={!!fieldState.error}>
-                    <InputLabel>Amenities</InputLabel>
+                    <InputLabel id="amenities-label">Amenities</InputLabel> {/* Added labelId */}
                     <Select
                       {...field}
+                      labelId="amenities-label" // Link InputLabel with Select
+                      id="amenities-select" // Optional id for select
+                      label="Amenities" // Add label prop
                       multiple
                       renderValue={(selected) =>
                         selected
@@ -882,21 +914,19 @@ export default function PropertyForm({ currentLead }) {
                   </FormControl>
                 )}
               />
+
               <FormControl fullWidth>
-                <TextField
+                <RHFTextField
                   name="service_charges"
                   label="Service Charge psqft"
                   variant="outlined"
                   type="number"
-                  value={serviceCharge}
-                  onChange={handleServiceChargeChange}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
                         <TextField
                           select
                           value={selectedCurrency}
-                          onChange={(e) => setSelectedCurrency(e.target.value)}
                           variant="standard"
                           sx={{
                             width: 'auto',
@@ -916,14 +946,19 @@ export default function PropertyForm({ currentLead }) {
                   fullWidth
                 />
               </FormControl>
+
               <Controller
                 name="property_status"
                 control={control}
                 render={({ field, fieldState }) => (
                   <FormControl fullWidth error={!!fieldState.error}>
-                    <InputLabel>Property Status</InputLabel>
+                    <InputLabel id="property-status-label">Property Status</InputLabel>{' '}
+                    {/* Added labelId */}
                     <Select
                       {...field}
+                      labelId="property-status-label" // Link InputLabel with Select
+                      id="property-status-select" // Optional id for select
+                      label="Property Status" // Add label prop
                       value={field.value || ''}
                       onChange={(event) => field.onChange(event.target.value)}
                       renderValue={(selected) => {
@@ -947,7 +982,9 @@ export default function PropertyForm({ currentLead }) {
                   </FormControl>
                 )}
               />
+
               <Box sx={{ gridColumn: 'span 2' }}>
+                <FormLabel sx={{ fontSize: '1.2rem', color: 'white', mb: 1 }}>Images</FormLabel>
                 <RHFUpload
                   multiple
                   thumbnail
@@ -966,7 +1003,9 @@ export default function PropertyForm({ currentLead }) {
                   <br /> max size of 3MB
                 </Typography>
               </Box>
+
               <Box sx={{ gridColumn: 'span 2', position: 'relative' }}>
+                <FormLabel sx={{ fontSize: '1.2rem', color: 'white', mb: 1 }}>Documents</FormLabel>
                 <RHFUpload
                   multiple
                   name="documents" // Ensure this matches your form field name

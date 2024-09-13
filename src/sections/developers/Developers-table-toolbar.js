@@ -7,15 +7,12 @@ import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import Iconify from 'src/components/iconify'; 
+import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 // ----------------------------------------------------------------------
 
-export default function UserTableToolbar({
-  filters,
-  onFilters,
-}) {
+export default function UserTableToolbar({ filters, onFilters }) {
   const popover = usePopover();
   const handleFilterName = useCallback(
     (event) => {
@@ -52,9 +49,9 @@ export default function UserTableToolbar({
               ),
             }}
           />
-          <IconButton onClick={popover.onOpen}>
+          {/* <IconButton onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />
-          </IconButton>
+          </IconButton> */}
         </Stack>
       </Stack>
 
@@ -97,5 +94,5 @@ export default function UserTableToolbar({
 
 UserTableToolbar.propTypes = {
   filters: PropTypes.object,
-  onFilters: PropTypes.func
+  onFilters: PropTypes.func,
 };

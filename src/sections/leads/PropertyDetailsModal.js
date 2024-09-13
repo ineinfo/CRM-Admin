@@ -13,18 +13,53 @@ import {
   Checkbox,
   Button,
 } from '@mui/material';
-import { useCountryData } from 'src/api/propertytype';
+import { useCountryData, useStateData } from 'src/api/propertytype';
 import { SelectLead } from 'src/api/leads';
 import { enqueueSnackbar } from 'notistack';
 
 const PropertyDetailsModal = ({ open, onClose, row, id, selected }) => {
-  const CountryApi = useCountryData();
-  const CountryList = CountryApi.data?.data;
+  const [countryList, setCountryList] = useState([]);
+  const [stateLists, setStateLists] = useState({}); // To store states for each location
   const [selectedRows, setSelectedRows] = useState([]);
+
+  const CountryApi = useCountryData();
+
+  useEffect(() => {
+    if (CountryApi.data?.data) {
+      setCountryList(CountryApi.data.data);
+    }
+  }, [CountryApi.data]);
+
+  // Function to fetch state list for each row's location
+  const fetchStateList = async (locationId) => {
+    if (locationId && !stateLists[locationId]) {
+      try {
+        const StateApi = await useStateData(locationId);
+        if (StateApi?.data) {
+          setStateLists((prevStateLists) => ({
+            ...prevStateLists,
+            [locationId]: StateApi.data, // Store the fetched states for each location
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch state data for location:', locationId);
+      }
+    }
+  };
+
+  // Fetch state list for each location in `row`
+  useEffect(() => {
+    if (row) {
+      row.forEach((property) => {
+        if (property.location) {
+          fetchStateList(property.location); // Fetch state list for each row's location
+        }
+      });
+    }
+  }, [row]);
 
   useEffect(() => {
     if (row && selected) {
-      // Match developer_id with property.id
       const initiallySelectedRows = row
         .filter((property) => selected.some((sel) => sel.developer_id === property.id))
         .map((property) => property.id);
@@ -33,51 +68,48 @@ const PropertyDetailsModal = ({ open, onClose, row, id, selected }) => {
     }
   }, [row, selected]);
 
-  // Create a map of country ID to name for quick lookup
-  const countryMap = React.useMemo(() => {
-    const map = new Map();
-    CountryList?.forEach((country) => {
-      map.set(country.id, country.name); // assuming country object has id and name properties
-    });
-    return map;
-  }, [CountryList]);
-
   if (!row) return null;
 
-  // Handle checkbox toggle
   const handleSelectRow = (property) => {
     const isSelected = selectedRows.includes(property.id);
-
     if (isSelected) {
-      // If selected, remove the property id from the selectedRows array
       setSelectedRows(selectedRows.filter((selectedId) => selectedId !== property.id));
     } else {
-      // If not selected, add the property id to the selectedRows array
       setSelectedRows([...selectedRows, property.id]);
     }
   };
 
-  // Handle logging selected rows and create FormData
   const handleLogSelectedRows = async () => {
-    // Create JSON object
     const data = {
       developer_id: selectedRows,
     };
-    console.log('devs', id, data);
+    console.log('Selected data:', id, data);
 
     try {
       await SelectLead(id, data);
       onClose();
+      enqueueSnackbar('Data updated successfully!', { variant: 'success' });
     } catch (error) {
       enqueueSnackbar(error.response?.data?.message || 'Unknown error', { variant: 'error' });
     }
+  };
+
+  const getCountryName = (locationId) => {
+    const country = countryList.find((country) => country.id === locationId);
+    return country ? country.name : '-';
+  };
+
+  // Helper function to get state name by state_id and locationId from stored stateLists
+  const getStateName = (locationId, stateId) => {
+    const states = stateLists[locationId] || [];
+    const state = states.find((state) => state.id === stateId); // Find the matching state by state_id
+    return state ? state.name : '-';
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
       <DialogTitle>Property Details</DialogTitle>
       <DialogContent>
-        {/* Button to log selected rows */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
           <Button variant="contained" color="primary" onClick={handleLogSelectedRows}>
             Selected Rows
@@ -91,7 +123,7 @@ const PropertyDetailsModal = ({ open, onClose, row, id, selected }) => {
                 <TableCell>Select</TableCell>
                 <TableCell>Developer Name</TableCell>
                 <TableCell>Location</TableCell>
-                <TableCell>State ID</TableCell>
+                <TableCell>State</TableCell> {/* Changed State ID to State Name */}
                 <TableCell>Parking</TableCell>
                 <TableCell>Range Min</TableCell>
                 <TableCell>Starting Price</TableCell>
@@ -107,8 +139,9 @@ const PropertyDetailsModal = ({ open, onClose, row, id, selected }) => {
                     />
                   </TableCell>
                   <TableCell>{property.developer_name}</TableCell>
-                  <TableCell>{countryMap.get(property.location) || 'Unknown Country'}</TableCell>
-                  <TableCell>{property.state_id}</TableCell>
+                  <TableCell>{getCountryName(property.location)}</TableCell>
+                  <TableCell>{getStateName(property.location, property.state_id)}</TableCell>{' '}
+                  {/* Display state name */}
                   <TableCell>{property.parking}</TableCell>
                   <TableCell>{property.range_min}</TableCell>
                   <TableCell>{property.starting_price}</TableCell>

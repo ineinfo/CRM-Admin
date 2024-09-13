@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 import isEqual from 'lodash/isEqual';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
@@ -18,17 +18,16 @@ import { useRouter } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
 
 import { useBoolean } from 'src/hooks/use-boolean';
-
 import { endpoints } from 'src/utils/axios';
 
 import { deleteUser } from 'src/api/users';
-
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { useSnackbar } from 'src/components/snackbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+
 import {
   useTable,
   emptyRows,
@@ -43,6 +42,7 @@ import {
 import UserTableRow from '../user-table-row';
 import UserTableToolbar from '../user-table-toolbar';
 import UserTableFiltersResult from '../user-table-filters-result';
+import { UsegetRoles } from 'src/api/roles';
 
 // --------------------------------------------------------------------
 
@@ -64,22 +64,26 @@ const defaultFilters = {
 export default function UserListView() {
   const { enqueueSnackbar } = useSnackbar();
   const table = useTable();
-
   const settings = useSettingsContext();
-
   const router = useRouter();
-
   const confirm = useBoolean();
 
   const [tableData, setTableData] = useState([]);
-
   const [filters, setFilters] = useState(defaultFilters);
+  const [loading, setLoading] = useState(false); // Loading state
 
-  const dataFiltered = applyFilter({
-    inputData: tableData,
-    comparator: getComparator(table.order, table.orderBy),
-    filters,
-  });
+  const { products: roles, isLoading: rolesLoading } = UsegetRoles(); // Fetch roles
+
+  const dataFiltered = useMemo(
+    () =>
+      applyFilter({
+        inputData: tableData,
+        comparator: getComparator(table.order, table.orderBy),
+        filters,
+        roles, // pass roles to applyFilter
+      }),
+    [tableData, table.order, table.orderBy, filters, roles]
+  );
 
   const dataInPage = dataFiltered.slice(
     table.page * table.rowsPerPage,
@@ -87,14 +91,11 @@ export default function UserListView() {
   );
 
   const denseHeight = table.dense ? 56 : 56 + 20;
-
   const canReset = !isEqual(defaultFilters, filters);
-
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
   const handleFilters = useCallback(
     (name, value) => {
-      console.log('name, value', name, value);
       table.onResetPage();
       setFilters((prevState) => ({
         ...prevState,
@@ -106,12 +107,14 @@ export default function UserListView() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true); // Start loading
       try {
-        const response = await axios.get(endpoints.users.list); // Update with your API endpoint
+        const response = await axios.get(endpoints.users.list);
         setTableData(response.data.data);
       } catch (err) {
-        console.log(err);
         enqueueSnackbar('Failed to load data', { variant: 'error' });
+      } finally {
+        setLoading(false); // Stop loading
       }
     };
     fetchData();
@@ -124,11 +127,9 @@ export default function UserListView() {
   const handleDeleteRow = useCallback(
     async (id) => {
       try {
-        await deleteUser(id); // Assuming deleteRole is an API function that deletes the role by ID
+        await deleteUser(id);
         const deleteRow = tableData.filter((row) => row.id !== id);
-
         enqueueSnackbar('Delete success!');
-
         setTableData(deleteRow);
       } catch (error) {
         enqueueSnackbar('Delete failed!', { variant: 'error' });
@@ -140,11 +141,8 @@ export default function UserListView() {
 
   const handleDeleteRows = useCallback(() => {
     const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
-
     enqueueSnackbar('Delete success!');
-
     setTableData(deleteRows);
-
     table.onUpdatePageDeleteRows({
       totalRowsInPage: dataInPage.length,
       totalRowsFiltered: dataFiltered.length,
@@ -280,18 +278,11 @@ export default function UserListView() {
         title="Delete"
         content={
           <>
-            Are you sure want to delete <strong> {table.selected.length} </strong> items?
+            Are you sure want to delete <strong>{table.selected.length}</strong> items?
           </>
         }
         action={
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => {
-              handleDeleteRows();
-              confirm.onFalse();
-            }}
-          >
+          <Button variant="contained" color="error" onClick={handleDeleteRows}>
             Delete
           </Button>
         }
@@ -300,42 +291,38 @@ export default function UserListView() {
   );
 }
 
-// ----------------------------------------------------------------------
+// FILTER FUNCTION
+function applyFilter({ inputData, comparator, filters, roles }) {
+  // Dynamic role map creation (id -> role_name)
+  const roleMap = {};
+  roles?.forEach((role) => {
+    roleMap[role.id] = role.role_name;
+  });
 
-function applyFilter({ inputData, comparator, filters }) {
-  const { name, status, role } = filters;
-
-  // Mapping role_id to role names
-  const roleMap = {
-    1: 'Administrator',
-    2: 'Agent',
-  };
-
+  // Sorting logic
   const stabilizedThis = inputData.map((el, index) => [el, index]);
-
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
     if (order !== 0) return order;
     return a[1] - b[1];
   });
-
   inputData = stabilizedThis.map((el) => el[0]);
 
-  // Filter by name (searching in both first_name and last_name)
-  if (name) {
-    inputData = inputData.filter((user) =>
-      `${user.first_name} ${user.last_name}`.toLowerCase().includes(name.toLowerCase())
+  // Filter by name
+  if (filters.name) {
+    inputData = inputData.filter(
+      (user) => user.name.toLowerCase().indexOf(filters.name.toLowerCase()) !== -1
     );
   }
 
-  // Filter by status
-  if (status !== 'all') {
-    inputData = inputData.filter((user) => user.status === status);
+  // Filter by role (filters.role contains role IDs)
+  if (filters.role.length) {
+    inputData = inputData.filter((user) => filters.role.includes(user.role_id));
   }
 
-  // Filter by role
-  if (role.length) {
-    inputData = inputData.filter((user) => role.includes(roleMap[user.role_id]));
+  // Filter by status
+  if (filters.status !== 'all') {
+    inputData = inputData.filter((item) => item.status === filters.status);
   }
 
   return inputData;

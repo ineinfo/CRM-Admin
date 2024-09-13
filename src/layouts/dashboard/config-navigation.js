@@ -10,7 +10,7 @@ import SvgColor from 'src/components/svg-color';
 
 const icon = (name) => (
   <SvgColor src={`/assets/icons/navbar/${name}.svg`} sx={{ width: 1, height: 1 }} />
-)
+);
 
 const ICONS = {
   job: icon('ic_job'),
@@ -40,9 +40,9 @@ const ICONS = {
   role: icon('ic_roles'),
   amenity: icon('ic_amenity'),
   property: icon('ic_property'),
-  clients: icon('ic_clients'),  
+  clients: icon('ic_clients'),
   leads: icon('ic_leads'),
-  propertylogo: icon('ic_properties')
+  propertylogo: icon('ic_properties'),
 };
 
 // ----------------------------------------------------------------------
@@ -59,15 +59,21 @@ export function useNavData() {
             title: t('Dashboard'),
             path: paths.dashboard.root,
             icon: ICONS.dashboard,
-          }
+          },
         ],
       },
       {
         subheader: t('management'),
         items: [
           {
-            title: t('Raw masters'), 
-            path: [paths.dashboard.roles.root, paths.dashboard.roles.new , paths.dashboard.amenities.root, paths.dashboard.amenities.new],
+            title: t('Raw masters'),
+            icon: ICONS.blank,
+            path: [
+              paths.dashboard.roles.root,
+              paths.dashboard.roles.new,
+              paths.dashboard.amenities.root,
+              paths.dashboard.amenities.new,
+            ],
             children: [
               {
                 title: t('Roles'),
@@ -75,7 +81,7 @@ export function useNavData() {
                 icon: ICONS.role,
                 children: [
                   { title: t('list'), path: paths.dashboard.roles.root },
-                  { title: t('create'), path: paths.dashboard.roles.new }
+                  { title: t('create'), path: paths.dashboard.roles.new },
                 ],
               },
               {
@@ -84,7 +90,7 @@ export function useNavData() {
                 icon: ICONS.amenity,
                 children: [
                   { title: t('list'), path: paths.dashboard.amenities.root },
-                  { title: t('create'), path: paths.dashboard.amenities.new }
+                  { title: t('create'), path: paths.dashboard.amenities.new },
                 ],
               },
               {
@@ -93,9 +99,9 @@ export function useNavData() {
                 icon: ICONS.property,
                 children: [
                   { title: t('list'), path: paths.dashboard.propertytype.root },
-                  { title: t('create'), path: paths.dashboard.propertytype.new }
+                  { title: t('create'), path: paths.dashboard.propertytype.new },
                 ],
-              }
+              },
             ],
           },
           {
@@ -104,7 +110,7 @@ export function useNavData() {
             icon: ICONS.user,
             children: [
               { title: t('list'), path: paths.dashboard.user.list },
-              { title: t('create new user'), path: paths.dashboard.user.new }
+              { title: t('create new user'), path: paths.dashboard.user.new },
             ],
           },
           // {
@@ -122,7 +128,7 @@ export function useNavData() {
             icon: ICONS.leads,
             children: [
               { title: t('list'), path: paths.dashboard.leads.list },
-              { title: t('create new lead'), path: paths.dashboard.leads.new }
+              { title: t('create new lead'), path: paths.dashboard.leads.new },
             ],
           },
           {
@@ -131,11 +137,11 @@ export function useNavData() {
             icon: ICONS.propertylogo,
             children: [
               { title: t('list'), path: paths.dashboard.propertypage.root },
-              { title: t('create new developer'), path: paths.dashboard.propertypage.new }
+              { title: t('create new developer'), path: paths.dashboard.propertypage.new },
             ],
-          }
+          },
         ],
-      }
+      },
     ],
     [t]
   );

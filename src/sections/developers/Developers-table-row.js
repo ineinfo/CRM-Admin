@@ -15,6 +15,7 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import { formatDate } from '@fullcalendar/core';
 import { useCountryData } from 'src/api/propertytype';
 import { useEffect, useState } from 'react';
+import dayjs from 'dayjs';
 
 // ----------------------------------------------------------------------
 
@@ -27,7 +28,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
     owner_name,
     handover_date,
     furnished,
-    sqft_starting_size,
+    // sqft_starting_size,
     email,
   } = row;
 
@@ -54,9 +55,11 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{starting_price}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{parking}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{owner_name}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatDate(handover_date)}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          {handover_date ? dayjs(handover_date).format('DD-MM-YYYY') : <center>-</center>}
+        </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{furnished}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{sqft_starting_size}</TableCell>
+        {/* <TableCell sx={{ whiteSpace: 'nowrap' }}>{sqft_starting_size}</TableCell> */}
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{email}</TableCell>
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
           <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>

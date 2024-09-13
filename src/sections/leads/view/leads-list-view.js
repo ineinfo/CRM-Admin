@@ -338,8 +338,10 @@ function applyFilter({ inputData, comparator, filters }) {
 
   // Filter by name (assuming the 'developer_name' or 'owner_name' needs filtering by the 'name' filter)
   if (name) {
-    inputData = inputData.filter((user) =>
-      user.developer_name.toLowerCase().includes(name.toLowerCase())
+    inputData = inputData.filter(
+      (user) =>
+        user.developer_name.toLowerCase().includes(name.toLowerCase()) ||
+        user.email.toLowerCase().includes(name.toLowerCase())
     );
   }
 

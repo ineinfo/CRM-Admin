@@ -19,7 +19,7 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 const DEFAULT_AVATAR_URL = '/logo/logo_single.png';
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
-  const { first_name, last_name, avatarurl, email, role_name } = row;
+  const { first_name, last_name, avatarurl, email, role_name, mobile_number } = row;
 
   const confirm = useBoolean();
 
@@ -46,7 +46,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           />
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{role_name}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{email}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{mobile_number}</TableCell>
 
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
           <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>

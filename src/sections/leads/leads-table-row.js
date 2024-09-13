@@ -40,11 +40,16 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
   const handleMatchPropertyClick = async () => {
     try {
-      const selected = await SelectedLead(id);
+      const Data = await SelectedLead(row?.id);
+      setSelectedData(Data.data);
+    } catch (error) {
+      console.log(error);
+    }
+    try {
+      const selected = await MatchLead(id);
       console.log('Selected lead', selected);
-      setSelectedData(selected.data);
-      const Data = await MatchLead(row?.id);
-      setMatchedData(Data.data);
+      setMatchedData(selected.data);
+
       setModalOpen(true);
     } catch (error) {
       enqueueSnackbar('No Data Match', { variant: 'error' });
@@ -75,7 +80,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{phone_number}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          {dayjs(handover_date).format('DD-MM-YYYY')}
+          {handover_date ? dayjs(handover_date).format('DD-MM-YYYY') : <center>-</center>}
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{email}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>

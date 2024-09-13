@@ -55,7 +55,7 @@ const TABLE_HEAD = [
   { id: 'owner_name', label: 'Owner', width: 100 },
   { id: 'handover_date', label: 'Handover Date', width: 100 },
   { id: 'furnished', label: 'Furnished', width: 50 },
-  { id: 'sqft_starting_size', label: 'Sqft', width: 100 },
+  // { id: 'sqft_starting_size', label: 'Sqft', width: 100 },
   { id: 'email', label: 'Email', width: 88 },
   { id: '', label: '', width: 88 },
 ];
@@ -74,7 +74,6 @@ export default function UserListView() {
   const CountryApi = useCountryData();
   const CountryList = CountryApi.data?.data;
   const settings = useSettingsContext();
-  console.log('Cooooooooountries', CountryList);
 
   const router = useRouter();
 
@@ -346,7 +345,7 @@ function applyFilter({ inputData, comparator, filters }) {
     inputData = inputData.filter(
       (user) =>
         user.developer_name.toLowerCase().includes(name.toLowerCase()) ||
-        user.owner_name.toLowerCase().includes(name.toLowerCase())
+        user.email.toLowerCase().includes(name.toLowerCase())
     );
   }
 

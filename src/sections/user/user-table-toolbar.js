@@ -14,13 +14,21 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { UsegetRoles } from 'src/api/roles';
 
 // ----------------------------------------------------------------------
 
 export default function UserTableToolbar({ filters, onFilters }) {
   const popover = usePopover();
+  const { products: roles } = UsegetRoles();
 
-  const roleOptions = ['Administrator', 'Agent'];
+  // Mapping role options from roles data (id and role_name)
+  const roleOptions = roles.map((role) => ({
+    id: role.id,
+    name: role.role_name,
+  }));
+
+  console.log('Options', roleOptions);
 
   const handleFilterName = useCallback(
     (event) => {
@@ -28,12 +36,13 @@ export default function UserTableToolbar({ filters, onFilters }) {
     },
     [onFilters]
   );
+
   const handleFilterRole = useCallback(
     (event) => {
-      onFilters(
-        'role',
-        Array.isArray(event.target.value) ? event.target.value : event.target.value.split(',')
-      );
+      const selectedIds = Array.isArray(event.target.value)
+        ? event.target.value
+        : event.target.value.split(',');
+      onFilters('role', selectedIds);
     },
     [onFilters]
   );
@@ -65,7 +74,11 @@ export default function UserTableToolbar({ filters, onFilters }) {
             value={filters.role}
             onChange={handleFilterRole}
             input={<OutlinedInput label="Role" />}
-            renderValue={(selected) => selected.map((value) => value).join(', ')}
+            renderValue={(selected) =>
+              selected
+                .map((value) => roleOptions.find((role) => role.id === value)?.name || value)
+                .join(', ')
+            }
             MenuProps={{
               PaperProps: {
                 sx: { maxHeight: 240 },
@@ -73,9 +86,9 @@ export default function UserTableToolbar({ filters, onFilters }) {
             }}
           >
             {roleOptions.map((option) => (
-              <MenuItem key={option} value={option}>
-                <Checkbox disableRipple size="small" checked={filters.role.includes(option)} />
-                {option}
+              <MenuItem key={option.id} value={option.id}>
+                <Checkbox disableRipple size="small" checked={filters.role.includes(option.id)} />
+                {option.name}
               </MenuItem>
             ))}
           </Select>
@@ -108,29 +121,17 @@ export default function UserTableToolbar({ filters, onFilters }) {
         arrow="right-top"
         sx={{ width: 140 }}
       >
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-          }}
-        >
+        <MenuItem onClick={popover.onClose}>
           <Iconify icon="solar:printer-minimalistic-bold" />
           Print
         </MenuItem>
 
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-          }}
-        >
+        <MenuItem onClick={popover.onClose}>
           <Iconify icon="solar:import-bold" />
           Import
         </MenuItem>
 
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-          }}
-        >
+        <MenuItem onClick={popover.onClose}>
           <Iconify icon="solar:export-bold" />
           Export
         </MenuItem>
