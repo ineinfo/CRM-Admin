@@ -183,7 +183,7 @@ export default function UserNewEditForm({ currentUser }) {
                   </FormControl>
                 )}
               />
-              <RHFTextField name="mobile_number" type={'mobile'} label="Mobile Number" />
+              <RHFTextField name="mobile_number" type="mobile" label="Mobile Number" />
 
               {/* Commenting out the Password field */}
               {/* <RHFTextField

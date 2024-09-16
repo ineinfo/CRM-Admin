@@ -13,7 +13,6 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 import ProductNewEditForm from '../propertytype-new-edit-form';
 
-
 // ----------------------------------------------------------------------
 
 export default function ProductEditView({ id }) {
@@ -29,7 +28,7 @@ export default function ProductEditView({ id }) {
           { name: 'Dashboard', href: paths.dashboard.root },
           {
             name: 'Property type',
-            href: paths.dashboard.roles.root,
+            href: paths.dashboard.propertytype.root,
           },
           { name: `Edit` },
         ]}

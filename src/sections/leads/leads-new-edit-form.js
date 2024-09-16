@@ -54,11 +54,12 @@ export default function PropertyForm({ currentLead }) {
   const router = useRouter();
   const { products: amenities } = UsegetAmenities();
   const { products: propertyTypes, productsLoading: propertyTypesLoading } = UsegetPropertiesType();
-  const { parking: parking, parkingLoading: parkingTypesLoading } = UsegetParkingType();
+  const { parking: parkings, parkingLoading: parkingTypesLoading } = UsegetParkingType();
+
   const { council: councils } = UsegetCouncil();
   const { finance: finances } = UsegetFinance();
 
-  const { propertyStatus: propertyStatus } = UsegetPropertySatatus();
+  const { propertyStatusIds: propertyStatus } = UsegetPropertySatatus();
   console.log('Councils', finances);
   console.log('Councils', councils);
 
@@ -102,7 +103,7 @@ export default function PropertyForm({ currentLead }) {
   // }
 
   const PropertySchema = Yup.object().shape({
-    developer_name: Yup.string().required('Developer Name is required'),
+    developer_name: Yup.string().required('Lead Name is required'),
     // location: Yup.number().required('Location is required'),
     // // city_id: Yup.number().required('Location is required'),
     // state_id: Yup.number().required('Location is required'),
@@ -219,32 +220,32 @@ export default function PropertyForm({ currentLead }) {
   }, [currentLead, id, sid]);
 
   useEffect(() => {
-    const fetchStates = async () => {
+    const FetchStates = async () => {
       try {
         const data = await useStateData(id);
         console.log('States Data:', data.data); // Log state data for debugging
         setStates(data.data);
-      } catch (error) {
-        console.error('Error fetching states:', error);
+      } catch (stateError) {
+        console.error('Error fetching states:', stateError);
       }
     };
     if (id) {
-      fetchStates();
+      FetchStates();
     }
   }, [id]);
 
   useEffect(() => {
-    const fetchCities = async () => {
+    const FetchCities = async () => {
       try {
         const data = await useCityData(sid);
         console.log('Cities Data:', data.data); // Log city data for debugging
         setCities(data.data);
-      } catch (error) {
-        console.error('Error fetching cities:', error);
+      } catch (cityError) {
+        console.error('Error fetching cities:', cityError);
       }
     };
     if (sid) {
-      fetchCities();
+      FetchCities();
     }
   }, [sid]);
 
@@ -335,14 +336,6 @@ export default function PropertyForm({ currentLead }) {
     [setValue, values.documents]
   );
 
-  const formatDate = (dateString) => {
-    const dateParts = dateString.split('-');
-    const year = dateParts[0];
-    const month = dateParts[1];
-    const day = dateParts[2];
-    return `${day}-${month}-${year}`;
-  };
-
   const onSubmit = handleSubmit(async (data) => {
     console.log('date', data.handover_date);
 
@@ -370,9 +363,9 @@ export default function PropertyForm({ currentLead }) {
       }
 
       // Log FormData contents
-      for (let pair of formData.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
-      }
+      // for (let pair of formData.entries()) {
+      //   console.log(`${pair[0]}: ${pair[1]}`);
+      // }
 
       if (currentLead) {
         await UpdateLead(currentLead.id, formData, Token);
@@ -383,8 +376,8 @@ export default function PropertyForm({ currentLead }) {
       }
       router.push(paths.dashboard.leads.list);
       reset();
-    } catch (error) {
-      enqueueSnackbar(error.response?.data?.message || 'Unknown error', { variant: 'error' });
+    } catch (err) {
+      enqueueSnackbar(err.response?.data?.message || 'Unknown error', { variant: 'error' });
     }
   });
 
@@ -547,7 +540,9 @@ export default function PropertyForm({ currentLead }) {
                   name="lead_type"
                   control={control}
                   rules={{ required: 'Lead type is required' }} // Add required rule
-                  render={({ field, fieldState: { error } }) => (
+                  render={(
+                    { field, fieldState: { error: leadError } } // Rename 'error' to 'fieldError'
+                  ) => (
                     <>
                       <InputLabel id="lead-type-label">Lead Type</InputLabel>{' '}
                       {/* Ensure labelId matches */}
@@ -560,12 +555,12 @@ export default function PropertyForm({ currentLead }) {
                         onChange={(event) => {
                           field.onChange(event.target.value);
                         }}
-                        error={!!error} // Display error styling if validation fails
+                        error={!!leadError} // Display error styling if validation fails
                       >
                         <MenuItem value="1">Buyer</MenuItem>
                         <MenuItem value="2">Seller</MenuItem>
                       </Select>
-                      {error && (
+                      {leadError && (
                         <FormHelperText error>Lead Type is Required</FormHelperText> // Show error message if validation fails
                       )}
                     </>
@@ -578,7 +573,7 @@ export default function PropertyForm({ currentLead }) {
                 <RHFTextField
                   name="phone_number"
                   label="Mobile Number"
-                  type={'mobile'}
+                  type="mobile"
                   variant="outlined"
                   InputProps={{
                     startAdornment: (
@@ -643,8 +638,8 @@ export default function PropertyForm({ currentLead }) {
                       renderValue={(selected) =>
                         selected
                           .map(
-                            (id) =>
-                              propertyTypes.find((property) => property.id === id)?.property_type
+                            (pr_id) =>
+                              propertyTypes.find((property) => property.id === pr_id)?.property_type
                           )
                           .join(', ')
                       }
@@ -818,19 +813,18 @@ export default function PropertyForm({ currentLead }) {
                           error={!!fieldState.error}
                           disabled={propertyTypesLoading}
                           sx={{ transition: 'all 0.3s ease' }}
-                          renderValue={(selected) => {
-                            // Ensure selected is an array
-                            return (selected || [])
-                              .map((id) => parking.find((type) => type.id === id)?.title)
-                              .join(', ');
-                          }}
+                          renderValue={(selected) =>
+                            (selected || [])
+                              .map((pid) => parkings.find((type) => type.id === pid)?.title)
+                              .join(', ')
+                          }
                         >
                           {propertyTypesLoading ? (
                             <MenuItem disabled>
                               <CircularProgress size={24} />
                             </MenuItem>
                           ) : (
-                            parking.map((type) => (
+                            parkings?.map((type) => (
                               <MenuItem key={type.id} value={type.id}>
                                 <Checkbox checked={(field.value || []).includes(type.id)} />{' '}
                                 {/* Ensure field.value is an array */}
@@ -884,7 +878,7 @@ export default function PropertyForm({ currentLead }) {
                 />
               </FormControl>
               {values.account_type === 'Leasehold' && (
-                <RHFTextField name="leasehold_length" label="Leasehold Length" type={'number'} />
+                <RHFTextField name="leasehold_length" label="Leasehold Length" type="number" />
               )}
 
               <Controller
@@ -901,7 +895,9 @@ export default function PropertyForm({ currentLead }) {
                       multiple
                       renderValue={(selected) =>
                         selected
-                          .map((id) => amenities.find((amenity) => amenity.id === id)?.amenity_name)
+                          .map(
+                            (aid) => amenities.find((amenity) => amenity.id === aid)?.amenity_name
+                          )
                           .join(', ')
                       }
                     >
@@ -966,7 +962,7 @@ export default function PropertyForm({ currentLead }) {
                       value={field.value || ''}
                       onChange={(event) => field.onChange(event.target.value)}
                       renderValue={(selected) => {
-                        const selectedPropertyStatus = propertyStatus.find(
+                        const selectedPropertyStatus = propertyStatus?.find(
                           (property) => property.id === selected
                         );
                         return selectedPropertyStatus ? selectedPropertyStatus.title : '';

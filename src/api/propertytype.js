@@ -164,7 +164,7 @@ export const deletePropertytype = async (id) => {
   return response.data;
 };
 
-//Country Data
+// Country Data
 export function useCountryData() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -198,7 +198,7 @@ export function useCountryData() {
   return memoizedValue;
 }
 
-//State Data
+// State Data
 export const useStateData = async (id = '101') => {
   try {
     const response = await axios.get(`${STATE_ROUTE}/${id}`);
@@ -208,7 +208,7 @@ export const useStateData = async (id = '101') => {
   }
 };
 
-//City Data
+// City Data
 export const useCityData = async (id = '4025') => {
   try {
     const response = await axios.get(`${CITY_ROUTE}/${id}`);

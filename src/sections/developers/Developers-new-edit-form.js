@@ -52,9 +52,9 @@ export default function PropertyForm({ currentProperty }) {
   const router = useRouter();
   const { products: amenities } = UsegetAmenities();
   const { products: propertyTypes, productsLoading: propertyTypesLoading } = UsegetPropertiesType();
-  const { parking: parking, parkingLoading: parkingTypesLoading } = UsegetParkingType();
+  const { parking: parkings, parkingLoading: parkingTypesLoading } = UsegetParkingType();
   const { council: councils } = UsegetCouncil();
-  const { propertyStatus: propertyStatus } = UsegetPropertySatatus();
+  const { propertyStatuses: propertyStatus } = UsegetPropertySatatus();
   // console.log('Councils', councils);
 
   const { enqueueSnackbar } = useSnackbar();
@@ -198,7 +198,7 @@ export default function PropertyForm({ currentProperty }) {
   }, [currentProperty, id, sid]);
 
   useEffect(() => {
-    const fetchStates = async () => {
+    const FetchStates = async () => {
       try {
         const data = await useStateData(id);
         setStates(data.data);
@@ -207,12 +207,12 @@ export default function PropertyForm({ currentProperty }) {
       }
     };
     if (id) {
-      fetchStates();
+      FetchStates();
     }
   }, [id, selectedState, currentProperty]);
 
   useEffect(() => {
-    const fetchStates = async () => {
+    const FetchStates = async () => {
       try {
         const data = await useCityData(sid);
         setCities(data.data);
@@ -221,7 +221,7 @@ export default function PropertyForm({ currentProperty }) {
       }
     };
     if (sid) {
-      fetchStates();
+      FetchStates();
     }
   }, [sid, selectedCity, currentProperty, selectedCountry, id]);
 
@@ -326,9 +326,9 @@ export default function PropertyForm({ currentProperty }) {
       }
 
       // Log FormData contents
-      for (let pair of formData.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
-      }
+      // for (let pair of formData.entries()) {
+      //   console.log(`${pair[0]}: ${pair[1]}`);
+      // }
 
       if (currentProperty) {
         await UpdateProperty(currentProperty.id, formData, Token);
@@ -567,8 +567,8 @@ export default function PropertyForm({ currentProperty }) {
                       renderValue={(selected) =>
                         selected
                           .map(
-                            (id) =>
-                              propertyTypes.find((property) => property.id === id)?.property_type
+                            (pr_id) =>
+                              propertyTypes.find((property) => property.id === pr_id)?.property_type
                           )
                           .join(', ')
                       }
@@ -708,21 +708,20 @@ export default function PropertyForm({ currentProperty }) {
                           error={!!fieldState.error}
                           disabled={propertyTypesLoading}
                           sx={{ transition: 'all 0.3s ease' }}
-                          renderValue={(selected) => {
-                            // Ensure selected is an array
-                            return (selected || [])
-                              .map((id) => parking.find((type) => type.id === id)?.title)
-                              .join(', ');
-                          }}
+                          renderValue={(selected) =>
+                            (selected || [])
+                              .map((pid) => parkings.find((type) => type.id === pid)?.title)
+                              .join(', ')
+                          }
                         >
                           {propertyTypesLoading ? (
                             <MenuItem disabled>
                               <CircularProgress size={24} />
                             </MenuItem>
                           ) : (
-                            parking.map((type) => (
+                            parkings.map((type) => (
                               <MenuItem key={type.id} value={type.id}>
-                                <Checkbox checked={(field.value || []).includes(type.id)} />{' '}
+                                <Checkbox checked={(field.value || []).includes(type.id)} />
                                 {/* Ensure field.value is an array */}
                                 <ListItemText primary={type.title} />
                               </MenuItem>
@@ -774,7 +773,7 @@ export default function PropertyForm({ currentProperty }) {
                 />
               </FormControl>
               {values.account_type === 'Leasehold' && (
-                <RHFTextField name="leasehold_length" label="Leasehold Length" type={'number'} />
+                <RHFTextField name="leasehold_length" label="Leasehold Length" type="number" />
               )}
               <Controller
                 name="amenities"
@@ -790,7 +789,9 @@ export default function PropertyForm({ currentProperty }) {
                       multiple
                       renderValue={(selected) =>
                         selected
-                          .map((id) => amenities.find((amenity) => amenity.id === id)?.amenity_name)
+                          .map(
+                            (aid) => amenities.find((amenity) => amenity.id === aid)?.amenity_name
+                          )
                           .join(', ')
                       }
                     >
@@ -853,7 +854,7 @@ export default function PropertyForm({ currentProperty }) {
                       value={field.value || ''}
                       onChange={(event) => field.onChange(event.target.value)}
                       renderValue={(selected) => {
-                        const selectedPropertyStatus = propertyStatus.find(
+                        const selectedPropertyStatus = propertyStatus?.find(
                           (property) => property.id === selected
                         );
                         return selectedPropertyStatus ? selectedPropertyStatus.title : '';

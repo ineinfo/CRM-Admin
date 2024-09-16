@@ -24,35 +24,36 @@ const PropertyDetailsModal = ({ open, onClose, row, id, selected }) => {
 
   const CountryApi = useCountryData();
 
+  // Function to fetch state list for each row's location
+  const FetchStateList = async (locationId) => {
+    // Fetch the state data unconditionally using the hook
+    const { data: StateApi, error } = useStateData(locationId);
+
+    if (locationId && !stateLists[locationId]) {
+      try {
+        if (StateApi) {
+          setStateLists((prevStateLists) => ({
+            ...prevStateLists,
+            [locationId]: StateApi, // Store the fetched states for each location
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to fetch state data for location:', locationId);
+      }
+    }
+  };
   useEffect(() => {
     if (CountryApi.data?.data) {
       setCountryList(CountryApi.data.data);
     }
   }, [CountryApi.data]);
 
-  // Function to fetch state list for each row's location
-  const fetchStateList = async (locationId) => {
-    if (locationId && !stateLists[locationId]) {
-      try {
-        const StateApi = await useStateData(locationId);
-        if (StateApi?.data) {
-          setStateLists((prevStateLists) => ({
-            ...prevStateLists,
-            [locationId]: StateApi.data, // Store the fetched states for each location
-          }));
-        }
-      } catch (error) {
-        console.error('Failed to fetch state data for location:', locationId);
-      }
-    }
-  };
-
   // Fetch state list for each location in `row`
   useEffect(() => {
     if (row) {
       row.forEach((property) => {
         if (property.location) {
-          fetchStateList(property.location); // Fetch state list for each row's location
+          FetchStateList(property.location); // Fetch state list for each row's location
         }
       });
     }
@@ -95,25 +96,25 @@ const PropertyDetailsModal = ({ open, onClose, row, id, selected }) => {
   };
 
   const getCountryName = (locationId) => {
-    const country = countryList.find((country) => country.id === locationId);
+    const country = countryList.find((cou) => cou.id === locationId);
     return country ? country.name : '-';
   };
 
   // Helper function to get state name by state_id and locationId from stored stateLists
   const getStateName = (locationId, stateId) => {
     const states = stateLists[locationId] || [];
-    const state = states.find((state) => state.id === stateId); // Find the matching state by state_id
+    const state = states.find((st) => st.id === stateId); // Find the matching state by state_id
     return state ? state.name : '-';
   };
 
   function formatPrice(price) {
     if (price >= 1_000_000_000) {
-      return (price / 1_000_000_000).toFixed(1) + 'B'; // Billion
-    } else if (price >= 1_000_000) {
-      return (price / 1_000_000).toFixed(1) + 'M'; // Million
-    } else {
-      return new Intl.NumberFormat('en-US').format(price); // Below million, show with commas
+      return `${(price / 1_000_000_000).toFixed(1)}B`; // Billion
     }
+    if (price >= 1_000_000) {
+      return `${(price / 1_000_000).toFixed(1)}M`; // Million
+    }
+    return new Intl.NumberFormat('en-US').format(price); // Below million, show with commas
   }
 
   return (

@@ -39,17 +39,17 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
+import { UsegetRoles } from 'src/api/roles';
 import UserTableRow from '../user-table-row';
 import UserTableToolbar from '../user-table-toolbar';
 import UserTableFiltersResult from '../user-table-filters-result';
-import { UsegetRoles } from 'src/api/roles';
 
 // --------------------------------------------------------------------
 
 const TABLE_HEAD = [
   { id: 'name', label: 'Name', width: 180 },
   { id: 'role_id', label: 'Role', width: 180 },
-  { id: 'mobile_number', label: 'mobile_number', width: 180 },
+  { id: 'mobile_number', label: 'Phone', width: 180 },
   { id: '', width: 88 },
 ];
 
@@ -308,12 +308,14 @@ function applyFilter({ inputData, comparator, filters, roles }) {
   });
   inputData = stabilizedThis.map((el) => el[0]);
 
-  // Filter by name
+  // Filter by name, email, or mobile number
   if (filters.name) {
+    const searchValue = filters.name.toLowerCase();
     inputData = inputData.filter(
       (user) =>
-        user.first_name.toLowerCase().includes(filters.name.toLowerCase()) ||
-        user.email.toLowerCase().includes(filters.name.toLowerCase())
+        user.first_name.toLowerCase().includes(searchValue) ||
+        user.email.toLowerCase().includes(searchValue) ||
+        user.mobile_number.includes(searchValue) // Adjusted mobile number filter
     );
   }
 

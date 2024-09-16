@@ -26,7 +26,7 @@ export const LEADS_ROUTE = `${apiUrl}/leads`;
 // PROPERTY MASTER
 export const PROPERTIES_ROUTE = `${apiUrl}/properties`;
 
-//Country
+// Country
 export const COUNTRY_ROUTE = `${apiUrl}/country`;
 
 // State

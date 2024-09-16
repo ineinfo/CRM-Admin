@@ -37,12 +37,12 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
   function formatPrice(price) {
     if (price >= 1_000_000_000) {
-      return (price / 1_000_000_000).toFixed(1) + 'B'; // Billion
-    } else if (price >= 1_000_000) {
-      return (price / 1_000_000).toFixed(1) + 'M'; // Million
-    } else {
-      return new Intl.NumberFormat('en-US').format(price); // Below million, show with commas
+      return `${(price / 1_000_000_000).toFixed(1)}B`; // Billion
     }
+    if (price >= 1_000_000) {
+      return `${(price / 1_000_000).toFixed(1)}M`; // Million
+    }
+    return new Intl.NumberFormat('en-US').format(price); // Below million, show with commas
   }
 
   return (

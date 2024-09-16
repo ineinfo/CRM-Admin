@@ -26,72 +26,90 @@ const parseDateFromDDMMYYYY = (value) => {
   if (!value || !/^\d{2}-\d{2}-\d{4}$/.test(value)) return null; // Return null if no value or invalid format
   const [day, month, year] = value.split('-');
   const parsedDate = new Date(`${year}-${month}-${day}`);
-  return isNaN(parsedDate.getTime()) ? null : parsedDate; // Check for invalid date
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate; // Check for invalid date
 };
 
 export default function RHFTextField({ name, helperText, type, placeholder, ...other }) {
   const { control } = useFormContext();
   const [selectedDate, setSelectedDate] = useState(null); // Initialize state for selected date
 
+  // Date Picker Component
+  const renderDatePicker = (field, error) => (
+    <DatePicker
+      selected={selectedDate || parseDateFromDDMMYYYY(field.value) || null} // Safely handle null or invalid dates
+      onChange={(date) => {
+        const formattedDate = date ? formatDateToDDMMYYYY(date) : '';
+        setSelectedDate(date); // Update state with selected date
+        field.onChange(formattedDate);
+      }}
+      dateFormat="dd-MM-yyyy"
+      customInput={<TextField {...other} fullWidth />}
+      placeholderText={placeholder || 'dd-mm-yyyy'} // Ensure placeholder is shown
+      isClearable
+      showMonthDropdown
+      showYearDropdown
+      dropdownMode="select"
+      todayButton="Today" // Optional, if you want to add a button to select today’s date
+    />
+  );
+
+  // Mobile Input Component
+  const renderMobileInput = (field, error) => (
+    <TextField
+      {...field}
+      fullWidth
+      type="text" // Use text input for mobile numbers
+      value={field.value ? field.value.replace(/\D/g, '') : ''} // Ensure only numbers are displayed
+      onChange={(event) => {
+        const rawValue = event.target.value;
+        const numericValue = rawValue.replace(/\D/g, ''); // Remove non-numeric characters
+        if (numericValue.length <= 15) {
+          // Limit the input to 15 characters
+          field.onChange(numericValue);
+        }
+      }}
+      error={!!error}
+      helperText={error ? error?.message : helperText}
+      placeholder={placeholder}
+      {...other}
+    />
+  );
+
+  // Number or Other Input Component
+  const renderNumberOrOtherInput = (field, error) => (
+    <TextField
+      {...field}
+      fullWidth
+      type={type === 'number' ? 'text' : type}
+      value={type === 'number' ? formatNumberWithCommas(field.value || '') : field.value}
+      onChange={(event) => {
+        const rawValue = event.target.value;
+        if (type === 'number') {
+          const numericValue = rawValue.replace(/,/g, '').replace(/^0+/, ''); // Remove leading zeros
+          field.onChange(numericValue);
+        } else {
+          field.onChange(rawValue);
+        }
+      }}
+      error={!!error}
+      helperText={error ? error?.message : helperText}
+      {...other}
+    />
+  );
+
   return (
     <Controller
       name={name}
       control={control}
-      render={({ field, fieldState: { error } }) =>
-        type === 'date' ? (
-          <DatePicker
-            selected={selectedDate || parseDateFromDDMMYYYY(field.value) || null} // Safely handle null or invalid dates
-            onChange={(date) => {
-              const formattedDate = date ? formatDateToDDMMYYYY(date) : '';
-              setSelectedDate(date); // Update state with selected date
-              field.onChange(formattedDate);
-            }}
-            dateFormat="dd-MM-yyyy"
-            customInput={<TextField {...other} fullWidth />}
-            placeholderText={placeholder || 'dd-mm-yyyy'} // Ensure placeholder is shown
-            isClearable
-            showMonthDropdown
-            showYearDropdown
-            dropdownMode="select"
-            todayButton="Today" // Optional, if you want to add a button to select today’s date
-          />
-        ) : type === 'mobile' ? (
-          <TextField
-            {...field}
-            fullWidth
-            type="text" // Use text input for mobile numbers
-            value={field.value ? field.value.replace(/\D/g, '') : ''} // Ensure only numbers are displayed
-            onChange={(event) => {
-              const rawValue = event.target.value;
-              const numericValue = rawValue.replace(/\D/g, ''); // Remove non-numeric characters
-              field.onChange(numericValue);
-            }}
-            error={!!error}
-            helperText={error ? error?.message : helperText}
-            placeholder={placeholder}
-            {...other}
-          />
-        ) : (
-          <TextField
-            {...field}
-            fullWidth
-            type={type === 'number' ? 'text' : type}
-            value={type === 'number' ? formatNumberWithCommas(field.value || '') : field.value}
-            onChange={(event) => {
-              const rawValue = event.target.value;
-              if (type === 'number') {
-                const numericValue = rawValue.replace(/,/g, '').replace(/^0+/, ''); // Remove leading zeros
-                field.onChange(numericValue);
-              } else {
-                field.onChange(rawValue);
-              }
-            }}
-            error={!!error}
-            helperText={error ? error?.message : helperText}
-            {...other}
-          />
-        )
-      }
+      render={({ field, fieldState: { error } }) => {
+        if (type === 'date') {
+          return renderDatePicker(field, error);
+        }
+        if (type === 'mobile') {
+          return renderMobileInput(field, error);
+        }
+        return renderNumberOrOtherInput(field, error);
+      }}
     />
   );
 }

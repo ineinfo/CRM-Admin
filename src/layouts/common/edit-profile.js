@@ -127,7 +127,7 @@ export default function UserEditForm({ metadata, currentUser }) {
   );
 
   return (
-    <Box width={'90%'} margin={'auto'}>
+    <Box width="90%" margin="auto">
       <Typography variant="h4">{metadata.title}</Typography>
       <FormProvider methods={methods} onSubmit={onSubmit}>
         <Grid container spacing={3} pt={4}>
@@ -193,7 +193,7 @@ export default function UserEditForm({ metadata, currentUser }) {
                     </FormControl>
                   )}
                 />
-                <RHFTextField name="mobile_number" label="Mobile Number" />
+                <RHFTextField name="mobile_number" type="mobile" label="Mobile Number" />
               </Box>
 
               <Stack alignItems="flex-end" sx={{ mt: 3 }}>

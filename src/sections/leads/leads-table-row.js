@@ -13,9 +13,9 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-import PropertyDetailsModal from './PropertyDetailsModal'; // Adjust the path as needed
 import { MatchLead, SelectedLead } from 'src/api/leads';
 import { enqueueSnackbar } from 'notistack';
+import PropertyDetailsModal from './PropertyDetailsModal'; // Adjust the path as needed
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
   const [modalOpen, setModalOpen] = useState(false);
@@ -46,9 +46,9 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
       console.log(error);
     }
     try {
-      const selected = await MatchLead(id);
+      const res = await MatchLead(id);
       console.log('Selected lead', selected);
-      setMatchedData(selected.data);
+      setMatchedData(res.data);
 
       setModalOpen(true);
     } catch (error) {
@@ -69,7 +69,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         </TableCell>
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
           <ListItemText
-            primary={developer_name ? ` ${developer_name}` : ''}
+            primary={developer_name ? `${developer_name}` : ''}
             secondary={location}
             primaryTypographyProps={{ typography: 'body2' }}
             secondaryTypographyProps={{

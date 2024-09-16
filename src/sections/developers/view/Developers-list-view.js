@@ -41,10 +41,10 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
+import { useCountryData } from 'src/api/propertytype';
 import UserTableRow from '../Developers-table-row';
 import UserTableToolbar from '../Developers-table-toolbar';
 import UserTableFiltersResult from '../Developers-table-filters-result';
-import { useCountryData } from 'src/api/propertytype';
 
 // ----------------------------------------------------------------------
 

@@ -41,10 +41,10 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
+import { useCountryData } from 'src/api/propertytype';
 import UserTableRow from '../leads-table-row';
 import UserTableToolbar from '../leads-table-toolbar';
 import UserTableFiltersResult from '../leads-table-filters-result';
-import { useCountryData } from 'src/api/propertytype';
 
 const TABLE_HEAD = [
   { id: 'customer_name', label: 'Name', width: 180 },

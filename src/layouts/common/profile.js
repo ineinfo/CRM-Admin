@@ -17,12 +17,13 @@ import {
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
 import { useAuthContext } from 'src/auth/hooks';
+import { UsegetRoles } from 'src/api/roles';
 
 const defaultAvatar = '/path-to-dummy-avatar.png'; // Dummy image path
 
 function Profile({ metadata }) {
   const { user } = useAuthContext();
-  console.log('dataaa', user);
+  const { products: roles } = UsegetRoles();
 
   // Default values for user properties
   const {
@@ -37,7 +38,9 @@ function Profile({ metadata }) {
 
   const [open, setOpen] = useState(false); // State to control dialog visibility
   const formattedDate = dayjs(created).format('DD-MM-YYYY');
-  const role = role_id === 1 ? 'Administrator' : role_id === 2 ? 'Agent' : 'Unknown Role';
+
+  // Find the role name based on role_id from the roles array
+  const role = roles.find((r) => r.id === role_id)?.role_name || 'Unknown Role';
 
   const router = useRouter();
 
@@ -59,7 +62,7 @@ function Profile({ metadata }) {
   };
 
   return (
-    <Box width={'90%'} margin={'auto'}>
+    <Box width="90%" margin="auto">
       {/* Title and Buttons Section */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4">{metadata.title}</Typography>
