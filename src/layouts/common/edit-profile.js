@@ -1,4 +1,5 @@
 'use client';
+
 import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import { useForm, Controller } from 'react-hook-form';
@@ -197,7 +198,7 @@ export default function UserEditForm({ metadata, currentUser }) {
 
               <Stack alignItems="flex-end" sx={{ mt: 3 }}>
                 <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-                  {'Save Changes'}
+                  Save Changes
                 </LoadingButton>
               </Stack>
             </Card>

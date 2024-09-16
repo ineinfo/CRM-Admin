@@ -84,6 +84,9 @@ export default function PropertyForm({ currentLead }) {
     if (value === 'yes') {
       setShowParkingType(true);
     }
+    if (value === 'no') {
+      setShowParkingType(false);
+    }
   };
 
   // if (currentLead) {

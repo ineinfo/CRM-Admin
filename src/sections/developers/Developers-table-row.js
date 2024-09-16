@@ -35,6 +35,16 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
   const confirm = useBoolean();
   const popover = usePopover();
 
+  function formatPrice(price) {
+    if (price >= 1_000_000_000) {
+      return (price / 1_000_000_000).toFixed(1) + 'B'; // Billion
+    } else if (price >= 1_000_000) {
+      return (price / 1_000_000).toFixed(1) + 'M'; // Million
+    } else {
+      return new Intl.NumberFormat('en-US').format(price); // Below million, show with commas
+    }
+  }
+
   return (
     <>
       <TableRow hover selected={selected}>
@@ -52,13 +62,21 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
             }}
           />
         </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{starting_price}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          {starting_price ? formatPrice(starting_price) : '-'}
+        </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{parking}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{owner_name}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          {handover_date ? dayjs(handover_date).format('DD-MM-YYYY') : <center>-</center>}
+          {handover_date ? (
+            dayjs(handover_date).format('DD-MM-YYYY')
+          ) : (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
+          )}
         </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{furnished}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>{furnished}</div>
+        </TableCell>
         {/* <TableCell sx={{ whiteSpace: 'nowrap' }}>{sqft_starting_size}</TableCell> */}
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{email}</TableCell>
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>

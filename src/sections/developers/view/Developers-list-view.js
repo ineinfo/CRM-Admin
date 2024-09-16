@@ -50,14 +50,14 @@ import { useCountryData } from 'src/api/propertytype';
 
 const TABLE_HEAD = [
   { id: 'developer_name', label: 'Developer name', width: 150 },
-  { id: 'starting_price', label: 'Starting Price', width: 100 },
-  { id: 'parking', label: 'Parking', width: 50 },
+  { id: 'starting_price', label: 'Starting Price', width: 130 },
+  { id: 'parking', label: 'Parking', width: 80 },
   { id: 'owner_name', label: 'Owner', width: 100 },
   { id: 'handover_date', label: 'Handover Date', width: 100 },
-  { id: 'furnished', label: 'Furnished', width: 50 },
+  { id: 'furnished', label: 'Furnished', width: 80 },
   // { id: 'sqft_starting_size', label: 'Sqft', width: 100 },
-  { id: 'email', label: 'Email', width: 88 },
-  { id: '', label: '', width: 88 },
+  { id: 'email', label: 'Email', width: 50 },
+  { id: '', label: '', width: 0 },
 ];
 
 const defaultFilters = {

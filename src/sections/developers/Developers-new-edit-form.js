@@ -78,6 +78,9 @@ export default function PropertyForm({ currentProperty }) {
     if (value === 'yes') {
       setShowParkingType(true);
     }
+    if (value === 'no') {
+      setShowParkingType(false);
+    }
   };
 
   const PropertySchema = Yup.object().shape({

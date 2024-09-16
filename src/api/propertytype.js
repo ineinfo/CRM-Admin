@@ -165,7 +165,6 @@ export const deletePropertytype = async (id) => {
 };
 
 //Country Data
-
 export function useCountryData() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -200,7 +199,6 @@ export function useCountryData() {
 }
 
 //State Data
-
 export const useStateData = async (id = '101') => {
   try {
     const response = await axios.get(`${STATE_ROUTE}/${id}`);
@@ -210,8 +208,7 @@ export const useStateData = async (id = '101') => {
   }
 };
 
-//State Data
-
+//City Data
 export const useCityData = async (id = '4025') => {
   try {
     const response = await axios.get(`${CITY_ROUTE}/${id}`);

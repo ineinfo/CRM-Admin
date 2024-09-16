@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { useMemo, useEffect, useReducer, useCallback } from 'react';
 
 import axios, { endpoints } from 'src/utils/axios';
-import { AUTH_ROUTE, LOGIN_ROUTE } from 'src/utils/apiendpoints';
+import { AUTH_ROUTE, CHANGE_PASSWORD, LOGIN_ROUTE } from 'src/utils/apiendpoints';
 
 import { AuthContext } from './auth-context';
 import { setSession, isValidToken } from './utils';
@@ -150,6 +150,33 @@ export function AuthProvider({ children }) {
     });
   }, []);
 
+  // CHANGE PASSWORD
+  const changePassword = useCallback(
+    async (token, current_password, new_password, confirm_password) => {
+      try {
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`, // Sending the token in Bearer format
+          },
+        };
+
+        const data = {
+          current_password,
+          new_password,
+          confirm_password,
+        };
+
+        await axios.post(CHANGE_PASSWORD, data, config); // API call to change password
+
+        // After changing the password, log the user out
+        logout();
+      } catch (error) {
+        console.error('Password change failed:', error);
+      }
+    },
+    [logout]
+  );
+
   // ----------------------------------------------------------------------
 
   const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';
@@ -167,8 +194,9 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
+      changePassword,
     }),
-    [login, logout, register, state.user, status]
+    [login, logout, changePassword, register, state.user, status]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;

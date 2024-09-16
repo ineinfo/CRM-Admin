@@ -311,7 +311,9 @@ function applyFilter({ inputData, comparator, filters, roles }) {
   // Filter by name
   if (filters.name) {
     inputData = inputData.filter(
-      (user) => user.name.toLowerCase().indexOf(filters.name.toLowerCase()) !== -1
+      (user) =>
+        user.first_name.toLowerCase().includes(filters.name.toLowerCase()) ||
+        user.email.toLowerCase().includes(filters.name.toLowerCase())
     );
   }
 

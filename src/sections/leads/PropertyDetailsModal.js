@@ -106,6 +106,16 @@ const PropertyDetailsModal = ({ open, onClose, row, id, selected }) => {
     return state ? state.name : '-';
   };
 
+  function formatPrice(price) {
+    if (price >= 1_000_000_000) {
+      return (price / 1_000_000_000).toFixed(1) + 'B'; // Billion
+    } else if (price >= 1_000_000) {
+      return (price / 1_000_000).toFixed(1) + 'M'; // Million
+    } else {
+      return new Intl.NumberFormat('en-US').format(price); // Below million, show with commas
+    }
+  }
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
       <DialogTitle>Property Details</DialogTitle>
@@ -143,8 +153,14 @@ const PropertyDetailsModal = ({ open, onClose, row, id, selected }) => {
                   <TableCell>{getStateName(property.location, property.state_id)}</TableCell>{' '}
                   {/* Display state name */}
                   <TableCell>{property.parking}</TableCell>
-                  <TableCell>{property.range_min}</TableCell>
-                  <TableCell>{property.starting_price}</TableCell>
+                  <TableCell>
+                    {' '}
+                    {property.range_min ? formatPrice(property.range_min) : '-'} sqft
+                  </TableCell>
+                  <TableCell>
+                    {' '}
+                    {property.starting_price ? formatPrice(property.starting_price) : '-'}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

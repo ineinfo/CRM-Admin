@@ -3,6 +3,7 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 // ROUTES
 export const LOGIN_ROUTE = `${apiUrl}/auth/login`;
 export const AUTH_ROUTE = `${apiUrl}/auth/verify-token`;
+export const CHANGE_PASSWORD = `${apiUrl}/users/changepassword`;
 
 // RAW MASTER ENDPOINT
 export const ROLES_ROUTE = `${apiUrl}/roles`;

@@ -99,13 +99,13 @@ export default function AccountPopover() {
           sx={{ m: 1, fontWeight: 'fontWeightBold', color: 'Menu' }}
         >
           Profile
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem
           onClick={handleChangepassword}
           sx={{ m: 1, fontWeight: 'fontWeightBold', color: 'Menu' }}
         >
           Change Password
-        </MenuItem> */}
+        </MenuItem>
         <MenuItem
           onClick={handleLogout}
           sx={{ m: 1, fontWeight: 'fontWeightBold', color: 'error.main' }}

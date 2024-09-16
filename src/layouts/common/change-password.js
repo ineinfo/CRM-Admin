@@ -1,7 +1,13 @@
 'use client';
+
 import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { useAuthContext } from 'src/auth/hooks';
+import axios from 'src/utils/axios';
+import { CHANGE_PASSWORD } from 'src/utils/apiendpoints';
+import { enqueueSnackbar } from 'notistack';
+import { useRouter } from 'next/navigation';
 
 const ChangePassword = () => {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -11,8 +17,12 @@ const ChangePassword = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { user, logout } = useAuthContext();
+  const token = user?.accessToken;
+  const router = useRouter();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Reset the error state
@@ -24,11 +34,33 @@ const ChangePassword = () => {
       return;
     }
 
-    // Log current password and new password
-    console.log('Current Password:', currentPassword);
-    console.log('New Password:', newPassword);
+    // Create the data object to be sent in the request
+    const data = {
+      current_password: currentPassword,
+      new_password: newPassword,
+      confirm_password: confirmPassword,
+    };
 
-    // Here you can handle the submission to your API or any other logic
+    try {
+      setLoading(true);
+      // Make the POST request to change password API
+      await axios.post(CHANGE_PASSWORD, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // If successful, log the user out
+      enqueueSnackbar('Password changed successfully', { variant: 'success' });
+      logout();
+      router.push('/auth/jwt/login');
+    } catch (error) {
+      console.error('Error changing password:', error);
+      enqueueSnackbar(error.message || 'Unknown error', { variant: 'error' });
+      // Handle errors (you can also display an error message to the user)
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -96,8 +128,14 @@ const ChangePassword = () => {
             ),
           }}
         />
-        <Button type="submit" variant="contained" color="primary" sx={{ marginTop: 2 }}>
-          Change Password
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          sx={{ marginTop: 2 }}
+          disabled={loading}
+        >
+          {loading ? 'Changing...' : 'Change Password'}
         </Button>
       </form>
     </Box>
