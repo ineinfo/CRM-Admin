@@ -59,13 +59,13 @@ export default function PropertyForm({ currentLead }) {
   const { council: councils } = UsegetCouncil();
   const { finance: finances } = UsegetFinance();
 
-  const { propertyStatusIds: propertyStatus } = UsegetPropertySatatus();
+  const { propertyStatus: propertyStatuses } = UsegetPropertySatatus();
   console.log('Councils', finances);
   console.log('Councils', councils);
 
   const { enqueueSnackbar } = useSnackbar();
   const [id, setId] = useState(0);
-  const [sid, setSid] = useState(currentLead?.state_id || 0);
+  const [sid, setSid] = useState(0);
   const getCountries = useCountryData();
   const [error, setError] = useState(false); // Define the error state
 
@@ -79,6 +79,7 @@ export default function PropertyForm({ currentLead }) {
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedCountry, setSelectedCountry] = useState(currentLead?.location);
   const [showParkingType, setShowParkingType] = useState(false);
+  const [isCurrentLeadSet, setIsCurrentLeadSet] = useState(false);
 
   const handleParkingChange = (event) => {
     const value = event.target.value;
@@ -212,81 +213,111 @@ export default function PropertyForm({ currentLead }) {
     }
   }, [getCountries.data]);
 
-  useEffect(() => {
-    if (currentLead) {
-      setId(currentLead.location || '');
-      setSid(currentLead.state_id || '');
-    }
-  }, [currentLead, id, sid]);
+  // useEffect(() => {
+  //   if (currentLead) {
+  //     setId(currentLead.location || '');
+  //     setSid(currentLead.state_id || '');
+  //   }
+  // }, [currentLead]);
+
+  // useEffect(() => {
+  //   const FetchStates = async () => {
+  //     try {
+  //       const data = await useStateData(id);
+  //       console.log('States Data:', data.data); // Log state data for debugging
+  //       setStates(data.data);
+  //     } catch (stateError) {
+  //       console.error('Error fetching states:', stateError);
+  //     }
+  //   };
+  //   if (id) {
+  //     FetchStates();
+  //   }
+  // }, [id]);
+
+  // useEffect(() => {
+  //   const FetchCities = async () => {
+  //     try {
+  //       const data = await useCityData(sid);
+  //       console.log('Cities Data:', data.data); // Log city data for debugging
+  //       setCities(data.data);
+  //     } catch (cityError) {
+  //       console.error('Error fetching cities:', cityError);
+  //     }
+  //   };
+  //   if (sid) {
+  //     FetchCities();
+  //   }
+  // }, [sid]);
 
   useEffect(() => {
-    const FetchStates = async () => {
-      try {
-        const data = await useStateData(id);
-        console.log('States Data:', data.data); // Log state data for debugging
-        setStates(data.data);
-      } catch (stateError) {
-        console.error('Error fetching states:', stateError);
-      }
-    };
-    if (id) {
-      FetchStates();
-    }
-  }, [id]);
-
-  useEffect(() => {
-    const FetchCities = async () => {
-      try {
-        const data = await useCityData(sid);
-        console.log('Cities Data:', data.data); // Log city data for debugging
-        setCities(data.data);
-      } catch (cityError) {
-        console.error('Error fetching cities:', cityError);
-      }
-    };
-    if (sid) {
-      FetchCities();
-    }
-  }, [sid]);
-
-  useEffect(() => {
-    if (selectedCountry) {
+    if (selectedCountry && !isCurrentLeadSet) {
       const country = countries.find((c) => c.name === selectedCountry);
       if (country) {
         setSelectedCurrency(country.currency);
         setSelectedPhonecode(country.phonecode);
         setId(country.id);
-        setValue('state_id', 0); // Reset city ID when country changes
-        setValue('pincode', 0); // Reset city ID when country changes
-
-        setValue('city_id', 0); // Reset city ID when country changes
+        // Reset state and city only if country is manually selected, not when currentLead is setting data
+        setValue('state_id', 0);
+        setValue('city_id', 0);
+        setValue('pincode', 0);
       }
     }
-  }, [selectedCountry, countries, setValue]);
+  }, [selectedCountry, countries, setValue, isCurrentLeadSet]);
 
   // Handles when the current property is loaded
   useEffect(() => {
     if (currentLead) {
-      const locationId = currentLead?.location; // Get location ID from currentLead
+      const locationId = currentLead?.location;
+      const stateId = currentLead?.state_id;
+      const cityId = currentLead?.city_id;
+
       if (locationId) {
         const matchedCountry = countries.find((country) => country.id === locationId);
         if (matchedCountry) {
-          console.log('Matched Country:1', matchedCountry); // Verify the matched country
-          setSelectedCountry(matchedCountry.name); // Set the country based on location ID
+          setSelectedCountry(matchedCountry.name);
           setSelectedCurrency(matchedCountry.currency);
           setSelectedPhonecode(matchedCountry.phonecode);
-          // setId(matchedCountry.id); // Set the country ID
-          setValue('city_id', currentLead?.city_id);
-          setValue('state_id', currentLead?.state_id);
+          setId(locationId);
+          setSid(stateId);
+          setValue('city_id', cityId);
+          setValue('state_id', stateId);
           setValue('pincode', currentLead?.pincode);
         }
       }
-      setValue(
-        'setShowParkingType',
-        currentLead?.parking === 'yes' ? setShowParkingType(true) : ''
-      );
+
+      setShowParkingType(currentLead?.parking === 'yes');
+      setIsCurrentLeadSet(true); // Mark that currentLead data has been set
     }
-  }, [currentLead, countries, setValue]);
+  }, [currentLead, setValue, countries]);
+
+  useEffect(() => {
+    const FetchStates = async () => {
+      try {
+        if (id) {
+          const data = await useStateData(id);
+          setStates(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching states:', error);
+      }
+    };
+    FetchStates();
+  }, [id]);
+
+  useEffect(() => {
+    const FetchCities = async () => {
+      try {
+        if (sid) {
+          const data = await useCityData(sid);
+          setCities(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching cities:', error);
+      }
+    };
+    FetchCities();
+  }, [sid]);
 
   // useEffect(() => {
   //   setSelectedDate(dayjs(currentLead?.handover_date).format('YYYY-MM-DD'));
@@ -443,6 +474,13 @@ export default function PropertyForm({ currentLead }) {
                       onChange={(event, newValue) => {
                         field.onChange(newValue ? newValue.id : '');
                         setSelectedCountry(newValue ? newValue.name : '');
+                        setId(newValue ? newValue.id : '');
+                        setSelectedCurrency(newValue?.currency);
+                        setSelectedPhonecode(newValue?.phonecode);
+                        // Reset state, city, and pincode when country changes
+                        setValue('state_id', 0);
+                        setValue('city_id', 0);
+                        setValue('pincode', 0);
                       }}
                       renderInput={(params) => (
                         <TextField {...params} label="Location" variant="outlined" />
@@ -468,6 +506,7 @@ export default function PropertyForm({ currentLead }) {
                           field.onChange(newValue ? newValue.id : '');
                           setSelectedState(newValue ? newValue.name : '');
                           setSid(newValue ? newValue.id : '');
+                          setValue('pincode', 0);
                         }}
                         renderInput={(params) => (
                           <TextField {...params} label="State / City" variant="outlined" />
@@ -493,6 +532,7 @@ export default function PropertyForm({ currentLead }) {
                         onChange={(event, newValue) => {
                           field.onChange(newValue ? newValue.id : '');
                           setSelectedCity(newValue ? newValue.name : '');
+                          setValue('pincode', 0);
                         }}
                         renderInput={(params) => (
                           <TextField {...params} label="Area / City" variant="outlined" />
@@ -962,15 +1002,15 @@ export default function PropertyForm({ currentLead }) {
                       value={field.value || ''}
                       onChange={(event) => field.onChange(event.target.value)}
                       renderValue={(selected) => {
-                        const selectedPropertyStatus = propertyStatus?.find(
+                        const selectedPropertyStatus = propertyStatuses?.find(
                           (property) => property.id === selected
                         );
                         return selectedPropertyStatus ? selectedPropertyStatus.title : '';
                       }}
                     >
-                      {propertyStatus &&
-                        propertyStatus.length > 0 &&
-                        propertyStatus.map((property) => (
+                      {propertyStatuses &&
+                        propertyStatuses.length > 0 &&
+                        propertyStatuses.map((property) => (
                           <MenuItem key={property.id} value={property.id}>
                             {property.title}
                           </MenuItem>

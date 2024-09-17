@@ -337,11 +337,13 @@ function applyFilter({ inputData, comparator, filters }) {
   inputData = stabilizedThis.map((el) => el[0]);
 
   // Filter by name (assuming the 'developer_name' or 'owner_name' needs filtering by the 'name' filter)
-  if (name) {
+  if (filters.name) {
+    const searchValue = filters.name.toLowerCase();
     inputData = inputData.filter(
       (user) =>
-        user.developer_name.toLowerCase().includes(name.toLowerCase()) ||
-        user.email.toLowerCase().includes(name.toLowerCase())
+        user.developer_name.toLowerCase().includes(searchValue) ||
+        user.email.toLowerCase().includes(searchValue) ||
+        user.phone_number.includes(searchValue) // Adjusted mobile number filter
     );
   }
 

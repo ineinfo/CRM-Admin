@@ -54,8 +54,8 @@ export default function PropertyForm({ currentProperty }) {
   const { products: propertyTypes, productsLoading: propertyTypesLoading } = UsegetPropertiesType();
   const { parking: parkings, parkingLoading: parkingTypesLoading } = UsegetParkingType();
   const { council: councils } = UsegetCouncil();
-  const { propertyStatuses: propertyStatus } = UsegetPropertySatatus();
-  // console.log('Councils', councils);
+  const { propertyStatus: propertyStatuses } = UsegetPropertySatatus();
+  console.log('propertyStatuses', propertyStatuses);
 
   const { enqueueSnackbar } = useSnackbar();
   const [id, setId] = useState(0);
@@ -72,6 +72,7 @@ export default function PropertyForm({ currentProperty }) {
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedCountry, setSelectedCountry] = useState(currentProperty?.location);
   const [showParkingType, setShowParkingType] = useState(false);
+  const [iscurrentPropertySet, setIscurrentPropertySet] = useState(false);
 
   const handleParkingChange = (event) => {
     const value = event.target.value;
@@ -190,12 +191,54 @@ export default function PropertyForm({ currentProperty }) {
     }
   }, [getCountries.data]);
 
+  // useEffect(() => {
+  //   if (currentProperty) {
+  //     setId(currentProperty.location || '');
+  //     setSid(currentProperty.state_id || '');
+  //   }
+  // }, [currentProperty, id, sid]);
+
+  // Handles when the user manually selects a country
+  useEffect(() => {
+    if (selectedCountry && !iscurrentPropertySet) {
+      const country = countries.find((c) => c.name === selectedCountry);
+      if (country) {
+        setSelectedCurrency(country.currency);
+        setSelectedPhonecode(country.phonecode);
+        setId(country.id);
+        // Reset state, city, and pincode only when a country is manually selected
+        setValue('state_id', 0); // Clear the state
+        setValue('city_id', 0); // Clear the city
+        setValue('pincode', ''); // Clear the pincode
+      }
+    }
+  }, [selectedCountry, countries, setValue, iscurrentPropertySet]);
+
+  // Handles when the current property is loaded
   useEffect(() => {
     if (currentProperty) {
-      setId(currentProperty.location || '');
-      setSid(currentProperty.state_id || '');
+      const locationId = currentProperty?.location;
+      const stateId = currentProperty?.state_id;
+      const cityId = currentProperty?.city_id;
+
+      if (locationId) {
+        const matchedCountry = countries.find((country) => country.id === locationId);
+        if (matchedCountry) {
+          setSelectedCountry(matchedCountry.name);
+          setSelectedCurrency(matchedCountry.currency);
+          setSelectedPhonecode(matchedCountry.phonecode);
+          setId(locationId);
+          setSid(stateId);
+          setValue('city_id', cityId);
+          setValue('state_id', stateId);
+          setValue('pincode', currentProperty?.pincode);
+        }
+      }
+
+      setShowParkingType(currentProperty?.parking === 'yes');
+      setIscurrentPropertySet(true); // Mark that currentProperty data has been set
     }
-  }, [currentProperty, id, sid]);
+  }, [currentProperty, setValue, countries]);
 
   useEffect(() => {
     const FetchStates = async () => {
@@ -212,7 +255,7 @@ export default function PropertyForm({ currentProperty }) {
   }, [id, selectedState, currentProperty]);
 
   useEffect(() => {
-    const FetchStates = async () => {
+    const FetchCities = async () => {
       try {
         const data = await useCityData(sid);
         setCities(data.data);
@@ -221,49 +264,9 @@ export default function PropertyForm({ currentProperty }) {
       }
     };
     if (sid) {
-      FetchStates();
+      FetchCities();
     }
   }, [sid, selectedCity, currentProperty, selectedCountry, id]);
-
-  // Handles when the user manually selects a country
-  useEffect(() => {
-    if (selectedCountry) {
-      const country = countries.find((c) => c.name === selectedCountry);
-      if (country) {
-        setSelectedCurrency(country.currency);
-        setSelectedPhonecode(country.phonecode);
-        setId(country.id);
-        setValue('state_id', 0); // Reset city ID when country changes
-        setValue('pincode', 0); // Reset city ID when country changes
-
-        setValue('city_id', 0); // Reset city ID when country changes
-      }
-    }
-  }, [selectedCountry, countries, setValue]);
-
-  // Handles when the current property is loaded
-  useEffect(() => {
-    if (currentProperty) {
-      const locationId = currentProperty?.location; // Get location ID from currentProperty
-      if (locationId) {
-        const matchedCountry = countries.find((country) => country.id === locationId);
-        if (matchedCountry) {
-          console.log('Matched Country:1', matchedCountry); // Verify the matched country
-          setSelectedCountry(matchedCountry.name); // Set the country based on location ID
-          setSelectedCurrency(matchedCountry.currency);
-          setSelectedPhonecode(matchedCountry.phonecode);
-          // setId(matchedCountry.id); // Set the country ID
-          setValue('city_id', currentProperty?.city_id);
-          setValue('state_id', currentProperty?.state_id);
-          setValue('pincode', currentProperty?.pincode);
-        }
-      }
-      setValue(
-        'setShowParkingType',
-        currentProperty?.parking === 'yes' ? setShowParkingType(true) : ''
-      );
-    }
-  }, [currentProperty, countries, setValue]);
 
   useEffect(() => {
     setSelectedDate(dayjs(currentProperty?.handover_date).format('DD-MM-YYYY'));
@@ -406,6 +409,13 @@ export default function PropertyForm({ currentProperty }) {
                       onChange={(event, newValue) => {
                         field.onChange(newValue ? newValue.id : '');
                         setSelectedCountry(newValue ? newValue.name : '');
+                        setId(newValue ? newValue.id : '');
+                        setSelectedCurrency(newValue?.currency);
+                        setSelectedPhonecode(newValue?.phonecode);
+                        // Reset state, city, and pincode when country changes
+                        setValue('state_id', 0);
+                        setValue('city_id', 0);
+                        setValue('pincode', 0);
                       }}
                       renderInput={(params) => (
                         <TextField {...params} label="Location" variant="outlined" />
@@ -415,6 +425,7 @@ export default function PropertyForm({ currentProperty }) {
                   )}
                 />
               </FormControl>
+
               {states && states.length > 0 && (
                 <FormControl fullWidth>
                   <Controller
@@ -431,6 +442,7 @@ export default function PropertyForm({ currentProperty }) {
                           field.onChange(newValue ? newValue.id : '');
                           setSelectedState(newValue ? newValue.name : '');
                           setSid(newValue ? newValue.id : '');
+                          setValue('pincode', 0);
                         }}
                         renderInput={(params) => (
                           <TextField {...params} label="State / City" variant="outlined" />
@@ -441,7 +453,8 @@ export default function PropertyForm({ currentProperty }) {
                   />
                 </FormControl>
               )}
-              {states && states.length > 0 && cities && cities.length > 0 && (
+
+              {cities && cities.length > 0 && (
                 <FormControl fullWidth>
                   <Controller
                     name="city_id"
@@ -456,6 +469,7 @@ export default function PropertyForm({ currentProperty }) {
                         onChange={(event, newValue) => {
                           field.onChange(newValue ? newValue.id : '');
                           setSelectedCity(newValue ? newValue.name : '');
+                          setValue('pincode', 0);
                         }}
                         renderInput={(params) => (
                           <TextField {...params} label="Area / City" variant="outlined" />
@@ -466,6 +480,7 @@ export default function PropertyForm({ currentProperty }) {
                   />
                 </FormControl>
               )}
+
               <RHFTextField name="pincode" label="Postcode" />
               <FormControl fullWidth>
                 <RHFTextField
@@ -854,15 +869,15 @@ export default function PropertyForm({ currentProperty }) {
                       value={field.value || ''}
                       onChange={(event) => field.onChange(event.target.value)}
                       renderValue={(selected) => {
-                        const selectedPropertyStatus = propertyStatus?.find(
+                        const selectedPropertyStatus = propertyStatuses?.find(
                           (property) => property.id === selected
                         );
                         return selectedPropertyStatus ? selectedPropertyStatus.title : '';
                       }}
                     >
-                      {propertyStatus &&
-                        propertyStatus.length > 0 &&
-                        propertyStatus.map((property) => (
+                      {propertyStatuses &&
+                        propertyStatuses.length > 0 &&
+                        propertyStatuses.map((property) => (
                           <MenuItem key={property.id} value={property.id}>
                             {property.title}
                           </MenuItem>

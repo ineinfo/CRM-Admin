@@ -63,10 +63,10 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           />
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          {starting_price ? formatPrice(starting_price) : '-'}
+          {starting_price ? formatPrice(starting_price) : <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>}
         </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{parking}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{owner_name}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{<div style={{ display: 'flex', justifyContent: 'center' }}>{parking}</div>}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{owner_name?owner_name:<div style={{ display: 'flex', justifyContent: 'center' }}>-</div>}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
           {handover_date ? (
             dayjs(handover_date).format('DD-MM-YYYY')

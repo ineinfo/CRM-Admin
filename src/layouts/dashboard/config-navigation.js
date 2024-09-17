@@ -81,7 +81,7 @@ export function useNavData() {
                 icon: ICONS.role,
                 children: [
                   { title: t('list'), path: paths.dashboard.roles.root },
-                  { title: t('create'), path: paths.dashboard.roles.new },
+                  { title: t('create role'), path: paths.dashboard.roles.new },
                 ],
               },
               {
@@ -90,7 +90,7 @@ export function useNavData() {
                 icon: ICONS.amenity,
                 children: [
                   { title: t('list'), path: paths.dashboard.amenities.root },
-                  { title: t('create'), path: paths.dashboard.amenities.new },
+                  { title: t('create amenity'), path: paths.dashboard.amenities.new },
                 ],
               },
               {
@@ -99,7 +99,7 @@ export function useNavData() {
                 icon: ICONS.property,
                 children: [
                   { title: t('list'), path: paths.dashboard.propertytype.root },
-                  { title: t('create'), path: paths.dashboard.propertytype.new },
+                  { title: t('create property type'), path: paths.dashboard.propertytype.new },
                 ],
               },
             ],
