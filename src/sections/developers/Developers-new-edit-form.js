@@ -520,7 +520,7 @@ export default function PropertyForm({ currentProperty }) {
                 <RHFTextField
                   name="phone_number"
                   label="Mobile Number"
-                  type="tel"
+                  type="mobile"
                   variant="outlined"
                   InputProps={{
                     startAdornment: (
@@ -530,10 +530,7 @@ export default function PropertyForm({ currentProperty }) {
                     ),
                   }}
                   value={values.phone_number.replace(`+${selectedPhonecode} `, '')}
-                  onChange={(e) => {
-                    const onlyNumbers = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
-                    setValue('phone_number', onlyNumbers);
-                  }}
+                  
                 />
               </FormControl>
 
