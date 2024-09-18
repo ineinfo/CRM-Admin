@@ -137,6 +137,7 @@ export default function PropertyForm({ currentProperty }) {
       city_id: currentProperty?.city_id || '0',
       starting_price: currentProperty?.starting_price || '0',
       number_of_bathrooms: currentProperty?.no_of_bathrooms || [],
+      no_of_bedrooms: currentProperty?.no_of_bedrooms || [],
       owner_name: currentProperty?.owner_name || '',
       handover_date: dayjs(currentProperty?.handover_date).format('DD-MM-YYYY') || '',
       email: currentProperty?.email || '', // New field
@@ -530,7 +531,36 @@ export default function PropertyForm({ currentProperty }) {
                     ),
                   }}
                   value={values.phone_number.replace(`+${selectedPhonecode} `, '')}
-                  
+                />
+              </FormControl>
+
+              <FormControl fullWidth>
+                <InputLabel id="number-of-bedrooms-label">Number of Bedrooms</InputLabel>{' '}
+                {/* Added labelId */}
+                <Controller
+                  name="no_of_bedrooms"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      labelId="number-of-bedrooms-label" // Link InputLabel with Select
+                      id="number-of-bedrooms-select" // Optional id for select
+                      label="Number of Bedrooms" // Add label prop
+                      multiple
+                      value={field.value || []} // Ensure value is an array
+                      onChange={(event) => {
+                        field.onChange(event.target.value);
+                      }}
+                      renderValue={(selected) => selected.join(', ')}
+                    >
+                      {Array.from({ length: 10 }, (_, index) => (
+                        <MenuItem key={index + 1} value={index + 1}>
+                          <Checkbox checked={field.value.includes(index + 1)} />
+                          <ListItemText primary={index + 1} />
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
                 />
               </FormControl>
 

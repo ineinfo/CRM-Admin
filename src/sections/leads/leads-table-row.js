@@ -28,6 +28,8 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
     developer_name,
     location,
     starting_price,
+    first_name,
+    last_name,
     parking,
     phone_number,
     owner_name,
@@ -63,13 +65,19 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
   return (
     <>
-      <TableRow hover selected={selected}>
+      <TableRow
+        hover
+        selected={selected}
+        onClick={() => {
+          onEditRow();
+        }}
+      >
         <TableCell padding="checkbox">
           <Checkbox checked={selected} onClick={onSelectRow} />
         </TableCell>
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
           <ListItemText
-            primary={developer_name ? `${developer_name}` : ''}
+            primary={developer_name ? `${developer_name}` : `${first_name} ${last_name}`}
             secondary={location}
             primaryTypographyProps={{ typography: 'body2' }}
             secondaryTypographyProps={{

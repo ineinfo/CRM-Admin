@@ -25,7 +25,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
     location, // This is your location value
     starting_price,
     parking,
-    owner_name,
+    phone_number,
     handover_date,
     furnished,
     // sqft_starting_size,
@@ -47,7 +47,13 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
   return (
     <>
-      <TableRow hover selected={selected}>
+      <TableRow
+        hover
+        selected={selected}
+        onClick={() => {
+          onEditRow();
+        }}
+      >
         <TableCell padding="checkbox">
           <Checkbox checked={selected} onClick={onSelectRow} />
         </TableCell>
@@ -63,10 +69,22 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           />
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          {starting_price ? formatPrice(starting_price) : <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>}
+          {starting_price ? (
+            formatPrice(starting_price)
+          ) : (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
+          )}
         </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{<div style={{ display: 'flex', justifyContent: 'center' }}>{parking}</div>}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{owner_name?owner_name:<div style={{ display: 'flex', justifyContent: 'center' }}>-</div>}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          {<div style={{ display: 'flex', justifyContent: 'center' }}>{parking}</div>}
+        </TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          {phone_number ? (
+            phone_number
+          ) : (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
+          )}
+        </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
           {handover_date ? (
             dayjs(handover_date).format('DD-MM-YYYY')

@@ -41,7 +41,7 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
-import { useCountryData } from 'src/api/propertytype';
+import { useCountryData, UsegetPropertiesType } from 'src/api/propertytype';
 import UserTableRow from '../Developers-table-row';
 import UserTableToolbar from '../Developers-table-toolbar';
 import UserTableFiltersResult from '../Developers-table-filters-result';
@@ -52,7 +52,7 @@ const TABLE_HEAD = [
   { id: 'developer_name', label: 'Developer name', width: 130 },
   { id: 'starting_price', label: 'Starting Price', width: 100 },
   { id: 'parking', label: 'Parking', width: 50 },
-  { id: 'owner_name', label: 'Owner', width: 80 },
+  { id: 'phone_number', label: 'Contact No', width: 80 },
   { id: 'handover_date', label: 'Handover Date', width: 100 },
   { id: 'furnished', label: 'Furnished', width: 80 },
   // { id: 'sqft_starting_size', label: 'Sqft', width: 100 },
@@ -64,6 +64,14 @@ const defaultFilters = {
   name: '',
   role: [],
   status: 'all',
+  property_type: [],
+  no_of_bedrooms: [],
+  amenities: [],
+  property_status: 0,
+  range_min: 0,
+  range_max: 20000,
+  parking: '',
+  account_type: '',
 };
 
 // ----------------------------------------------------------------------
@@ -218,7 +226,7 @@ export default function UserListView() {
           }}
         />
         <Card>
-          <UserTableToolbar filters={filters} onFilters={handleFilters} roleOptions={_roles} />
+          <UserTableToolbar filters={filters} onFilters={handleFilters} />
           {canReset && (
             <UserTableFiltersResult
               filters={filters}
@@ -326,9 +334,20 @@ export default function UserListView() {
 }
 
 // ----------------------------------------------------------------------
-
 function applyFilter({ inputData, comparator, filters }) {
-  const { name, status, role } = filters;
+  const {
+    name,
+    status,
+    role,
+    property_type,
+    no_of_bedrooms,
+    amenities,
+    range_min,
+    range_max,
+    parking,
+    account_type,
+    property_status,
+  } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 
@@ -340,7 +359,7 @@ function applyFilter({ inputData, comparator, filters }) {
 
   inputData = stabilizedThis.map((el) => el[0]);
 
-  // Filter by name (assuming the 'developer_name' or 'owner_name' needs filtering by the 'name' filter)
+  // Filter by name
   if (name) {
     inputData = inputData.filter(
       (user) =>
@@ -357,6 +376,50 @@ function applyFilter({ inputData, comparator, filters }) {
   // Filter by role
   if (role.length) {
     inputData = inputData.filter((user) => role.includes(user.role));
+  }
+
+  // Filter by property type
+  if (property_type.length) {
+    inputData = inputData.filter((user) =>
+      user.property_type.some((type) => property_type.includes(type))
+    );
+  }
+
+  // Filter by number of bedrooms
+  if (no_of_bedrooms.length) {
+    inputData = inputData.filter((user) =>
+      user.no_of_bedrooms.some((type) => no_of_bedrooms.includes(type))
+    );
+  }
+
+  // Filter by amenities
+  if (amenities.length) {
+    inputData = inputData.filter((user) => user.amenities.some((type) => amenities.includes(type)));
+  }
+
+  // **Correct filtering for range_min and range_max**
+  if (range_min !== undefined && range_min !== null) {
+    inputData = inputData.filter((user) => user.range_min >= range_min);
+  }
+
+  if (range_max !== undefined && range_max !== null) {
+    inputData = inputData.filter((user) => user.range_max <= range_max);
+  }
+
+  if (parking) {
+    inputData = inputData.filter((user) =>
+      user.parking.toLowerCase().includes(parking.toLowerCase())
+    );
+  }
+
+  if (account_type) {
+    inputData = inputData.filter((user) =>
+      user.account_type.toLowerCase().includes(account_type.toLowerCase())
+    );
+  }
+
+  if (property_status) {
+    inputData = inputData.filter((user) => user.property_status === property_status);
   }
 
   return inputData;

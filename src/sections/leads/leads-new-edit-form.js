@@ -80,6 +80,7 @@ export default function PropertyForm({ currentLead }) {
   const [selectedCountry, setSelectedCountry] = useState(currentLead?.location);
   const [showParkingType, setShowParkingType] = useState(false);
   const [isCurrentLeadSet, setIsCurrentLeadSet] = useState(false);
+  const [showdate, setShowdate] = useState(false);
 
   const handleParkingChange = (event) => {
     const value = event.target.value;
@@ -104,7 +105,9 @@ export default function PropertyForm({ currentLead }) {
   // }
 
   const PropertySchema = Yup.object().shape({
-    developer_name: Yup.string().required('Lead Name is required'),
+    // developer_name: Yup.string().required('Lead Name is required'),
+    first_name: Yup.string().required('First name is required'),
+    // last_name: Yup.string().required('Last Name is required'),
     // location: Yup.number().required('Location is required'),
     // // city_id: Yup.number().required('Location is required'),
     // state_id: Yup.number().required('Location is required'),
@@ -147,7 +150,9 @@ export default function PropertyForm({ currentLead }) {
     const isPDF = (filename) => /\.pdf$/i.test(filename);
 
     return {
-      developer_name: currentLead?.developer_name || '',
+      // developer_name: currentLead?.developer_name || '',
+      first_name: currentLead?.first_name || '',
+      last_name: currentLead?.last_name || '',
       pincode: currentLead?.pincode || '0',
       service_charges: currentLead?.service_charges || '0',
       property_type: currentLead?.property_type || [],
@@ -459,7 +464,9 @@ export default function PropertyForm({ currentLead }) {
                 sm: 'repeat(2, 1fr)',
               }}
             >
-              <RHFTextField name="developer_name" label="Lead Name" />
+              {/* <RHFTextField name="developer_name" label="Lead Name" /> */}
+              <RHFTextField name="first_name" label="First Name" />
+              <RHFTextField name="last_name" label="Last Name" />
               <FormControl fullWidth>
                 <Controller
                   name="location"
@@ -593,7 +600,15 @@ export default function PropertyForm({ currentLead }) {
                         label="Lead Type" // Add label prop
                         value={field.value || ''} // Default to empty string if no value is selected
                         onChange={(event) => {
-                          field.onChange(event.target.value);
+                          const selectedValue = event.target.value;
+                          field.onChange(selectedValue);
+          
+                          // Set showDate based on the selected lead type
+                          if (selectedValue === '1') {
+                            setShowdate(true); // Show date for "Buyer"
+                          } else if (selectedValue === '2') {
+                            setShowdate(false); // Hide date for "Seller"
+                          }
                         }}
                         error={!!leadError} // Display error styling if validation fails
                       >
@@ -763,14 +778,16 @@ export default function PropertyForm({ currentLead }) {
                 )}
               />
 
-              <FormControl fullWidth>
-                <RHFTextField
-                  name="handover_date"
-                  label="Handover Date"
-                  type="date"
-                  placeholder="DD-MM-YYYY"
-                />
-              </FormControl>
+              {showdate && (
+                <FormControl fullWidth>
+                  <RHFTextField
+                    name="handover_date"
+                    label="Move in date"
+                    type="date"
+                    placeholder="DD-MM-YYYY"
+                  />
+                </FormControl>
+              )}
 
               <FormControl fullWidth>
                 <Controller
@@ -1087,7 +1104,17 @@ export default function PropertyForm({ currentLead }) {
                 </Typography>
                 <RHFTextField name="note" multiline rows={4} variant="outlined" fullWidth />
               </Box>
+              <FormControl fullWidth>
+                  <RHFTextField
+                    name="handover_date"
+                    label="Follow up date"
+                    type="date"
+                    placeholder="DD-MM-YYYY"
+                  />
+                </FormControl>
             </Box>
+
+            
 
             <Stack alignItems="flex-end" sx={{ mt: 4 }}>
               <LoadingButton

@@ -21,7 +21,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 
 import { endpoints } from 'src/utils/axios';
 
-import { _roles } from 'src/_mock';
+import { _roles, USER_STATUS_OPTIONS } from 'src/_mock';
 import { DeleteLead } from 'src/api/leads';
 
 import Iconify from 'src/components/iconify';
@@ -45,11 +45,16 @@ import { useCountryData } from 'src/api/propertytype';
 import UserTableRow from '../leads-table-row';
 import UserTableToolbar from '../leads-table-toolbar';
 import UserTableFiltersResult from '../leads-table-filters-result';
+import { alpha, Tab, Tabs } from '@mui/material';
+import Label from 'src/components/label';
 
+// ----------------------------------------------------------------------
+
+const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...USER_STATUS_OPTIONS];
 const TABLE_HEAD = [
   { id: 'customer_name', label: 'Name', width: 180 },
   { id: 'customer_mobile', label: 'Phone', width: 180 },
-  { id: 'handover_date', label: 'Handover Date', width: 100 },
+  { id: 'handover_date', label: 'Move in date', width: 100 },
   { id: 'email', label: 'Email', width: 88 },
   { id: '', width: 88 },
   { id: '', width: 88 },
@@ -79,6 +84,7 @@ export default function UserListView() {
   const [tableData, setTableData] = useState([]);
 
   const [filters, setFilters] = useState(defaultFilters);
+  const [activeTab, setActiveTab] = useState('all'); // Initial tab selection
 
   const dataFiltered = applyFilter({
     inputData: tableData,
@@ -189,6 +195,12 @@ export default function UserListView() {
     [router]
   );
 
+  const handleFilterStatus = useCallback(
+    (event, newValue) => {
+      handleFilters('status', newValue);
+    },
+    [handleFilters]
+  );
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -214,6 +226,41 @@ export default function UserListView() {
           }}
         />
         <Card>
+          <Tabs
+            value={filters.status}
+            onChange={handleFilterStatus}
+            sx={{
+              px: 2.5,
+              boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+            }}
+          >
+            {STATUS_OPTIONS.map((tab) => (
+              <Tab
+                key={tab.value}
+                iconPosition="end"
+                value={tab.value}
+                label={tab.label}
+                icon={
+                  <Label
+                    variant={
+                      ((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'
+                    }
+                    color={
+                      (tab.value === 'active' && 'success') ||
+                      (tab.value === 'pending' && 'warning') ||
+                      (tab.value === 'banned' && 'error') ||
+                      'default'
+                    }
+                  >
+                    {['active', 'pending', 'banned', 'rejected'].includes(tab.value)
+                      ? tableData.filter((user) => user.status === tab.value).length
+                      : tableData.length}
+                  </Label>
+                }
+              />
+            ))}
+          </Tabs>
+
           <UserTableToolbar filters={filters} onFilters={handleFilters} roleOptions={_roles} />
           {canReset && (
             <UserTableFiltersResult
@@ -349,7 +396,13 @@ function applyFilter({ inputData, comparator, filters }) {
 
   // Filter by status
   if (status !== 'all') {
-    inputData = inputData.filter((user) => user.status === status);
+    if (status === 'active') {
+      inputData = inputData.filter((user) => user.isActive);
+    } else if (status === 'inactive') {
+      inputData = inputData.filter((user) => !user.isActive);
+    } else if (status === 'previous') {
+      inputData = inputData.filter((user) => user.isPreviousBuyer); // You may need to adjust this field based on your data structure
+    }
   }
 
   // Filter by role
