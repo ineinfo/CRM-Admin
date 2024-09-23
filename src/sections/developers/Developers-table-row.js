@@ -16,6 +16,7 @@ import { formatDate } from '@fullcalendar/core';
 import { useCountryData } from 'src/api/propertytype';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
+import { Link } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -50,23 +51,23 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
       <TableRow
         hover
         selected={selected}
-        onClick={() => {
-          onEditRow();
-        }}
+
       >
         <TableCell padding="checkbox">
           <Checkbox checked={selected} onClick={onSelectRow} />
         </TableCell>
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <ListItemText
-            primary={developer_name ? ` ${developer_name}` : ''}
-            secondary={location}
-            primaryTypographyProps={{ typography: 'body2' }}
-            secondaryTypographyProps={{
-              component: 'span',
-              color: 'text.disabled',
-            }}
-          />
+          <Link color="inherit" sx={{ cursor: "pointer" }} onClick={() => {
+            onEditRow();
+          }}><ListItemText
+              primary={developer_name ? ` ${developer_name}` : ''}
+              secondary={location}
+              primaryTypographyProps={{ typography: 'body2' }}
+              secondaryTypographyProps={{
+                component: 'span',
+                color: 'text.disabled',
+              }}
+            /></Link>
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
           {starting_price ? (

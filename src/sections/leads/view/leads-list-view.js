@@ -56,8 +56,9 @@ const TABLE_HEAD = [
   { id: 'customer_mobile', label: 'Phone', width: 180 },
   { id: 'handover_date', label: 'Move in date', width: 100 },
   { id: 'email', label: 'Email', width: 88 },
-  { id: '', width: 88 },
-  { id: '', width: 88 },
+  { id: 'Followup_date', label: 'Followup date', width: 120 },
+  { id: '', width: 50 },
+  { id: '', width: 50 },
 ];
 
 const defaultFilters = {
@@ -388,7 +389,8 @@ function applyFilter({ inputData, comparator, filters }) {
     const searchValue = filters.name.toLowerCase();
     inputData = inputData.filter(
       (user) =>
-        user.developer_name.toLowerCase().includes(searchValue) ||
+        user.first_name?.toLowerCase().includes(searchValue) ||
+        user.last_name?.toLowerCase().includes(searchValue) ||
         user.email.toLowerCase().includes(searchValue) ||
         user.phone_number.includes(searchValue) // Adjusted mobile number filter
     );

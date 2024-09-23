@@ -162,10 +162,18 @@ export const paths = {
       edit: (id) => `${ROOTS.DASHBOARD}/propertytype/${id}/edit`,
     },
     propertypage: {
+      main: `${ROOTS.DASHBOARD}/developers`,
       root: `${ROOTS.DASHBOARD}/developers/list`,
       new: `${ROOTS.DASHBOARD}/developers/new`,
       details: (id) => `${ROOTS.DASHBOARD}/developers/${id}`,
       edit: (id) => `${ROOTS.DASHBOARD}/developers/${id}/edit`,
+    },
+
+    followup: {
+      root: `${ROOTS.DASHBOARD}/followup`,
+      new: `${ROOTS.DASHBOARD}/followup/new`,
+      details: (id) => `${ROOTS.DASHBOARD}/developers/${id}`,
+      edit: (id) => `${ROOTS.DASHBOARD}/followup/${id}/edit`,
     },
     invoice: {
       root: `${ROOTS.DASHBOARD}/invoice`,

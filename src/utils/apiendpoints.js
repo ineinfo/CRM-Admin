@@ -26,6 +26,9 @@ export const LEADS_ROUTE = `${apiUrl}/leads`;
 // PROPERTY MASTER
 export const PROPERTIES_ROUTE = `${apiUrl}/properties`;
 
+// Followup MASTER
+export const FOLLOWUP_ROUTE = `${apiUrl}/followup`;
+
 // Country
 export const COUNTRY_ROUTE = `${apiUrl}/country`;
 

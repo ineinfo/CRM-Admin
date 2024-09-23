@@ -14,6 +14,7 @@ import {
   COUNCIL_TAX_BAND,
   PROPERTY_STATUS,
   FINANCE,
+  FOLLOWUP_ROUTE,
 } from './apiendpoints';
 
 // ----------------------------------------------------------------------
@@ -112,5 +113,13 @@ export const endpoints = {
     list: PROPERTIES_ROUTE,
     create: PROPERTIES_ROUTE,
     details: (id) => `${PROPERTIES_ROUTE}/${id}`,
+  },
+  followup: {
+    list: FOLLOWUP_ROUTE,
+    create: FOLLOWUP_ROUTE,
+    details: (id) => `${FOLLOWUP_ROUTE}/?lead_id=${id}`,
+    specificRow: (id) => `${FOLLOWUP_ROUTE}/?id=${id}`,
+    update: (id) => `${FOLLOWUP_ROUTE}/${id}`,
+    deleteSingle: (id) => `${FOLLOWUP_ROUTE}/${id}`,
   },
 };

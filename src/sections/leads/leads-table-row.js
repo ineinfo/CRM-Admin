@@ -16,6 +16,8 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import { MatchLead, SelectedLead } from 'src/api/leads';
 import { enqueueSnackbar } from 'notistack';
 import PropertyDetailsModal from './PropertyDetailsModal'; // Adjust the path as needed
+import { useRouter } from 'next/navigation';
+import { Link } from '@mui/material';
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
   const [modalOpen, setModalOpen] = useState(false);
@@ -40,6 +42,8 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
     id,
   } = row;
 
+  const router = useRouter()
+
   const handleMatchPropertyClick = async () => {
     try {
       const Data = await SelectedLead(row?.id);
@@ -62,35 +66,47 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
   const handleCloseModal = () => {
     setModalOpen(false);
   };
+  const handlefollowupDate = () => {
+    router.push(`/dashboard/followup?id=${id}`)
+  }
 
   return (
     <>
       <TableRow
         hover
         selected={selected}
-        onClick={() => {
-          onEditRow();
-        }}
+
       >
         <TableCell padding="checkbox">
           <Checkbox checked={selected} onClick={onSelectRow} />
         </TableCell>
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <ListItemText
-            primary={developer_name ? `${developer_name}` : `${first_name} ${last_name}`}
-            secondary={location}
-            primaryTypographyProps={{ typography: 'body2' }}
-            secondaryTypographyProps={{
-              component: 'span',
-              color: 'text.disabled',
-            }}
-          />
+
+          <Link color="inherit" sx={{ cursor: "pointer" }} onClick={() => {
+            onEditRow();
+          }}><ListItemText
+              primary={developer_name ? `${developer_name}` : `${first_name} ${last_name}`}
+              secondary={location}
+              primaryTypographyProps={{ typography: 'body2' }}
+              secondaryTypographyProps={{
+                component: 'span',
+                color: 'text.disabled',
+              }}
+            /></Link>
+
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{phone_number}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
           {handover_date ? dayjs(handover_date).format('DD-MM-YYYY') : <center>-</center>}
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{email}</TableCell>
+
+
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          <Button variant="contained" color="secondary" onClick={handlefollowupDate}>
+            <Iconify icon="eva:calendar-outline" />
+          </Button>
+        </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
           <Button variant="contained" color="secondary" onClick={handleMatchPropertyClick}>
             Property Match
@@ -101,7 +117,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
         </TableCell>
-      </TableRow>
+      </TableRow >
       <CustomPopover
         open={popover.open}
         onClose={popover.onClose}

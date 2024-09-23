@@ -139,7 +139,7 @@ export default function PropertyForm({ currentProperty }) {
       number_of_bathrooms: currentProperty?.no_of_bathrooms || [],
       no_of_bedrooms: currentProperty?.no_of_bedrooms || [],
       owner_name: currentProperty?.owner_name || '',
-      handover_date: dayjs(currentProperty?.handover_date).format('DD-MM-YYYY') || '',
+      handover_date: currentProperty?.handover_date ? dayjs(currentProperty.handover_date).format('DD-MM-YYYY') : null,
       email: currentProperty?.email || '', // New field
       phone_number: currentProperty?.phone_number || '', // New field
       currency: currentProperty?.currency || 'GBP',
@@ -307,6 +307,9 @@ export default function PropertyForm({ currentProperty }) {
     try {
       const formData = new FormData();
       Object.keys(data).forEach((key) => {
+        if (key === 'handover_date' && data[key] === null) {
+          data[key] = '';
+        }
         if (
           key === 'parking_option' ||
           key === 'property_type' ||
@@ -448,12 +451,14 @@ export default function PropertyForm({ currentProperty }) {
                         renderInput={(params) => (
                           <TextField {...params} label="State / City" variant="outlined" />
                         )}
-                        isOptionEqualToValue={(option, value) => option.name === value.name}
+                        isOptionEqualToValue={(option, value) => option.id === value}
+                        freeSolo // Enable free text input
                       />
                     )}
                   />
                 </FormControl>
               )}
+
 
               {cities && cities.length > 0 && (
                 <FormControl fullWidth>
@@ -475,12 +480,14 @@ export default function PropertyForm({ currentProperty }) {
                         renderInput={(params) => (
                           <TextField {...params} label="Area / City" variant="outlined" />
                         )}
-                        isOptionEqualToValue={(option, value) => option.name === value.name}
+                        isOptionEqualToValue={(option, value) => option.id === value}
+                        freeSolo // Enable free text input
                       />
                     )}
                   />
                 </FormControl>
               )}
+
 
               <RHFTextField name="pincode" label="Postcode" />
               <FormControl fullWidth>
@@ -664,7 +671,7 @@ export default function PropertyForm({ currentProperty }) {
               />
 
               <FormControl fullWidth>
-                {' '}
+
                 <RHFTextField
                   name="handover_date"
                   label="Handover Date"
@@ -983,7 +990,7 @@ export default function PropertyForm({ currentProperty }) {
                   },
                 }}
               >
-                {!currentProperty ? 'Create Property' : 'Save Changes'}
+                {!currentProperty ? 'Create Developer' : 'Save Changes'}
               </LoadingButton>
             </Stack>
           </Card>

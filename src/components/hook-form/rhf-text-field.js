@@ -34,13 +34,14 @@ export default function RHFTextField({ name, helperText, type, placeholder, ...o
   const [selectedDate, setSelectedDate] = useState(null); // Initialize state for selected date
 
   // Date Picker Component
+  // Date Picker Component
   const renderDatePicker = (field, error) => (
     <DatePicker
-      selected={selectedDate || parseDateFromDDMMYYYY(field.value) || null} // Safely handle null or invalid dates
+      selected={selectedDate || (field.value ? parseDateFromDDMMYYYY(field.value) : null)} // Set to null if field.value is null
       onChange={(date) => {
         const formattedDate = date ? formatDateToDDMMYYYY(date) : '';
         setSelectedDate(date); // Update state with selected date
-        field.onChange(formattedDate);
+        field.onChange(formattedDate); // Pass formatted date or empty string
       }}
       dateFormat="dd-MM-yyyy"
       customInput={<TextField {...other} fullWidth />}
@@ -52,6 +53,7 @@ export default function RHFTextField({ name, helperText, type, placeholder, ...o
       todayButton="Today" // Optional, if you want to add a button to select today’s date
     />
   );
+
 
   // Mobile Input Component
   const renderMobileInput = (field, error) => (

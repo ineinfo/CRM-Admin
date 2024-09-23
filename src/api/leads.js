@@ -140,3 +140,89 @@ export const SelectedLead = async (id) => {
   const response = await axios.get(endpoints.leads.select(id));
   return response.data;
 };
+
+
+//Create Follow Up by lead_id
+export const CreateFollowUp = async (data, id) => {
+  try {
+    // Add lead_id to the data object
+    const updatedData = {
+      ...data, // Copy existing data
+      lead_id: id // Add the lead_id key with the value of id
+    };
+
+    const response = await axios.post(endpoints.followup.create, updatedData);
+
+    return response.data;
+  } catch (error) {
+    console.error('Error Create FollowUp:', error);
+    return null;
+  }
+}
+
+export function UsegetFollowupProperty(RowID) {
+  const URL = RowID ? endpoints.followup.specificRow(RowID) : null;
+
+  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
+
+  const memoizedValue = useMemo(
+    () => ({
+      product: data?.data[0],
+      productLoading: isLoading,
+      productError: error,
+      productValidating: isValidating,
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+
+export function UsegetFollowupDetail(LeadId) {
+  const URL = LeadId ? endpoints.leads.details(LeadId) : null;
+
+  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
+
+  const memoizedValue = useMemo(
+    () => ({
+      product: data?.data,
+      productLoading: isLoading,
+      productError: error,
+      productValidating: isValidating,
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+
+export const UpdateFollowUp = async (id, data, token) => {
+  console.log("==============>", data);
+  try {
+
+    const response = await axios.put(endpoints.followup.update(id), data, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error update property:', error);
+    return null;
+  }
+};
+
+export const DeleteFollowUp = async (id) => {
+  const response = await axios.delete(endpoints.followup.deleteSingle(id));
+  return response.data;
+};
+
+
+export const DeleteMultipleFollowUp = async (ids) => {
+  const idString = ids.join(',');
+  const response = await axios.delete(endpoints.followup.deleteSingle(idString));
+  return response.data;
+};
+

@@ -163,7 +163,8 @@ export default function PropertyForm({ currentLead }) {
       starting_price: currentLead?.starting_price || '0',
       number_of_bathrooms: currentLead?.no_of_bathrooms || [],
       owner_name: currentLead?.owner_name || '',
-      handover_date: dayjs(currentLead?.handover_date).format('DD-MM-YYYY') || null,
+      handover_date: currentLead?.handover_date ? dayjs(currentLead.handover_date).format('DD-MM-YYYY') : null,
+      followup_date: currentLead?.followup_date ? dayjs(currentLead.followup_date).format('DD-MM-YYYY') : null,
       email: currentLead?.email || '', // New field
       phone_number: currentLead?.phone_number || '', // New field
       currency: currentLead?.currency || 'GBP',
@@ -292,6 +293,7 @@ export default function PropertyForm({ currentLead }) {
       }
 
       setShowParkingType(currentLead?.parking === 'yes');
+      setShowdate(currentLead?.lead_type == 1);
       setIsCurrentLeadSet(true); // Mark that currentLead data has been set
     }
   }, [currentLead, setValue, countries]);
@@ -378,6 +380,12 @@ export default function PropertyForm({ currentLead }) {
     try {
       const formData = new FormData();
       Object.keys(data).forEach((key) => {
+        if (key === 'followup_date' && data[key] === null) {
+          data[key] = '';
+        }
+        if (key === 'handover_date' && data[key] === null) {
+          data[key] = '';
+        }
         if (
           key === 'parking_option' ||
           key === 'property_type' ||
@@ -519,11 +527,13 @@ export default function PropertyForm({ currentLead }) {
                           <TextField {...params} label="State / City" variant="outlined" />
                         )}
                         isOptionEqualToValue={(option, value) => option.id === value}
+                        freeSolo // Enable free text input
                       />
                     )}
                   />
                 </FormControl>
               )}
+
               {cities && cities.length > 0 && (
                 <FormControl fullWidth>
                   <Controller
@@ -545,11 +555,13 @@ export default function PropertyForm({ currentLead }) {
                           <TextField {...params} label="Area / City" variant="outlined" />
                         )}
                         isOptionEqualToValue={(option, value) => option.id === value}
+                        freeSolo // Enable free text input
                       />
                     )}
                   />
                 </FormControl>
               )}
+
               <RHFTextField name="pincode" label="Postcode" />
               <FormControl fullWidth>
                 <RHFTextField
@@ -602,7 +614,7 @@ export default function PropertyForm({ currentLead }) {
                         onChange={(event) => {
                           const selectedValue = event.target.value;
                           field.onChange(selectedValue);
-          
+
                           // Set showDate based on the selected lead type
                           if (selectedValue === '1') {
                             setShowdate(true); // Show date for "Buyer"
@@ -749,7 +761,7 @@ export default function PropertyForm({ currentLead }) {
                 control={control}
                 render={({ field, fieldState }) => (
                   <FormControl fullWidth error={!!fieldState.error}>
-                    <InputLabel id="council-tax-band-label">Council Tax Band</InputLabel>{' '}
+                    <InputLabel id="council-tax-band-label">Council Tax Band</InputLabel>
                     {/* Added labelId */}
                     <Select
                       {...field}
@@ -1105,16 +1117,16 @@ export default function PropertyForm({ currentLead }) {
                 <RHFTextField name="note" multiline rows={4} variant="outlined" fullWidth />
               </Box>
               <FormControl fullWidth>
-                  <RHFTextField
-                    name="handover_date"
-                    label="Follow up date"
-                    type="date"
-                    placeholder="DD-MM-YYYY"
-                  />
-                </FormControl>
+                {currentLead ? "" : <RHFTextField
+                  name="followup_date"
+                  label="Follow up date"
+                  type="date"
+                  placeholder="DD-MM-YYYY"
+                />}
+              </FormControl>
             </Box>
 
-            
+
 
             <Stack alignItems="flex-end" sx={{ mt: 4 }}>
               <LoadingButton

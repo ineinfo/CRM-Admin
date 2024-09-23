@@ -126,16 +126,25 @@ export function useNavData() {
           // },
           {
             title: t('Leads'),
-            path: paths.dashboard.leads.root,
+            path: [paths.dashboard.leads.root, paths.dashboard.followup.new, paths.dashboard.followup.root],
             icon: ICONS.leads,
             children: [
               { title: t('list'), path: paths.dashboard.leads.list },
               { title: t('create new lead'), path: paths.dashboard.leads.new },
             ],
           },
+          // {
+          //   title: t('Follow Up'),
+          //   path: paths.dashboard.followup.root,
+          //   icon: ICONS.propertylogo,
+          //   children: [
+          //     { title: t('list'), path: paths.dashboard.followup.root },
+          //     { title: t('create new Follow Up'), path: paths.dashboard.followup.new },
+          //   ],
+          // },
           {
             title: t('Developers'),
-            path: paths.dashboard.propertypage.root,
+            path: [paths.dashboard.propertypage.main],
             icon: ICONS.propertylogo,
             children: [
               { title: t('list'), path: paths.dashboard.propertypage.root },
