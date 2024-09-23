@@ -246,14 +246,15 @@ export default function UserListView() {
                     variant={
                       ((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'
                     }
-                    color={
-                      (tab.value === 'active' && 'success') ||
-                      (tab.value === 'pending' && 'warning') ||
-                      (tab.value === 'banned' && 'error') ||
-                      'default'
-                    }
+                    sx={{
+                      color: `${(tab.value === 'active' && 'purple') ||
+                        (tab.value === 'inactive' && 'blue') ||
+                        (tab.value === 'previous' && '#ffbb00') ||
+                        'default'
+                        }`
+                    }}
                   >
-                    {['active', 'pending', 'banned', 'rejected'].includes(tab.value)
+                    {['active', 'inactive', 'previous'].includes(tab.value)
                       ? tableData.filter((user) => user.status === tab.value).length
                       : tableData.length}
                   </Label>
