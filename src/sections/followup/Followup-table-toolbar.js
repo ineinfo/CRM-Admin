@@ -9,6 +9,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { InputLabel } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -17,9 +18,18 @@ export default function FollowupTableToolbar({
     onFilters,
 }) {
     const popover = usePopover();
+
     const handleFilterName = useCallback(
         (event) => {
             onFilters('name', event.target.value);
+        },
+        [onFilters]
+    );
+
+    const handleFilterStatus = useCallback(
+        (event) => {
+            const value = event.target.value === '1' ? 1 : 2; // '1' for In Progress, '2' for Completed
+            onFilters('status', value);
         },
         [onFilters]
     );
@@ -39,6 +49,19 @@ export default function FollowupTableToolbar({
                 }}
             >
                 <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
+
+                    {/* <TextField
+                        select
+                        label="Status"
+                        value={filters.status || ''}
+                        onChange={handleFilterStatus}
+                        sx={{ width: 160 }} // Adjust width as needed
+                    >
+                        <MenuItem value="1">In Progress</MenuItem>
+                        <MenuItem value="2">Completed</MenuItem>
+                    </TextField> */}
+
+                    {/* Search Input */}
                     <TextField
                         fullWidth
                         value={filters.name}
@@ -52,6 +75,7 @@ export default function FollowupTableToolbar({
                             ),
                         }}
                     />
+
                     <IconButton onClick={popover.onOpen}>
                         <Iconify icon="eva:more-vertical-fill" />
                     </IconButton>
@@ -97,5 +121,5 @@ export default function FollowupTableToolbar({
 
 FollowupTableToolbar.propTypes = {
     filters: PropTypes.object,
-    onFilters: PropTypes.func
+    onFilters: PropTypes.func,
 };

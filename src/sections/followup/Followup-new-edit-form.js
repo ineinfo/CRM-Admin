@@ -21,27 +21,26 @@ import dayjs from "dayjs";
 import { useAuthContext } from "src/auth/hooks";
 
 export default function FollowupForm({ currentUser, id }) {
-    console.log("dataaaaaa", currentUser);
-
-    const Lead = currentUser?.lead_id || id
-    const Row = currentUser?.id
+    const Lead = currentUser?.lead_id || id;
+    const Row = currentUser?.id;
     const router = useRouter();
     const { enqueueSnackbar } = useSnackbar();
     const { user } = useAuthContext();
-    // console.log("nedded",user.accessToken);
     const Token = user?.accessToken;
 
     const FollowupSchema = Yup.object().shape({
         followup_date: Yup.string().required("Follow-up Date is required"),
         summary: Yup.string().required("Summary is required"),
+        followup_status: Yup.number().required("Status is required"),
     });
 
     const defaultValues = useMemo(
         () => ({
             lead_first_name: currentUser?.lead_first_name || "",
             lead_last_name: currentUser?.lead_last_name || "",
-            followup_date: currentUser?.followup_date ? dayjs(currentUser.followup_date).format('DD-MM-YYYY') : null,
+            followup_date: currentUser?.followup_date ? dayjs(currentUser.followup_date).format("DD-MM-YYYY") : null,
             summary: currentUser?.summary || "",
+            followup_status: currentUser?.followup_status === 2 ? 2 : 1, // Default to "In Progress" (1), else "Completed" (2)
         }),
         [currentUser]
     );
@@ -63,18 +62,20 @@ export default function FollowupForm({ currentUser, id }) {
     }, [currentUser, reset, defaultValues]);
 
     const onSubmit = handleSubmit(async (data) => {
-        console.log("=====>", data);
+        const statusValue = data.followup_status === 1 ? 1 : 2;
+        const formData = { ...data, followup_status: statusValue };
+        console.log("dataas", formData);
+
 
         try {
             if (currentUser?.followup_date) {
-                UpdateFollowUp(Row, data, Token)
+                await UpdateFollowUp(Row, formData, Token);
                 enqueueSnackbar("Follow-up information saved successfully!", { variant: "success" });
             } else {
-                CreateFollowUp(data, Lead)
+                await CreateFollowUp(formData, Lead);
                 enqueueSnackbar("Follow-up Created successfully!", { variant: "success" });
-
             }
-            router.push(`/dashboard/followup?id=${Lead}`)
+            router.push(`/dashboard/followup?id=${Lead}`);
             reset();
         } catch (error) {
             enqueueSnackbar(error.message || "Unknown error", { variant: "error" });
@@ -91,26 +92,53 @@ export default function FollowupForm({ currentUser, id }) {
         >
             <FormProvider methods={methods} onSubmit={onSubmit}>
                 <Card sx={{ p: 5, width: "100%" }}>
-                    {/* <Typography variant="h6" textAlign="center" gutterBottom>
-                        Follow-up Form
-                    </Typography> */}
                     <Grid container spacing={3}>
                         <Grid xs={6}>
-                            <RHFTextField name="lead_first_name" label="First Name" InputProps={{
-                                readOnly: true,
-                            }} />
+                            <RHFTextField
+                                name="lead_first_name"
+                                label="First Name"
+                                InputProps={{ readOnly: true }}
+                            />
                         </Grid>
                         <Grid xs={6}>
-                            <RHFTextField name="lead_last_name" label="Last Name" InputProps={{
-                                readOnly: true,
-                            }} />
+                            <RHFTextField
+                                name="lead_last_name"
+                                label="Last Name"
+                                InputProps={{ readOnly: true }}
+                            />
                         </Grid>
                         <Grid xs={6}>
                             <FormControl fullWidth>
-                                <RHFTextField name="followup_date" label="Follow-up Date" type='date' fullWidth />
-                            </FormControl>                        </Grid>
+                                <RHFTextField
+                                    name="followup_date"
+                                    label="Follow-up Date"
+                                    type="date"
+                                    fullWidth
+                                />
+                            </FormControl>
+                        </Grid>
+                        <Grid xs={6}>
+                            <FormControl fullWidth>
+                                <InputLabel>Status</InputLabel>
+                                <Controller
+                                    name="followup_status"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select {...field} label="Status">
+                                            <MenuItem value={1}>In Progress</MenuItem>
+                                            <MenuItem value={2}>Completed</MenuItem>
+                                        </Select>
+                                    )}
+                                />
+                            </FormControl>
+                        </Grid>
                         <Grid xs={12}>
-                            <RHFTextField name="summary" label="Summary" multiline rows={4} />
+                            <RHFTextField
+                                name="summary"
+                                label="Summary"
+                                multiline
+                                rows={4}
+                            />
                         </Grid>
                     </Grid>
 
@@ -127,4 +155,5 @@ export default function FollowupForm({ currentUser, id }) {
 
 FollowupForm.propTypes = {
     currentUser: PropTypes.object,
+    id: PropTypes.string,
 };

@@ -107,7 +107,7 @@ export default function PropertyForm({ currentLead }) {
   const PropertySchema = Yup.object().shape({
     // developer_name: Yup.string().required('Lead Name is required'),
     first_name: Yup.string().required('First name is required'),
-    // last_name: Yup.string().required('Last Name is required'),
+    last_name: Yup.string().required('Last Name is required'),
     // location: Yup.number().required('Location is required'),
     // // city_id: Yup.number().required('Location is required'),
     // state_id: Yup.number().required('Location is required'),
@@ -1110,12 +1110,12 @@ export default function PropertyForm({ currentLead }) {
                   <br /> max size of 5MB
                 </Typography>
               </Box>
-              <Box sx={{ gridColumn: 'span 2' }}>
+              {currentLead ? "" : <Box sx={{ gridColumn: 'span 2' }}>
                 <Typography variant="h6" sx={{ mb: 1 }}>
                   Note
                 </Typography>
                 <RHFTextField name="note" multiline rows={4} variant="outlined" fullWidth />
-              </Box>
+              </Box>}
               <FormControl fullWidth>
                 {currentLead ? "" : <RHFTextField
                   name="followup_date"

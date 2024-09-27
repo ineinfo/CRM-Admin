@@ -53,6 +53,7 @@ import UserTableFiltersResult from 'src/sections/clients/clients-table-filters-r
 const TABLE_HEAD = [
     { id: 'name', label: 'Lead name', width: 150 },
     { id: 'followup_date', label: 'Followup Date', width: 100 },
+    { id: 'status', label: 'Status', width: 80 },
     { id: 'summary', label: 'Summary', width: 150 },
     { id: '', label: '', width: 0 },
 ];
@@ -398,13 +399,13 @@ function applyFilter({ inputData, comparator, filters }) {
         inputData = inputData.filter(
             (user) =>
                 user.lead_first_name.toLowerCase().includes(name.toLowerCase()) ||
-                user.lead_last_name.toLowerCase().includes(name.toLowerCase()) ||
-                user.email.toLowerCase().includes(name.toLowerCase())
+                user.lead_last_name.toLowerCase().includes(name.toLowerCase())
+            // user.email.toLowerCase().includes(name.toLowerCase())
         );
     }
 
     // Filter by status
-    // if (status !== 'all') {
+    // if (status) {
     //     inputData = inputData.filter((user) => user.status === status);
     // }
 

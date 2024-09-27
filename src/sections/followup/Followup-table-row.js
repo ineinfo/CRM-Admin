@@ -16,11 +16,12 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import dayjs from 'dayjs';
 
 import { useState } from 'react';
+import { Link } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
 export default function FollowupTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
-    const { lead_first_name, lead_last_name, followup_date, summary, createdAt, updatedAt } = row;
+    const { lead_first_name, lead_last_name, followup_date, summary, createdAt, updatedAt, followup_status } = row;
     const confirm = useBoolean();
     const popover = usePopover();
     const [isExpanded, setIsExpanded] = useState(false);
@@ -37,20 +38,27 @@ export default function FollowupTableRow({ row, selected, onEditRow, onSelectRow
             <TableRow hover selected={selected}>
                 <TableCell padding="checkbox">
                     <Checkbox checked={selected} onClick={onSelectRow} />
-                </TableCell>
-                <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-                    <ListItemText
-                        primary={(lead_first_name && lead_last_name ? `${lead_first_name} ${lead_last_name}` : '-')}
-                        secondary={updatedAt ? `Updated at ${dayjs(updatedAt).format('DD-MM-YYYY')}` : `Created at ${dayjs(createdAt).format('DD-MM-YYYY')}`}
-                        primaryTypographyProps={{ typography: 'body2' }}
-                        secondaryTypographyProps={{
-                            component: 'span',
-                            color: 'text.disabled',
-                        }}
-                    />
-                </TableCell>
+                </TableCell><Link color="inherit" sx={{ cursor: "pointer" }} onClick={() => {
+                    onEditRow();
+                }}>
+                    <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
+                        <ListItemText
+                            primary={(lead_first_name && lead_last_name ? `${lead_first_name} ${lead_last_name}` : '-')}
+                            secondary={updatedAt ? `Updated at ${dayjs(updatedAt).format('DD-MM-YYYY')}` : `Created at ${dayjs(createdAt).format('DD-MM-YYYY')}`}
+                            primaryTypographyProps={{ typography: 'body2' }}
+                            secondaryTypographyProps={{
+                                component: 'span',
+                                color: 'text.disabled',
+                            }}
+                        />
+                    </TableCell></Link>
                 <TableCell sx={{ whiteSpace: 'nowrap' }}>{followup_date ? (
                     dayjs(followup_date).format('DD-MM-YYYY')
+                ) : (
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
+                )}</TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>{followup_status ? (
+                    followup_status === 1 ? "In Progress" : "Completed"
                 ) : (
                     <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
                 )}</TableCell>

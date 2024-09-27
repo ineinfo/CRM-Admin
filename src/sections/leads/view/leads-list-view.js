@@ -251,7 +251,8 @@ export default function UserListView() {
                         (tab.value === 'inactive' && 'blue') ||
                         (tab.value === 'previous' && '#ffbb00') ||
                         'default'
-                        }`
+                        }`,
+                      backgroundColor: "white"
                     }}
                   >
                     {['active', 'inactive', 'previous'].includes(tab.value)
