@@ -18,6 +18,7 @@ import { enqueueSnackbar } from 'notistack';
 import PropertyDetailsModal from './PropertyDetailsModal'; // Adjust the path as needed
 import { useRouter } from 'next/navigation';
 import { Link } from '@mui/material';
+import OfferModal from './OfferModal';
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
   const [modalOpen, setModalOpen] = useState(false);
@@ -107,6 +108,11 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
             <Iconify icon="eva:calendar-outline" />
           </Button>
         </TableCell>
+
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          <OfferModal row={row} />
+        </TableCell>
+
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
           <Button variant="contained" color="secondary" onClick={handleMatchPropertyClick}>
             Property Match
@@ -164,6 +170,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         id={id}
         selected={selectedData}
       />
+
     </>
   );
 }

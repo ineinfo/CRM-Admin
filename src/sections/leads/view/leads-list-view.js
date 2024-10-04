@@ -54,9 +54,10 @@ const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...USER_STATUS_OPTIONS];
 const TABLE_HEAD = [
   { id: 'customer_name', label: 'Name', width: 180 },
   { id: 'customer_mobile', label: 'Phone', width: 180 },
-  { id: 'handover_date', label: 'Move in date', width: 100 },
-  { id: 'email', label: 'Email', width: 88 },
-  { id: 'Followup_date', label: 'Followup date', width: 120 },
+  { id: 'handover_date', label: 'Move in date', width: 120 },
+  { id: 'email', label: 'Email', width: 100 },
+  { id: 'Followup_date', label: 'Followup date', width: 130 },
+  { id: 'offer', label: 'Offer', width: 100 },
   { id: '', width: 50 },
   { id: '', width: 50 },
 ];
