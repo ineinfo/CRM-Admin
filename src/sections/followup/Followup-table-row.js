@@ -20,7 +20,7 @@ import { Link } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
-export default function FollowupTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
+export default function FollowupTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, report }) {
     const { lead_first_name, lead_last_name, followup_date, summary, createdAt, updatedAt, followup_status } = row;
     const confirm = useBoolean();
     const popover = usePopover();
@@ -79,11 +79,11 @@ export default function FollowupTableRow({ row, selected, onEditRow, onSelectRow
                         </>
                     )}
                 </TableCell>
-                <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
+                {report ? '' : <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
                     <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
                         <Iconify icon="eva:more-vertical-fill" />
                     </IconButton>
-                </TableCell>
+                </TableCell>}
             </TableRow>
             <CustomPopover
                 open={popover.open}

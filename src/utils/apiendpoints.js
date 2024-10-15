@@ -23,11 +23,20 @@ export const CLIENTS_ROUTE = `${apiUrl}/clients`;
 // LEAD MODULE
 export const LEADS_ROUTE = `${apiUrl}/leads`;
 
+// POWER REPORT MODULE
+export const REPORT_ROUTE = `${apiUrl}/leads/archive`;
+
 // PROPERTY MASTER
 export const PROPERTIES_ROUTE = `${apiUrl}/properties`;
 
 // Followup MASTER
 export const FOLLOWUP_ROUTE = `${apiUrl}/followup`;
+
+//Sales 
+export const SALES_ROUTE = `${apiUrl}/salesprogression`
+
+//calender
+export const CALENDAR_ROUTE = `${apiUrl}/calender`
 
 // Country
 export const COUNTRY_ROUTE = `${apiUrl}/country`;

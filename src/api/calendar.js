@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import useSWR, { mutate } from 'swr';
-
+import axios from 'axios';
 import { fetcher, endpoints } from 'src/utils/axios';
 
 // ----------------------------------------------------------------------
@@ -14,102 +14,79 @@ const options = {
 };
 
 export function useGetEvents() {
-  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher, options);
+  const URL = endpoints.calendar.list;
 
-  const memoizedValue = useMemo(() => {
-    const events = data?.events.map((event) => ({
-      ...event,
-      textColor: event.color,
-    }));
+  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
 
-    return {
-      events: events || [],
+  const memoizedValue = useMemo(
+    () => ({
+      events: data?.data,
       eventsLoading: isLoading,
       eventsError: error,
       eventsValidating: isValidating,
-      eventsEmpty: !isLoading && !data?.events.length,
-    };
-  }, [data?.events, error, isLoading, isValidating]);
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
 
   return memoizedValue;
 }
 
 // ----------------------------------------------------------------------
 
-export async function createEvent(eventData) {
-  /**
-   * Work on server
-   */
-  // const data = { eventData };
-  // await axios.post(URL, data);
+export async function createEvent(eventData, token) {
+  try {
+    const response = await axios.post(endpoints.calendar.create, eventData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  /**
-   * Work in local
-   */
-  mutate(
-    URL,
-    (currentData) => {
-      const events = [...currentData.events, eventData];
+    // Revalidate or update cache after creation
+    mutate(endpoints.calendar.list);
 
-      return {
-        ...currentData,
-        events,
-      };
-    },
-    false
-  );
+    return response.data;
+  } catch (error) {
+    console.error('Error creating event:', error);
+    return null;
+  }
 }
 
 // ----------------------------------------------------------------------
 
-export async function updateEvent(eventData) {
-  /**
-   * Work on server
-   */
-  // const data = { eventData };
-  // await axios.put(endpoints.calendar, data);
+export async function updateEvent(id, eventData, token) {
+  try {
+    const response = await axios.put(endpoints.calendar.update(id), eventData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  /**
-   * Work in local
-   */
-  mutate(
-    URL,
-    (currentData) => {
-      const events = currentData.events.map((event) =>
-        event.id === eventData.id ? { ...event, ...eventData } : event
-      );
+    // Revalidate or update cache after update
+    mutate(endpoints.calendar.list);
 
-      return {
-        ...currentData,
-        events,
-      };
-    },
-    false
-  );
+    return response.data;
+  } catch (error) {
+    console.error('Error updating event:', error);
+    return null;
+  }
 }
 
 // ----------------------------------------------------------------------
 
-export async function deleteEvent(eventId) {
-  /**
-   * Work on server
-   */
-  // const data = { eventId };
-  // await axios.patch(endpoints.calendar, data);
+export async function deleteEvent(eventId, token) {
+  try {
+    const response = await axios.delete(endpoints.calendar.deleteSingle(eventId), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  /**
-   * Work in local
-   */
-  mutate(
-    URL,
-    (currentData) => {
-      const events = currentData.events.filter((event) => event.id !== eventId);
+    // Revalidate or update cache after deletion
+    mutate(endpoints.calendar.list);
 
-      return {
-        ...currentData,
-        events,
-      };
-    },
-    false
-  );
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    return null;
+  }
 }

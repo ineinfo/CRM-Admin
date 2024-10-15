@@ -22,7 +22,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { endpoints } from 'src/utils/axios';
 
 import { _roles, USER_STATUS_OPTIONS } from 'src/_mock';
-import { DeleteLead } from 'src/api/leads';
+import { ArchiveLead, DeleteLead } from 'src/api/leads';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -47,6 +47,8 @@ import UserTableToolbar from '../leads-table-toolbar';
 import UserTableFiltersResult from '../leads-table-filters-result';
 import { alpha, Tab, Tabs } from '@mui/material';
 import Label from 'src/components/label';
+import Invoice from '../Invoice';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -57,9 +59,10 @@ const TABLE_HEAD = [
   { id: 'handover_date', label: 'Move in date', width: 120 },
   { id: 'email', label: 'Email', width: 100 },
   { id: 'Followup_date', label: 'Followup date', width: 130 },
-  { id: 'offer', label: 'Offer', width: 100 },
+  { id: 'status', label: 'Status', width: 100 },
   { id: '', width: 50 },
   { id: '', width: 50 },
+  // { id: '', width: 50 },
 ];
 
 const defaultFilters = {
@@ -73,6 +76,9 @@ const defaultFilters = {
 export default function UserListView() {
   const { enqueueSnackbar } = useSnackbar();
   const table = useTable();
+
+  const { user } = useAuthContext();
+  const Token = user?.accessToken;
 
   const CountryApi = useCountryData();
   const CountryList = CountryApi.data?.data;
@@ -177,6 +183,23 @@ export default function UserListView() {
     [enqueueSnackbar, tableData]
   );
 
+  const handleArchiveRow = useCallback(
+    async (id) => {
+      try {
+        await ArchiveLead(id, Token);
+        const deleteRow = tableData.filter((row) => row.id !== id);
+
+        enqueueSnackbar('Archeived success!');
+
+        setTableData(deleteRow);
+      } catch (error) {
+        enqueueSnackbar('Archive failed!', { variant: 'error' });
+        console.error(error);
+      }
+    },
+    [enqueueSnackbar, tableData]
+  );
+
   const handleDeleteRows = useCallback(() => {
     const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
 
@@ -257,12 +280,18 @@ export default function UserListView() {
                     }}
                   >
                     {['active', 'inactive', 'previous'].includes(tab.value)
-                      ? tableData.filter((user) => user.status === tab.value).length
+                      ? tableData.filter((user) =>
+                        (tab.value === 'active' && user.status === 1) ||
+                        (tab.value === 'inactive' && user.status === 2) ||
+                        (tab.value === 'previous' && user.status === 3)
+                      ).length
                       : tableData.length}
                   </Label>
                 }
               />
             ))}
+
+
           </Tabs>
 
           <UserTableToolbar filters={filters} onFilters={handleFilters} roleOptions={_roles} />
@@ -323,7 +352,9 @@ export default function UserListView() {
                         selected={table.selected.includes(row.id)}
                         onSelectRow={() => table.onSelectRow(row.id)}
                         onDeleteRow={() => handleDeleteRow(row.id)}
+                        onArchiveRow={() => handleArchiveRow(row.id)}
                         onEditRow={() => handleEditRow(row.id)}
+
                       />
                     ))}
                   <TableEmptyRows
@@ -368,6 +399,7 @@ export default function UserListView() {
           </Button>
         }
       />
+
     </>
   );
 }
@@ -389,26 +421,33 @@ function applyFilter({ inputData, comparator, filters }) {
 
   // Filter by name (assuming the 'developer_name' or 'owner_name' needs filtering by the 'name' filter)
   if (filters.name) {
-    const searchValue = filters.name.toLowerCase();
-    inputData = inputData.filter(
-      (user) =>
-        user.first_name?.toLowerCase().includes(searchValue) ||
-        user.last_name?.toLowerCase().includes(searchValue) ||
-        user.email.toLowerCase().includes(searchValue) ||
-        user.phone_number.includes(searchValue) // Adjusted mobile number filter
-    );
+    // Split the input name by spaces to handle cases where both first and last names are entered
+    const nameParts = name.toLowerCase().split(' ');
+
+    inputData = inputData.filter((user) => {
+      const fullName = `${user.first_name?.toLowerCase()} ${user.last_name?.toLowerCase()}`.trim();
+
+      // Check if all parts of the name input are found in the full name (both first and last name entered)
+      return nameParts.every(part => fullName.includes(part)) ||
+        user.first_name?.toLowerCase().includes(name.toLowerCase()) ||
+        user.last_name?.toLowerCase().includes(name.toLowerCase()) ||
+        user.developer_name?.toLowerCase().includes(name.toLowerCase()) ||
+        user.note?.toLowerCase().includes(name.toLowerCase()) ||
+        user.email?.toLowerCase().includes(name.toLowerCase());
+    });
   }
 
   // Filter by status
   if (status !== 'all') {
     if (status === 'active') {
-      inputData = inputData.filter((user) => user.isActive);
+      inputData = inputData.filter((user) => user.status === 1);
     } else if (status === 'inactive') {
-      inputData = inputData.filter((user) => !user.isActive);
+      inputData = inputData.filter((user) => user.status === 2);
     } else if (status === 'previous') {
-      inputData = inputData.filter((user) => user.isPreviousBuyer); // You may need to adjust this field based on your data structure
+      inputData = inputData.filter((user) => user.status === 3); // Adjust this value based on your data structure
     }
   }
+
 
   // Filter by role
   if (role.length) {

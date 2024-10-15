@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm, Controller, FormProvider } from 'react-hook-form';
 import {
     Dialog,
@@ -21,6 +21,13 @@ import {
 import { RHFTextField } from 'src/components/hook-form';
 import { useCountryData } from 'src/api/propertytype';
 import { NumericFormat } from 'react-number-format';
+import { GetSalesStatus, UpdateLead, UpdateSalesStatus } from 'src/api/leads';
+import { useAuthContext } from 'src/auth/hooks';
+import { enqueueSnackbar } from 'notistack';
+import Invoice from './Invoice';
+import Iconify from 'src/components/iconify';
+import dayjs from 'dayjs';
+
 
 const steps = [
     'Offer Accepted',
@@ -31,17 +38,69 @@ const steps = [
     'Survey or Searches',
     'Conveyancing Enquiries',
     'Sales Invoice Created',
+    'Commission invoice sent',
     'Exchange of contracts and details',
     'Completion Date',
 ];
 
-const SalesProgressionModal = ({ open, onClose, row }) => {
+const keys = [
+    'amount',
+    ''
+]
+
+const Fields = {
+    inv_sale_date: null,
+    inv_seller_developer_name: "",
+    inv_property_address: "",
+    inv_apartment_type: "",
+    inv_buyer_name: "",
+    inv_selling_real_estate_company_name: "",
+    inv_selling_agent_name: "",
+    inv_total_purchase_price: '',
+    inv_commission: '',
+    inv_selling_brokerage_commission: "",
+    inv_selling_brokerage_currency: "",
+    inv_closing_note: "",
+    inv_prepared_by: "",
+    inv_name: "",
+    inv_company_name: "",
+    inv_phone: "",
+    inv_email: "",
+    inv_address: "",
+    inv_bank_name: "",
+    inv_bank_account_name: "",
+    inv_bank_account_number: "",
+    inv_bank_sort_code: "",
+    inv_bank_reference: "",
+};
+
+const SalesProgressionModal = ({ open, onClose, row, data }) => {
     const getCountries = useCountryData();
     const [countries, setCountries] = useState([])
     const [isChecked, setIsChecked] = useState(true);
+    const [download, setDownload] = useState(false);
     const [currency, setCurrency] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [countryCode, setCountryCode] = useState(0);
     const [phoneCode, setPhoneCode] = useState('')
+    const [error, setError] = useState(false)
     const [type, setType] = useState('')
+    const [activeStep, setActiveStep] = useState(0);
+    const [moved, setMoved] = useState(true)
+    const [showInvoice, setShowInvoice] = useState(false)
+    const [invoiceFields, setInvoiceFields] = useState({ ...Fields });
+
+    const invoiceRef = useRef();
+
+
+    const triggerDownload = () => {
+        if (invoiceRef.current) {
+            invoiceRef.current.handleDownload();
+        }
+    };
+
+
+
     const methods = useForm({
         defaultValues: {
             stepsData: Array(steps.length).fill(''),
@@ -52,16 +111,20 @@ const SalesProgressionModal = ({ open, onClose, row }) => {
                 contact: '',
             },
             mortgageType: '',
-            mortgageDetails: '',
             invoiceStatus: '',
             amount: '',
             completionDate: null,
         },
     });
 
+    const { user } = useAuthContext();
+    const Token = user?.accessToken;
+
+
+
+
     const { control, handleSubmit, setValue, getValues } = methods;
 
-    const [activeStep, setActiveStep] = useState(0);
     const [isSaved, setIsSaved] = useState(Array(steps.length).fill(false));
     console.log("===========>2", row);
     useEffect(() => {
@@ -70,20 +133,102 @@ const SalesProgressionModal = ({ open, onClose, row }) => {
         }
     }, [getCountries.data]);
 
+    useEffect(() => {
+        if (open && row?.location) {
+            handleCountryChange(row?.location);
+
+        }
+        // Always reset error on open
+        setError(false);
+    }, [open, row?.location, countries]);
+
     const handleCountryChange = async (name) => {
-        const matchedCountry = await countries.find(country => country.name === name);
+        const matchedCountry = countries.find(country => country.name === name);
         if (matchedCountry) {
-            setCurrency(matchedCountry.currency);
-            setPhoneCode(matchedCountry.phonecode)// Assuming `currency` is the key you're looking for
+            // Only set currency and phone code if they are not already set
+            if (!currency) {
+                setCurrency(matchedCountry.currency);
+                setPhoneCode(matchedCountry.phonecode);
+                setCountryCode(matchedCountry.id);
+            }
         }
     };
-    useEffect(() => {
-        if (open && row.location) {
-            handleCountryChange(row.location);
-        }
-    }, [open, row.location, countries]);
     const handleSave = () => {
         const currentValues = getValues(`stepsData[${activeStep}]`);
+        if (activeStep == 8) {
+            setShowInvoice(true)
+        }
+        if (!currentValues) {
+            return setError(true);
+        }
+        if (activeStep == 2 && !getValues(`documentUpload[${activeStep}]`)) {
+            return setError(true);
+        }
+        if (activeStep == 3 &&
+            (!getValues(`stepsData[${activeStep}].companyName`)?.trim() ||
+                !getValues(`stepsData[${activeStep}].address`)?.trim() ||
+                !getValues(`stepsData[${activeStep}].solicitorsName`)?.trim() ||
+                !getValues(`stepsData[${activeStep}].number`)?.trim() ||
+                !getValues(`stepsData[${activeStep}].email`)?.trim())) {
+            return setError(true);
+        }
+
+        if (activeStep == 4) {
+            console.log("mortgage", getValues(`stepsData[${activeStep}]`));
+
+            // Check local state 'type' instead of using getValues
+            if (type === "mortgage" && !getValues(`stepsData[${activeStep}].details`)) {
+                return setError(true);  // Trigger error if no details are provided
+            }
+        }
+
+
+        if (activeStep == 7) {
+            let hasError = false;
+            let errorMessage = ''; // Track specific error messages
+
+            // Loop through each key in the invoiceFields
+            Object.keys(invoiceFields).forEach((key) => {
+                const fieldValue = getValues(`stepsData[${activeStep}].${key}`)?.trim();
+
+                // Check if the field is empty
+                if (!fieldValue) {
+                    hasError = true;
+                    errorMessage = 'All fields are required.';
+                }
+
+                // Check if the field is a number for specific keys
+                if (
+                    (key === 'inv_total_purchase_price' ||
+                        key === 'inv_commission' ||
+                        key === 'inv_selling_brokerage_commission')
+                    && isNaN(fieldValue)
+                ) {
+                    hasError = true;
+                    errorMessage = `The field ${key.replace(/^inv_/, '').replace(/_/g, ' ')} must be a valid number.`;
+                }
+            });
+
+            // If any field has an error, set the error flag and show the specific message
+            if (hasError) {
+                setError(true);
+                setErrorMessage(errorMessage); // You can set the error message to display the correct message
+                return;
+            }
+        }
+
+
+        if (activeStep == 9 &&
+            (!getValues(`stepsData[${activeStep}].amount`)?.trim() ||
+                !getValues(`stepsData[${activeStep}].date`)?.trim())) {
+            return setError(true);
+        }
+
+        if (activeStep == 10 &&
+            (!getValues(`documentUpload[${activeStep}]`))) {
+            return setError(true);
+        }
+        setError(false)
         console.log(`Saving step ${activeStep}:`, currentValues); // Debug log
         setIsSaved((prev) => {
             const newSavedStatus = [...prev];
@@ -93,83 +238,337 @@ const SalesProgressionModal = ({ open, onClose, row }) => {
         handleSubmit(onSubmit)();
     };
 
-    const onSubmit = () => {
-        if (activeStep < steps.length - 1) {
-            setActiveStep((prev) => prev + 1);
+    const onSubmit = async () => {
+        let data = {
+
+        };
+        if (activeStep === 0) {
+            const stepDataValue = Number(getValues(`stepsData[${activeStep}]`).replace(/[^0-9.-]+/g, ""));
+            data = {
+                lead_id: row?.id,
+                [keys[activeStep]]: stepDataValue, // Use the converted number here
+                lead_status: activeStep + 1
+            }
+        }
+
+        if (activeStep === 1) {
+            data = {
+                lead_id: row?.id,
+                lead_status: activeStep + 1
+            };
+        }
+        if (activeStep === 2) {
+            data = new FormData();
+            data.append('lead_id', row?.id);
+            data.append('lead_status', activeStep + 1);
+
+            // Assuming document is the file to be uploaded
+            const documentFile = await getValues(`documentUpload[${activeStep}]`);
+            console.log("File", documentFile);
+
+            if (documentFile) {
+                data.append('document', documentFile); // Append the document file
+            }
+        }
+
+        if (activeStep === 3) {
+            data = {
+                lead_id: row?.id,
+                company_name: getValues(`stepsData[${activeStep}].companyName`),
+                address: getValues(`stepsData[${activeStep}].address`),
+                solicitor_name: getValues(`stepsData[${activeStep}].solicitorsName`),
+                number: getValues(`stepsData[${activeStep}].number`),
+                email: getValues(`stepsData[${activeStep}].email`),
+                lead_status: activeStep + 1
+            }
+        }
+        if (activeStep === 4) {
+            data = {
+                lead_id: row?.id,
+                mortgage_status: type === "mortgage" ? 1 : 2,
+                mortgage_amount: getValues(`stepsData[${activeStep}].details`),
+                lead_status: activeStep + 1
+            }
+        }
+        if (activeStep === 5) {
+            data = {
+                lead_id: row?.id,
+                servey_search: getValues(`stepsData[${activeStep}]`),
+                lead_status: activeStep + 1
+            }
+        }
+        if (activeStep === 6) {
+            data = {
+                lead_id: row?.id,
+                conveyancing: getValues(`stepsData[${activeStep}]`),
+                lead_status: activeStep + 1
+            }
+        }
+        if (activeStep === 7) {
+            // Start with the base data object
+            data = {
+                lead_id: row?.id,
+                sales_invoice_credited: "yes",
+                lead_status: activeStep + 1,
+            };
+
+            // Add the invoiceFields keys and their values to the data object
+            Object.keys(invoiceFields).forEach((key) => {
+                const value = getValues(`stepsData[${activeStep}].${key}`);
+
+                // Convert to number if the key is inv_commission or inv_total_purchase_price
+                if (key === 'inv_commission' || key === 'inv_total_purchase_price' || key === 'inv_selling_brokerage_commission') {
+                    data[key] = Number(value) || 0; // Convert to number, default to 0 if NaN
+                } else {
+                    data[key] = value; // Keep the original value
+                }
+            });
+        }
+
+        if (activeStep === 7) {
+            const updatedFields = { ...invoiceFields }; // Create a copy to update
+
+            Object.keys(invoiceFields).forEach((key) => {
+                const value = getValues(`stepsData[${activeStep}].${key}`);
+
+                // Set value in updatedFields
+                if (key === 'inv_commission' || key === 'inv_total_purchase_price' || key === 'inv_selling_brokerage_commission') {
+                    updatedFields[key] = Number(value) || 0; // Convert to number, default to 0 if NaN
+                } else {
+                    updatedFields[key] = value || ""; // Set value, default to empty string if no value
+                }
+            });
+
+            setInvoiceFields(updatedFields); // Update the state
+            setShowInvoice(true);
+            console.log('Invoice2', updatedFields); // Log the updated fields
+        }
+
+        if (activeStep === 8) {
+            data = {
+                lead_id: row?.id,
+                commission_invoice_value: getValues(`stepsData[${activeStep}]`),
+                lead_status: activeStep + 1
+            }
+        }
+
+
+        if (activeStep === 9) {
+            data = {
+                lead_id: row?.id,
+                exchange_of_contract_amount: Number(getValues(`stepsData[${activeStep}].amount`).replace(/[^0-9.-]+/g, "")),
+                exchange_of_contract_date: getValues(`stepsData[${activeStep}].date`),
+                lead_status: activeStep + 1
+            }
+        }
+        if (activeStep === 10) {
+            data = new FormData();
+            data.append('lead_id', row?.id);
+            data.append('lead_status', activeStep + 1);
+            const completionDate = await getValues(`stepsData[${activeStep}]`);
+            if (completionDate) {
+                data.append('completion_date', completionDate);
+            }
+            const documentFile = await getValues(`documentUpload[${activeStep}]`);
+            console.log("File", documentFile);
+
+            if (documentFile) {
+                data.append('document', documentFile); // Append the document file
+            }
+        }
+
+
+        try {
+            await UpdateSalesStatus(data, Token)
+            if (activeStep < steps.length - 1) {
+                setActiveStep((prev) => prev + 1);
+
+            }
+        } catch (error) {
+            console.log(error);
+
+        }
+
+
+    };
+
+    const getStatus = async () => {
+        try {
+            const value = await GetSalesStatus(row?.id, Token);
+
+            if (value && value.length > 0) {
+                console.log("Status", value);
+                const updatedFields = { ...invoiceFields }; // Create a copy for updates
+
+                // Loop through each item in value
+                value.forEach((item, index) => {
+                    console.log('Item:', item); // Log item structure for debugging
+
+                    if (item.lead_status == 8) {
+                        Object.keys(invoiceFields).forEach((key) => {
+                            const value = item[key]; // Change item.key to item[key]
+
+                            // Set value in updatedFields
+                            if (key === 'inv_commission' || key === 'inv_total_purchase_price' || key === 'inv_selling_brokerage_commission') {
+                                updatedFields[key] = Number(value) || 0; // Convert to number, default to 0 if NaN
+                            } else {
+                                updatedFields[key] = value || ""; // Set value, default to empty string if no value
+                            }
+                        });
+                        setInvoiceFields(updatedFields); // Update the state after the loop
+                        console.log('Invoice', updatedFields, item);
+                        setShowInvoice(true)
+                    }
+
+
+
+                    setActiveStep((prev) => prev + 1);
+                });
+            }
+        } catch (error) {
+            console.error("Error fetching status:", error);
         }
     };
-    const handleComplete = () => {
-        onClose()
-        alert('Moved to Previous Buyer')
-    }
+
+
+
+
+    // Call getStatus on component mount or when row changes
+    useEffect(() => {
+        if (open && row?.id) {
+            getStatus();
+            if (row?.status === 3) {
+                setMoved(false)
+            } else {
+                setMoved(true)
+            }
+        } else if (!open) {
+            // Reset state when modal is closed
+            setActiveStep(0);
+            setIsSaved(Array(steps.length).fill(false));
+        }
+    }, [open, row?.id]);
+
+
+    const handleComplete = async () => {
+        // Reset states when closing modal
+        const formData = new FormData();
+
+        // Add row data to formData
+        Object.keys(row).forEach(key => {
+            if (key === 'status') {
+                formData.append('status', 3); // Update status to 3
+            } else if (key === 'location') {
+                formData.append('location', countryCode);
+            } else if (key === 'handover_date') {
+                // Format the handover_date to dd-mm-yyyy
+                const formattedDate = dayjs(row[key]).format('DD-MM-YYYY');
+                formData.append('handover_date', formattedDate);
+            } else if (['parking_option', 'no_of_bathrooms', 'property_type', 'amenities', 'match_property', 'files'].includes(key)) {
+                // Convert the array to a JSON string and append it
+                formData.append(key, JSON.stringify(row[key]));
+            } else {
+                formData.append(key, row[key]);
+            }
+        });
+
+        try {
+            // Make the API call to update the lead with formData
+            await UpdateLead(row.id, formData, Token);
+            enqueueSnackbar('Moved to previous buyer', { variant: 'success' });
+        } catch (error) {
+            enqueueSnackbar(error.response?.data?.message || 'Unknown error', { variant: 'error' });
+        }
+
+        setActiveStep(0);
+        setIsSaved(Array(steps.length).fill(false));
+        onClose();
+        setActiveStep((prev) => prev + 1);
+        setMoved(false);
+    };
+
+
+
+    console.log("1121222", activeStep, moved);
+
+
     const renderStepContent = (index) => {
         switch (index) {
             case 0: // Offer Accepted
                 return (
-                    <Controller
-                        name={`stepsData[${index}]`}
-                        control={control}
-                        render={({ field }) => (
-                            <NumericFormat
-                                {...field}
-                                customInput={RHFTextField}
-                                fullWidth
-                                variant="outlined"
-                                placeholder="Enter amount"
-                                allowNegative={false}
-                                thousandSeparator={true}
-                                isNumericString={true}
-                                decimalScale={0} // no decimals
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end" style={{ border: "none" }}>
-                                            <Select
-                                                sx={{
-                                                    border: "none", // remove the border
-                                                    '& .MuiOutlinedInput-notchedOutline': {
-                                                        border: "none", // remove the border of the select box
-                                                    },
-                                                }}
-                                                value={currency} // use the currency from state
-                                                onChange={(e) => setCurrency(e.target.value)} // update currency on selection
-                                                displayEmpty
-                                                renderValue={(selected) => (selected ? selected : "Select Currency")} // display placeholder if no currency
-                                            >
-                                                {countries.map((country) => (
-                                                    <MenuItem key={country.id} value={country.currency}>
-                                                        {country.currency}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                                onValueChange={({ value }) => field.onChange(value)} // handle value change
-                            />
-                        )}
-                    />
+                    <>
+                        <Controller
+                            name={`stepsData[${index}]`}
+                            control={control}
+                            render={({ field }) => (
+                                <NumericFormat
+                                    {...field}
+                                    customInput={RHFTextField}
+                                    fullWidth
+                                    variant="outlined"
+                                    placeholder="Enter amount"
+                                    allowNegative={false}
+                                    thousandSeparator={true}
+                                    isNumericString={true}
+                                    decimalScale={0} // no decimals
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end" style={{ border: "none" }}>
+                                                <Select
+                                                    sx={{
+                                                        border: "none",
+                                                        '& .MuiOutlinedInput-notchedOutline': {
+                                                            border: "none",
+                                                        },
+                                                    }}
+                                                    value={currency}
+                                                    onChange={(e) => setCurrency(e.target.value)}
+                                                    displayEmpty
+                                                    renderValue={(selected) => selected ? selected : "Select Currency"}
+                                                >
+                                                    {countries.map((country) => (
+                                                        <MenuItem key={country.id} value={country.currency}>
+                                                            {country.currency}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                    onValueChange={({ value }) => field.onChange(value)} // handle value change
+                                />
+                            )}
+                        />
 
+                        {error && <div style={{ color: "red", marginTop: "5px" }}>Field is mandatory</div>}
+                    </>
                 );
+
 
             case 1: // Reservation form sent
                 return (
-                    <Controller
-                        name={`stepsData[${index}]`}
-                        control={control}
-                        render={({ field }) => (
-                            <div>
-                                <Checkbox
-                                    {...field}
-                                    checked={!!field.value} // Checkbox remains checkable
-                                    onChange={(e) => {
-                                        const newValue = e.target.checked ? 'Yes' : '';
-                                        field.onChange(newValue);
-                                    }}
-                                />
-                                <Typography variant="caption">Form sent?</Typography>
-                            </div>
-                        )}
-                    />
+                    <>
+                        <Controller
+                            name={`stepsData[${index}]`}
+                            control={control}
+                            render={({ field }) => (
+                                <div>
+                                    <Checkbox
+                                        {...field}
+                                        checked={!!field.value} // Checkbox remains checkable
+                                        onChange={(e) => {
+                                            const newValue = e.target.checked ? 'Yes' : '';
+                                            field.onChange(newValue);
+                                        }}
+                                    />
+                                    <Typography variant="caption">Form sent?</Typography>
+                                </div>
+                            )}
+                        />
+                        {error && <div style={{ color: "red", marginTop: "5px" }}>
+                            Field is mandatory
+                        </div>}
+                    </>
                 );
 
             case 2: // Reservation form completed
@@ -187,7 +586,7 @@ const SalesProgressionModal = ({ open, onClose, row }) => {
                                         checked={isChecked} // Use local state for checked
                                         onChange={(e) => {
                                             setIsChecked(e.target.checked); // Update local state
-                                            field.onChange(e.target.checked ? "Yes" : "No"); // Update form state
+                                            field.onChange(e.target.checked ? "Yes" : ""); // Update form state
                                         }}
                                     />
                                     <Typography variant="caption">Form signed?</Typography>
@@ -238,6 +637,11 @@ const SalesProgressionModal = ({ open, onClose, row }) => {
                                 {getValues(`stepsData[${index}]`)} 
                             </Typography>
                         )} */}
+                        {error && !getValues(`stepsData[${index}].documentUpload`) && (
+                            <div style={{ color: "red", marginTop: "5px" }}>
+                                All Field is mandatory
+                            </div>
+                        )}
                     </div>
                 );
 
@@ -339,14 +743,17 @@ const SalesProgressionModal = ({ open, onClose, row }) => {
                                 </div>
                             )}
                         />
+                        {error && <div style={{ color: "red", marginTop: "5px" }}>
+                            All Fields are mandatory
+                        </div>}
                     </div>
                 )
 
             case 4: // Mortgage or Cash buyer
                 return (
-                    <div>
+                    <>
                         <Controller
-                            name="mortgageType"
+                            name={`stepsData[${index}]`}
                             control={control}
                             render={({ field }) => (
                                 <TextField
@@ -366,10 +773,10 @@ const SalesProgressionModal = ({ open, onClose, row }) => {
                                 </TextField>
                             )}
                         />
-                        {getValues('mortgageType') === "mortgage" && ( // Check local state instead of getValues
+                        {type === "mortgage" && ( // Check local state instead of getValues
                             <div style={{ marginTop: '8px' }}>
                                 <Controller
-                                    name="mortgageDetails"
+                                    name={`stepsData[${index}].details`}
                                     control={control}
                                     render={({ field }) => (
                                         <RHFTextField
@@ -383,61 +790,164 @@ const SalesProgressionModal = ({ open, onClose, row }) => {
                                 />
                             </div>
                         )}
-                    </div>
+                        {error && <div style={{ color: "red", marginTop: "5px" }}>
+                            Field is mandatory
+                        </div>}
+                    </>
                 );
 
 
             case 5: // Survey or Searches
             case 6: // Conveyancing Enquiries
                 return (
-                    <FormControl fullWidth variant="outlined" sx={{ marginTop: "10px" }}>
-                        <Controller
-                            name={`stepsData[${index}]`}
-                            control={control}
-                            render={({ field }) => (
-                                <RHFTextField
-                                    {...field}
-                                    id={`stepsData[${index}]`} // Adding id for accessibility
-                                    placeholder="Enter Details"
-                                    label={index == 5 ? 'Survey or Searches' : 'Conveyancing Enquiries'}
-                                />
-                            )}
-                        />
-                    </FormControl>
+                    <>
+                        <FormControl fullWidth variant="outlined" sx={{ marginTop: "10px" }}>
+                            <Controller
+                                name={`stepsData[${index}]`}
+                                control={control}
+                                render={({ field }) => (
+                                    <RHFTextField
+                                        {...field}
+                                        id={`stepsData[${index}]`} // Adding id for accessibility
+                                        placeholder="Enter Details"
+                                        label={index == 5 ? 'Survey or Searches' : 'Conveyancing Enquiries'}
+                                    />
+                                )}
+                            />
+                        </FormControl>
+                        {error && <div style={{ color: "red", marginTop: "5px" }}>
+                            Field is mandatory
+                        </div>}
+                    </>
                 );
 
             case 7: // Sales Invoice Created
                 return (
-                    <FormControl fullWidth variant="outlined">
-                        <Controller
-                            name={`stepsData[${index}]`}
-                            control={control}
-                            render={({ field }) => (
-                                <>
-                                    <Select
-                                        {...field}
-                                        id={`stepsData[${index}]`} // Adding id for accessibility
-                                        displayEmpty
-                                        MenuProps={{
-                                            PaperProps: {
-                                                style: {
-                                                    maxHeight: 200, // Set a max height for the dropdown menu
-                                                },
-                                            },
-                                        }}
-                                        sx={{ height: '56px', display: 'flex', alignItems: 'center' }} // Ensure adequate height
-                                    >
-                                        <MenuItem value="">Select an option</MenuItem> {/* Placeholder */}
-                                        <MenuItem value="yes">Yes</MenuItem>
-                                        <MenuItem value="no">No</MenuItem>
-                                    </Select>
-                                </>
-                            )}
-                        />
-                    </FormControl>
+                    <>
+                        <div style={{ display: "flex" }}>
+                            <FormControl fullWidth variant="outlined" sx={{ marginBottom: "10px" }}>
+                                <Controller
+                                    name={`stepsData[${index}]`}
+                                    control={control}
+                                    render={({ field }) => (
+                                        <>
+                                            <Select
+                                                {...field}
+                                                id={`stepsData[${index}]`} // Adding id for accessibility
+                                                displayEmpty
+                                                MenuProps={{
+                                                    PaperProps: {
+                                                        style: {
+                                                            maxHeight: 200, // Set a max height for the dropdown menu
+                                                        },
+                                                    },
+                                                }}
+                                                sx={{ height: '56px', display: 'flex', alignItems: 'center' }} // Ensure adequate height
+                                                onChange={(event) => {
+                                                    const value = event.target.value;
+                                                    field.onChange(value); // Update the form state
+
+                                                    // Set download state based on selection
+                                                    setDownload(value === 'yes');
+                                                }}
+                                            >
+                                                <MenuItem value="">Select an option</MenuItem> {/* Placeholder */}
+                                                <MenuItem value="yes">Yes</MenuItem>
+                                                <MenuItem value="">No</MenuItem>
+                                            </Select>
+                                        </>
+                                    )}
+                                />
+                            </FormControl>
+
+
+                        </div>
+
+                        {download && (
+                            <>
+                                {Object.keys(invoiceFields).map((key) => (
+                                    <div style={{ marginTop: "10px" }} key={key}> {/* Add key here for the div */}
+                                        <Controller
+                                            name={`stepsData[${index}].${key}`} // Use a nested structure for the invoice data
+                                            control={control}
+                                            defaultValue={invoiceFields[key]} // Set the default value from the object
+                                            render={({ field }) => {
+                                                // Check if the current key is 'inv_selling_brokerage_currency'
+                                                if (key === 'inv_selling_brokerage_currency') {
+                                                    return (
+                                                        <FormControl fullWidth variant="outlined" style={{ marginBottom: "10px" }}>
+                                                            <InputLabel id={`select-${key}-label`}>
+                                                                {key.replace(/^inv_/, '').replace(/_/g, ' ').toUpperCase()} {/* Label formatting */}
+                                                            </InputLabel>
+                                                            <Select
+                                                                {...field}
+                                                                labelId={`select-${key}-label`}
+                                                                label={key.replace(/^inv_/, '').replace(/_/g, ' ').toUpperCase()} // Label for the select box
+                                                                style={{ marginBottom: "10px" }} // Consistent styling
+                                                            >
+                                                                <MenuItem value="">
+                                                                    <em>Select Currency</em> {/* Placeholder option */}
+                                                                </MenuItem>
+                                                                <MenuItem value="AED">AED</MenuItem>
+                                                                <MenuItem value="GBP">GBP</MenuItem>
+                                                            </Select>
+                                                        </FormControl>
+                                                    );
+                                                }
+
+                                                return (
+                                                    <RHFTextField
+                                                        {...field}
+                                                        label={key.replace(/^inv_/, '').replace(/_/g, ' ').toUpperCase()} // Formatting the label
+                                                        type={invoiceFields[key] === null ? 'date' : 'text'}
+                                                        variant="outlined"
+                                                        fullWidth
+                                                        style={{ marginBottom: "10px" }}
+                                                    />
+                                                );
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </>
+                        )}
+
+                        {error && (
+                            <div style={{ color: "red", marginTop: "5px" }}>
+                                {errorMessage ? errorMessage : "Field is Required"}
+                            </div>
+                        )}
+                    </>
                 );
 
-            case 8: // Exchange of contracts
+            case 8: // Conveyancing Enquiries
+                return (
+                    <>
+                        <FormControl fullWidth variant="outlined" sx={{ marginTop: "10px" }}>
+                            <Controller
+                                name={`stepsData[${index}]`}
+                                control={control}
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        id={`stepsData[${index}]`} // Adding id for accessibility
+                                        placeholder="Enter Details"
+                                        label="Commission invoice sent"
+                                        variant="outlined"
+                                        type="number" // Restrict input to numbers
+                                        inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} // Prevent non-numeric input
+                                    />
+                                )}
+                            />
+                        </FormControl>
+                        {error && (
+                            <div style={{ color: "red", marginTop: "5px" }}>
+                                Field is mandatory
+                            </div>
+                        )}
+                    </>
+                );
+            case 9: // Exchange of contracts
                 return (
 
                     <>
@@ -477,25 +987,73 @@ const SalesProgressionModal = ({ open, onClose, row }) => {
                                 )}
                             />
                         </FormControl>
+                        {error && <div style={{ color: "red", marginTop: "5px" }}>
+                            Field is mandatory
+                        </div>}
                     </>
                 );
 
-            case 9: // Completion Date
+            case 10: // Completion Date and ID Proof
                 return (
-                    <FormControl fullWidth variant="outlined">
-                        <Controller
-                            name={`stepsData[${index}]`}
-                            control={control}
-                            render={({ field }) => (
-                                <RHFTextField
-                                    {...field}
-                                    type="date"
-                                    id={`stepsData[${index}]`} // Adding id for accessibility
-                                    InputLabelProps={{ shrink: true }} // Ensures the label stays shrunk when a date is selected
-                                />
-                            )}
-                        />
-                    </FormControl>
+                    <>
+                        {/* Completion Date Field */}
+                        <FormControl fullWidth variant="outlined">
+                            <Controller
+                                name={`stepsData[${index}]`}
+                                control={control}
+                                rules={{ required: true }}
+                                render={({ field }) => (
+                                    <RHFTextField
+                                        {...field}
+                                        type="date"
+                                        label="Completion Date"
+                                        id={`stepsData[${index}].completionDate`} // Adding id for accessibility
+                                        InputLabelProps={{ shrink: true }} // Ensures the label stays shrunk when a date is selected
+                                    />
+                                )}
+                            />
+                        </FormControl>
+
+
+
+                        {/* ID Proof Upload Field */}
+                        <FormControl fullWidth variant="outlined" style={{ marginTop: "15px" }}>
+                            <Controller
+                                name={`documentUpload[${index}]`}
+                                control={control}
+                                render={({ field }) => (
+                                    <TextField
+                                        fullWidth
+                                        InputLabelProps={{ shrink: true }}
+                                        inputProps={{
+                                            accept: 'application/pdf', // Only PDF allowed
+                                        }}
+                                        type="file"
+                                        onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if (file) {
+                                                // Check file type and size
+                                                const isValidFile =
+                                                    file.type === 'application/pdf' && file.size <= 5 * 1024 * 1024;
+
+                                                if (!isValidFile) {
+                                                    alert('Please upload a valid PDF file less than 5 MB.');
+                                                    return;
+                                                }
+
+                                                field.onChange(file); // Save the file to the form state
+                                                // Set the step value as the file name
+                                            }
+                                        }}
+                                    />
+                                )}
+                            />
+                        </FormControl>
+
+                        {error && <div style={{ color: "red", marginTop: "5px" }}>
+                            Field is mandatory
+                        </div>}
+                    </>
                 );
 
             default:
@@ -512,7 +1070,7 @@ const SalesProgressionModal = ({ open, onClose, row }) => {
                         {steps.map((label, index) => (
                             <Step key={label}>
                                 <StepLabel>
-                                    {label} {isSaved[index] && ` - ${index == 3 ? getValues(`stepsData[${index}].companyName`) : index == 4 ? type : index == 8 ? getValues(`stepsData[${index}].amount`) : getValues(`stepsData[${index}]`) || ''}`}
+                                    {label} {isSaved[index] && ` - ${index == 3 ? getValues(`stepsData[${index}].companyName`) : index == 4 ? type : index == 8 ? getValues(`stepsData[${index}].amount`) : index == 7 ? 'Yes' : index == 9 ? getValues(`stepsData[${index}].date`) : getValues(`stepsData[${index}]`) || ''}`}
                                 </StepLabel>
                                 {activeStep === index && !isSaved[index] && (
                                     <>
@@ -532,12 +1090,28 @@ const SalesProgressionModal = ({ open, onClose, row }) => {
                     </Stepper>
                 </DialogContent>
                 <DialogActions>
+
+                    {showInvoice && <>
+                        <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
+                            <Invoice ref={invoiceRef} data={invoiceFields} />
+                        </div>
+
+                        <Button onClick={triggerDownload} variant="contained" color="info">
+                            Invoice <Iconify icon="solar:import-bold" />
+                        </Button>
+                    </>}
+
                     <Button onClick={onClose} color="secondary">
                         Close
                     </Button>
-                    {isSaved[steps.length - 1] && (
+                    {moved && isSaved[steps.length - 1] && (
                         <Button onClick={handleComplete} color="primary" variant="contained">
                             Completed
+                        </Button>
+                    )}
+                    {!moved && (
+                        <Button color="warning" variant="outlined">
+                            Moved to previous buyer
                         </Button>
                     )}
                 </DialogActions>

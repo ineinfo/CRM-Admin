@@ -361,11 +361,20 @@ function applyFilter({ inputData, comparator, filters }) {
 
   // Filter by name
   if (name) {
-    inputData = inputData.filter(
-      (user) =>
-        user.developer_name.toLowerCase().includes(name.toLowerCase()) ||
-        user.email.toLowerCase().includes(name.toLowerCase())
-    );
+    // Split the input name by spaces to handle cases where both first and last names are entered
+    const nameParts = name.toLowerCase().split(' ');
+
+    inputData = inputData.filter((user) => {
+      const fullName = `${user.first_name?.toLowerCase()} ${user.last_name?.toLowerCase()}`.trim();
+
+      // Check if all parts of the name input are found in the full name (both first and last name entered)
+      return nameParts.every(part => fullName.includes(part)) ||
+        user.first_name?.toLowerCase().includes(name.toLowerCase()) ||
+        user.last_name?.toLowerCase().includes(name.toLowerCase()) ||
+        user.developer_name?.toLowerCase().includes(name.toLowerCase()) ||
+        //  user.note?.toLowerCase().includes(name.toLowerCase()) ||
+        user.email?.toLowerCase().includes(name.toLowerCase());
+    });
   }
 
   // Filter by status
@@ -408,13 +417,13 @@ function applyFilter({ inputData, comparator, filters }) {
 
   if (parking) {
     inputData = inputData.filter((user) =>
-      user.parking.toLowerCase().includes(parking.toLowerCase())
+      user.parking?.toLowerCase().includes(parking.toLowerCase())
     );
   }
 
   if (account_type) {
     inputData = inputData.filter((user) =>
-      user.account_type.toLowerCase().includes(account_type.toLowerCase())
+      user.account_type?.toLowerCase().includes(account_type.toLowerCase())
     );
   }
 

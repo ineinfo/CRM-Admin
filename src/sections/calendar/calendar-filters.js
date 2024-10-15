@@ -120,7 +120,7 @@ export default function CalendarFilters({
   const renderEvents = (
     <>
       <Typography variant="subtitle2" sx={{ px: 2.5, mb: 1 }}>
-        Events ({events.length})
+        Events ({events?.length})
       </Typography>
 
       <Scrollbar sx={{ height: 1 }}>

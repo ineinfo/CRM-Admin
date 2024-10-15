@@ -15,6 +15,9 @@ import {
   PROPERTY_STATUS,
   FINANCE,
   FOLLOWUP_ROUTE,
+  SALES_ROUTE,
+  CALENDAR_ROUTE,
+  REPORT_ROUTE,
 } from './apiendpoints';
 
 // ----------------------------------------------------------------------
@@ -43,7 +46,7 @@ export const fetcher = async (args) => {
 export const endpoints = {
   chat: '/api/chat',
   kanban: '/api/kanban',
-  calendar: '/api/calendar',
+
   auth: {
     me: '/api/auth/me',
     login: '/api/auth/login',
@@ -106,8 +109,12 @@ export const endpoints = {
     list: LEADS_ROUTE,
     create: LEADS_ROUTE,
     details: (id) => `${LEADS_ROUTE}/${id}`,
+    archive: (id) => `${LEADS_ROUTE}/archive/${id}`,
     match: (id) => `${LEADS_ROUTE}/findproperty/${id}`,
     select: (id) => `${LEADS_ROUTE}/matchproperty/${id}`,
+  },
+  report: {
+    list: REPORT_ROUTE,
   },
   propertypage: {
     list: PROPERTIES_ROUTE,
@@ -122,4 +129,16 @@ export const endpoints = {
     update: (id) => `${FOLLOWUP_ROUTE}/${id}`,
     deleteSingle: (id) => `${FOLLOWUP_ROUTE}/${id}`,
   },
+  sales: {
+    create: SALES_ROUTE,
+    list: (id) => `${SALES_ROUTE}/${id}`,
+    statusUpdate: `${SALES_ROUTE}/updatestatus`,
+    status: (id) => `${SALES_ROUTE}/status_ledger/${id}`,
+  },
+  calendar: {
+    create: CALENDAR_ROUTE,
+    list: CALENDAR_ROUTE,
+    update: (id) => `${CALENDAR_ROUTE}/${id}`,
+    deleteSingle: (id) => `${CALENDAR_ROUTE}/${id}`,
+  }
 };

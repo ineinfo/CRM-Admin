@@ -22,6 +22,7 @@ import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 import { ColorPicker } from 'src/components/color-utils';
 import FormProvider, { RHFSwitch, RHFTextField } from 'src/components/hook-form';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -43,6 +44,11 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }) {
     defaultValues: currentEvent,
   });
 
+  const { user } = useAuthContext()
+  const token = user?.accessToken
+
+
+
   const {
     reset,
     watch,
@@ -58,7 +64,7 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }) {
   const onSubmit = handleSubmit(async (data) => {
     const eventData = {
       id: currentEvent?.id ? currentEvent?.id : uuidv4(),
-      color: data?.color,
+      color: data?.color == '' ? '#fda92d' : data?.color,
       title: data?.title,
       allDay: data?.allDay,
       description: data?.description,
@@ -69,10 +75,10 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }) {
     try {
       if (!dateError) {
         if (currentEvent?.id) {
-          await updateEvent(eventData);
+          await updateEvent(currentEvent?.id, eventData, token);
           enqueueSnackbar('Update success!');
         } else {
-          await createEvent(eventData);
+          await createEvent(eventData, token);
           enqueueSnackbar('Create success!');
         }
         onClose();
@@ -85,7 +91,7 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }) {
 
   const onDelete = useCallback(async () => {
     try {
-      await deleteEvent(`${currentEvent?.id}`);
+      await deleteEvent(`${currentEvent?.id}`, token);
       enqueueSnackbar('Delete success!');
       onClose();
     } catch (error) {

@@ -1,0 +1,39 @@
+body {
+    font-family:'Calibri', Arial, sans-serif ;
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;
+    color: #000000;
+}
+        .invoice-container {
+    width: 80%;
+    margin: 0 auto;
+}
+
+header h1 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.details, .price, .notes, .bank-details {
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 16px;
+    margin: 7px 0;
+}
+
+strong {
+    font-weight: bold;
+}
+
+footer {
+    margin-top: 20px;
+    text-align: center;
+}
+
+footer p {
+    font-size: 14px;
+}

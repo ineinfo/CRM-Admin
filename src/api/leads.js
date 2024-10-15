@@ -117,6 +117,19 @@ export const DeleteLead = async (id) => {
   return response.data;
 };
 
+//  Archive user
+export const ArchiveLead = async (id, token) => {
+  const response = await axios.put(
+    endpoints.leads.archive(id),
+    {}, // Empty body if needed, or pass data if required
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+  return response.data;
+};
 //  Match Lead
 export const MatchLead = async (id) => {
   const response = await axios.get(endpoints.leads.match(id));
@@ -153,10 +166,10 @@ export const CreateFollowUp = async (data, id) => {
 
     const response = await axios.post(endpoints.followup.create, updatedData);
 
-    return response.data;
+    return "Follow-up Created successfully!";
   } catch (error) {
     console.error('Error Create FollowUp:', error);
-    return null;
+    return "Something Went Wrong";
   }
 }
 
@@ -226,3 +239,71 @@ export const DeleteMultipleFollowUp = async (ids) => {
   return response.data;
 };
 
+
+
+//Sales Progression
+export const CreateSales = async (formData, token) => {
+  try {
+    console.log(formData, token);
+
+    const response = await axios.post(endpoints.sales.create, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error creating property:', error);
+    return null;
+  }
+};
+
+// Getting  Sales
+export const GetSales = async (id, token) => {
+  try {
+    const response = await axios.get(endpoints.sales.list(id), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.data;
+  } catch (error) {
+    console.error(error); // Handle the error
+  }
+};
+
+
+//Update Sales status
+export const UpdateSalesStatus = async (data, token) => {
+  try {
+    // Determine if data is FormData (multipart)
+    const isFormData = data instanceof FormData;
+
+    const response = await axios.put(endpoints.sales.statusUpdate, data, {
+      headers: {
+        'Content-Type': isFormData ? 'multipart/form-data' : 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error updating property:', error);
+    return null;
+  }
+};
+
+//Get sales status
+export const GetSalesStatus = async (id, token) => {
+  try {
+    const response = await axios.get(endpoints.sales.status(id), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.data;
+  } catch (error) {
+    console.error(error); // Handle the error
+  }
+};

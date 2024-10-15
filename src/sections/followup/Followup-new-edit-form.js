@@ -72,8 +72,10 @@ export default function FollowupForm({ currentUser, id }) {
                 await UpdateFollowUp(Row, formData, Token);
                 enqueueSnackbar("Follow-up information saved successfully!", { variant: "success" });
             } else {
-                await CreateFollowUp(formData, Lead);
-                enqueueSnackbar("Follow-up Created successfully!", { variant: "success" });
+                const res = await CreateFollowUp(formData, Lead);
+                console.log("res=====>", res);
+
+                enqueueSnackbar(res, { variant: res == "Follow-up Created successfully!" ? 'success' : 'error' });
             }
             router.push(`/dashboard/followup?id=${Lead}`);
             reset();

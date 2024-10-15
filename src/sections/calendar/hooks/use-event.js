@@ -6,14 +6,15 @@ import { CALENDAR_COLOR_OPTIONS } from 'src/_mock/_calendar';
 // ----------------------------------------------------------------------
 
 export default function useEvent(events, selectEventId, selectedRange, openForm) {
-  const currentEvent = events.find((event) => event.id === selectEventId);
+  const currentEvent = events?.find((event) => String(event.id) === String(selectEventId));
+
 
   const defaultValues = useMemo(
     () => ({
       id: '',
       title: '',
       description: '',
-      color: CALENDAR_COLOR_OPTIONS[1],
+      color: '',
       allDay: false,
       start: selectedRange ? selectedRange.start : new Date().getTime(),
       end: selectedRange ? selectedRange.end : new Date().getTime(),
@@ -28,6 +29,9 @@ export default function useEvent(events, selectEventId, selectedRange, openForm)
   if (currentEvent || selectedRange) {
     return merge({}, defaultValues, currentEvent);
   }
+
+  console.log("CurrentValues2", defaultValues);
+
 
   return defaultValues;
 }

@@ -67,7 +67,7 @@ export function useNavData() {
         items: [
           {
             title: t('Raw masters'),
-            icon: ICONS.blank,
+            icon: ICONS.label,
             path: [
               paths.dashboard.roles.root,
               paths.dashboard.roles.new,
@@ -145,11 +145,25 @@ export function useNavData() {
           {
             title: t('Developers'),
             path: [paths.dashboard.propertypage.main],
-            icon: ICONS.propertylogo,
+            icon: ICONS.job,
             children: [
               { title: t('list'), path: paths.dashboard.propertypage.root },
               { title: t('create new developer'), path: paths.dashboard.propertypage.new },
             ],
+          },
+          {
+            title: t('Calender'),
+            path: [paths.dashboard.calendar],
+            icon: ICONS.calendar,
+            // children: [
+            //   { title: t('list'), path: paths.dashboard.calendar },
+            //   { title: t('create new developer'), path: paths.dashboard.propertypage.new },
+            // ],
+          },
+          {
+            title: t('Power Report'),
+            path: [paths.dashboard.report],
+            icon: ICONS.blog,
           },
         ],
       },

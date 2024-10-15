@@ -1110,12 +1110,12 @@ export default function PropertyForm({ currentLead }) {
                   <br /> max size of 5MB
                 </Typography>
               </Box>
-              {currentLead ? "" : <Box sx={{ gridColumn: 'span 2' }}>
+              <Box sx={{ gridColumn: 'span 2' }}>
                 <Typography variant="h6" sx={{ mb: 1 }}>
                   Note
                 </Typography>
                 <RHFTextField name="note" multiline rows={4} variant="outlined" fullWidth />
-              </Box>}
+              </Box>
               <FormControl fullWidth>
                 {currentLead ? "" : <RHFTextField
                   name="followup_date"

@@ -44,7 +44,7 @@ export default function RHFTextField({ name, helperText, type, placeholder, ...o
         field.onChange(formattedDate); // Pass formatted date or empty string
       }}
       dateFormat="dd-MM-yyyy"
-      customInput={<TextField {...other} fullWidth />}
+      customInput={<TextField {...other} fullWidth sx={{ zIndex: 10 }} />}
       placeholderText={placeholder || 'dd-mm-yyyy'} // Ensure placeholder is shown
       isClearable
       showMonthDropdown

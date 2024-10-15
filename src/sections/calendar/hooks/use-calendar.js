@@ -103,7 +103,7 @@ export default function useCalendar() {
       const { event } = arg;
 
       onOpenForm();
-      setSelectEventId(event.id);
+      setSelectEventId(event._def.publicId);
     },
     [onOpenForm]
   );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
@@ -17,15 +17,28 @@ import { MatchLead, SelectedLead } from 'src/api/leads';
 import { enqueueSnackbar } from 'notistack';
 import PropertyDetailsModal from './PropertyDetailsModal'; // Adjust the path as needed
 import { useRouter } from 'next/navigation';
-import { Link } from '@mui/material';
+import { alpha, Link } from '@mui/material';
 import OfferModal from './OfferModal';
+import Invoice from './Invoice';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
-export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
+export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, onArchiveRow }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [matchedData, setMatchedData] = useState([]);
   const [selectedData, setSelectedData] = useState([]);
   const confirm = useBoolean();
+  const confirmArchive = useBoolean();
   const popover = usePopover();
+  const invoiceRef = useRef();
+
+
+  const triggerDownload = () => {
+    if (invoiceRef.current) {
+      invoiceRef.current.handleDownload();
+    }
+  };
+
 
   const {
     developer_name,
@@ -41,6 +54,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
     sqft_starting_size,
     email,
     id,
+    status
   } = row;
 
   const router = useRouter()
@@ -76,6 +90,13 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
       <TableRow
         hover
         selected={selected}
+        sx={{
+          backgroundColor: status == 3 ? 'transparent' : (row?.sales_status ? alpha('#fda92d', 0.25) : 'transparent'),
+          '&:hover': {
+            backgroundColor: alpha('#4CAF50', 0.25),
+          },
+          alignItems: 'center'
+        }}
 
       >
         <TableCell padding="checkbox">
@@ -86,13 +107,14 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           <Link color="inherit" sx={{ cursor: "pointer" }} onClick={() => {
             onEditRow();
           }}><ListItemText
-              primary={developer_name ? `${developer_name}` : `${first_name} ${last_name}`}
+              primary={!first_name ? `${developer_name}` : `${first_name} ${last_name}`}
               secondary={location}
               primaryTypographyProps={{ typography: 'body2' }}
               secondaryTypographyProps={{
                 component: 'span',
                 color: 'text.disabled',
               }}
+              sx={{ height: "35px" }}
             /></Link>
 
         </TableCell>
@@ -118,6 +140,17 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
             Property Match
           </Button>
         </TableCell>
+        {/* <TableCell sx={{ whiteSpace: 'nowrap' }}>
+
+
+          <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
+            <Invoice ref={invoiceRef} />
+          </div>
+
+          <Button onClick={triggerDownload} >
+            <Iconify icon="solar:import-bold" />
+          </Button>
+        </TableCell> */}
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
           <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />
@@ -139,6 +172,18 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           <Iconify icon="solar:pen-bold" />
           Edit
         </MenuItem>
+
+        <MenuItem
+          onClick={() => {
+            confirmArchive.onTrue();
+            popover.onClose();
+          }}
+          sx={{ color: 'info' }}
+        >
+          <Iconify icon="mage:archive-fill" />
+          Archive
+        </MenuItem>
+
         <MenuItem
           onClick={() => {
             confirm.onTrue();
@@ -149,6 +194,8 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           <Iconify icon="solar:trash-bin-trash-bold" />
           Delete
         </MenuItem>
+
+
       </CustomPopover>
 
       <ConfirmDialog
@@ -157,8 +204,19 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         title="Delete"
         content="Are you sure want to delete?"
         action={
-          <Button variant="contained" color="error" onClick={onDeleteRow}>
+          <Button variant="contained" color="info" onClick={onDeleteRow}>
             Delete
+          </Button>
+        }
+      />
+      <ConfirmDialog
+        open={confirmArchive.value}
+        onClose={confirmArchive.onFalse}
+        title="Archive"
+        content="Are you sure want to Archive?"
+        action={
+          <Button variant="contained" color="info" onClick={onArchiveRow} >
+            Archive
           </Button>
         }
       />
