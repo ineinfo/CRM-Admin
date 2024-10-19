@@ -111,6 +111,22 @@ export const UpdateLead = async (id, formData, token) => {
   }
 };
 
+// Update Lead Note 
+export const UpdateLeadNote = async (id, data, token) => {
+  const response = await axios.put(
+    endpoints.leads.updatenote(id), // URL
+    data, // Payload to be sent
+    {
+      headers: {
+        Authorization: `Bearer ${token}`, // Passing the token in headers
+        'Content-Type': 'application/json' // Ensure correct content type
+      }
+    }
+  );
+
+  return response.data;
+};
+
 //  delete user
 export const DeleteLead = async (id) => {
   const response = await axios.delete(endpoints.leads.details(id));
@@ -130,9 +146,35 @@ export const ArchiveLead = async (id, token) => {
   );
   return response.data;
 };
+
+//  Archive user
+export const UnarchiveLead = async (id, data, token) => {
+  const response = await axios.put(
+    endpoints.leads.unarchive(id),
+    data, // Empty body if needed, or pass data if required
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+  return response.data;
+};
+
 //  Match Lead
 export const MatchLead = async (id) => {
   const response = await axios.get(endpoints.leads.match(id));
+  return response.data;
+};
+
+//  Detail Lead
+export const DetailLead = async (id, token) => {
+  const response = await axios.get(endpoints.report.details(id), {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
   return response.data;
 };
 

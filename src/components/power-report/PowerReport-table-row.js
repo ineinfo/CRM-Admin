@@ -13,14 +13,16 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-import { MatchLead, SelectedLead } from 'src/api/leads';
+import { DetailLead, MatchLead, SelectedLead } from 'src/api/leads';
 import { enqueueSnackbar } from 'notistack';
 import { useRouter } from 'next/navigation';
 import { alpha, Link } from '@mui/material';
 import PropertyDetailsModal from 'src/sections/leads/PropertyDetailsModal';
 import OfferModal from 'src/sections/leads/OfferModal';
+import DetailsModal from './Detail-modal';
+import { useAuthContext } from 'src/auth/hooks';
 
-export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, onArchiveRow }) {
+export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, onUnarchiveRow }) {
     const [modalOpen, setModalOpen] = useState(false);
     const [matchedData, setMatchedData] = useState([]);
     const [selectedData, setSelectedData] = useState([]);
@@ -29,6 +31,9 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
     const popover = usePopover();
     const invoiceRef = useRef();
 
+    const { user } = useAuthContext();
+    // console.log("nedded",user.accessToken);
+    const token = user?.accessToken;
 
     const triggerDownload = () => {
         if (invoiceRef.current) {
@@ -56,16 +61,16 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
     const router = useRouter()
 
-    const handleMatchPropertyClick = async () => {
+    const handleDetail = async (id, token) => {
+        // try {
+        //     const Data = await SelectedLead(row?.id);
+        //     setSelectedData(Data.data);
+        // } catch (error) {
+        //     console.log(error);
+        // }
         try {
-            const Data = await SelectedLead(row?.id);
-            setSelectedData(Data.data);
-        } catch (error) {
-            console.log(error);
-        }
-        try {
-            const res = await MatchLead(id);
-            console.log('Selected lead', selected);
+            const res = await DetailLead(id, token);
+            console.log('Selected lead', res);
             setMatchedData(res.data);
 
             setModalOpen(true);
@@ -78,6 +83,12 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
     const handleCloseModal = () => {
         setModalOpen(false);
     };
+
+    const handleUnarchive = (data) => {
+        onUnarchiveRow(data)
+        setModalOpen(false);
+    };
+
     const handlefollowupDate = () => {
         router.push(`/dashboard/followup?id=${id}&report=true`)
 
@@ -128,103 +139,18 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
                     </Button>
                 </TableCell>
 
-                {/* <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                    <OfferModal row={row} />
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                    <Button variant="outlined" color="inherit" onClick={() => { handleDetail(id, token) }}>
+                        Detail
+
+                    </Button>
                 </TableCell>
 
-                <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                    <Button variant="contained" color="secondary" onClick={handleMatchPropertyClick}>
-                        Property Match
-                    </Button>
-                </TableCell> */}
-                {/* <TableCell sx={{ whiteSpace: 'nowrap' }}>
 
-
-          <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
-            <Invoice ref={invoiceRef} />
-          </div>
-
-          <Button onClick={triggerDownload} >
-            <Iconify icon="solar:import-bold" />
-          </Button>
-        </TableCell> */}
-                {/* <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
-                    <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
-                        <Iconify icon="eva:more-vertical-fill" />
-                    </IconButton>
-                </TableCell> */}
             </TableRow >
-            <CustomPopover
-                open={popover.open}
-                onClose={popover.onClose}
-                arrow="right-top"
-                sx={{ width: 140 }}
-            >
-                <MenuItem
-                    onClick={() => {
-                        onEditRow();
-                        popover.onClose();
-                    }}
-                >
-                    <Iconify icon="solar:pen-bold" />
-                    Edit
-                </MenuItem>
-
-                {/* <MenuItem
-                    onClick={() => {
-                        confirmArchive.onTrue();
-                        popover.onClose();
-                    }}
-                    sx={{ color: 'info' }}
-                >
-                    <Iconify icon="mage:archive-fill" />
-                    Archive
-                </MenuItem> */}
-
-                <MenuItem
-                    onClick={() => {
-                        confirm.onTrue();
-                        popover.onClose();
-                    }}
-                    sx={{ color: 'error.main' }}
-                >
-                    <Iconify icon="solar:trash-bin-trash-bold" />
-                    Delete
-                </MenuItem>
 
 
-            </CustomPopover>
-
-            <ConfirmDialog
-                open={confirm.value}
-                onClose={confirm.onFalse}
-                title="Delete"
-                content="Are you sure want to delete?"
-                action={
-                    <Button variant="contained" color="info" onClick={onDeleteRow}>
-                        Delete
-                    </Button>
-                }
-            />
-            <ConfirmDialog
-                open={confirmArchive.value}
-                onClose={confirmArchive.onFalse}
-                title="Archive"
-                content="Are you sure want to Archive?"
-                action={
-                    <Button variant="contained" color="info" onClick={onArchiveRow} >
-                        Archive
-                    </Button>
-                }
-            />
-
-            <PropertyDetailsModal
-                open={modalOpen}
-                onClose={handleCloseModal}
-                row={matchedData}
-                id={id}
-                selected={selectedData}
-            />
+            <DetailsModal open={modalOpen} handleClose={handleCloseModal} propertyData={matchedData} unarchive={(data) => handleUnarchive(data)} />
 
         </>
     );

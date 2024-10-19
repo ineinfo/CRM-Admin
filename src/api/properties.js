@@ -44,6 +44,25 @@ export function UsegetProperty(productId) {
   return memoizedValue;
 }
 
+export function UsegetProspect(productId) {
+  const URL = productId ? endpoints.opportunity.details(productId) : null;
+
+  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
+
+  const memoizedValue = useMemo(
+    () => ({
+      product: data?.data,
+      productLoading: isLoading,
+      productError: error,
+      productValidating: isValidating,
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+
+
 // ----------------------------------------------------------------------
 
 export function UseSearchProperty(query) {
@@ -66,6 +85,37 @@ export function UseSearchProperty(query) {
 
   return memoizedValue;
 }
+
+//create prospect
+
+export const CreateProspect = async (formData, token) => {
+  try {
+    console.log(formData, token);
+
+    const response = await axios.post(endpoints.opportunity.create, formData, {
+      headers: {
+
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error creating property:', error);
+    return null;
+  }
+};
+
+//update prospect
+export const UpdateProspect = async (id, formData, token) => {
+  const response = await axios.put(endpoints.opportunity.details(id), formData, {
+    headers: {
+
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
 
 export const CreateProperty = async (formData, token) => {
   try {
@@ -99,5 +149,12 @@ export const UpdateProperty = async (id, formData, token) => {
 // Update role
 export const DeleteProperty = async (id) => {
   const response = await axios.delete(endpoints.propertypage.details(id));
+  return response.data;
+};
+
+
+// Update prospect
+export const DeleteProspect = async (id) => {
+  const response = await axios.delete(endpoints.opportunity.details(id));
   return response.data;
 };

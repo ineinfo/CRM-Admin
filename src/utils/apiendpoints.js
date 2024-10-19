@@ -29,6 +29,9 @@ export const REPORT_ROUTE = `${apiUrl}/leads/archive`;
 // PROPERTY MASTER
 export const PROPERTIES_ROUTE = `${apiUrl}/properties`;
 
+// OPPORTUNITY MASTER
+export const OPPORTUNITY_ROUTE = `${apiUrl}/opportunity`;
+
 // Followup MASTER
 export const FOLLOWUP_ROUTE = `${apiUrl}/followup`;
 

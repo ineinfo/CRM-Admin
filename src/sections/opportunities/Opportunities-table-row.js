@@ -20,31 +20,30 @@ import { Link } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
+const developmentTypeMap = {
+  1: 'Houses',
+  2: 'Apartments',
+  3: 'Penthouses',
+  4: 'Bungalows',
+};
+
+
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
   const {
-    developer_name,
-    location, // This is your location value
-    starting_price,
-    parking,
-    phone_number,
-    handover_date,
-    furnished,
+    first_name,
+    last_name,
+    country_id,
+    development_type,
+    mobile,
+    followup,
     // sqft_starting_size,
     email,
   } = row;
+  console.log("Data====>12", row);
 
   const confirm = useBoolean();
   const popover = usePopover();
 
-  function formatPrice(price) {
-    if (price >= 1_000_000_000) {
-      return `${(price / 1_000_000_000).toFixed(1)}B`; // Billion
-    }
-    if (price >= 1_000_000) {
-      return `${(price / 1_000_000).toFixed(1)}M`; // Million
-    }
-    return new Intl.NumberFormat('en-US').format(price); // Below million, show with commas
-  }
 
   return (
     <>
@@ -60,8 +59,8 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           <Link color="inherit" sx={{ cursor: "pointer" }} onClick={() => {
             onEditRow();
           }}><ListItemText
-              primary={developer_name ? ` ${developer_name}` : ''}
-              secondary={location}
+              primary={first_name ? ` ${first_name} ${last_name}` : ''}
+              secondary={country_id == 0 ? '-' : country_id}
               primaryTypographyProps={{ typography: 'body2' }}
               secondaryTypographyProps={{
                 component: 'span',
@@ -70,34 +69,30 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
             /></Link>
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          {starting_price ? (
-            formatPrice(starting_price)
-          ) : (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
-          )}
+          <TableCell sx={{ whiteSpace: 'nowrap' }}>
+            {development_type ? (
+              developmentTypeMap[development_type] || '-'
+            ) : (
+              <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
+            )}
+          </TableCell>
         </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          {<div style={{ display: 'flex', justifyContent: 'center' }}> {parking.charAt(0).toUpperCase() + parking.slice(1)}</div>}
-        </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          {phone_number ? (
-            phone_number
-          ) : (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
-          )}
-        </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          {handover_date ? (
-            dayjs(handover_date).format('DD-MM-YYYY')
-          ) : (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
-          )}
-        </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          <div style={{ display: 'flex', justifyContent: 'center' }}>{furnished.charAt(0).toUpperCase() + furnished.slice(1)}</div>
 
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          {mobile ? (
+            mobile
+          ) : (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
+          )}
         </TableCell>
-        {/* <TableCell sx={{ whiteSpace: 'nowrap' }}>{sqft_starting_size}</TableCell> */}
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          {followup ? (
+            dayjs(followup).format('DD-MM-YYYY')
+          ) : (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
+          )}
+        </TableCell>
+
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{email}</TableCell>
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
           <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>

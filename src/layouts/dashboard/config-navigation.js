@@ -165,6 +165,15 @@ export function useNavData() {
             path: [paths.dashboard.report],
             icon: ICONS.blog,
           },
+          {
+            title: t('Future prospects'),
+            path: [paths.dashboard.opportunity.main],
+            icon: ICONS.lock,
+            children: [
+              { title: t('list'), path: paths.dashboard.opportunity.root },
+              { title: t('add prospect'), path: paths.dashboard.opportunity.new },
+            ],
+          },
         ],
       },
     ],

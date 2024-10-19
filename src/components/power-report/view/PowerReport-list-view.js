@@ -22,7 +22,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { endpoints } from 'src/utils/axios';
 
 import { _roles, USER_STATUS_OPTIONS } from 'src/_mock';
-import { ArchiveLead, DeleteLead } from 'src/api/leads';
+import { ArchiveLead, DeleteLead, UnarchiveLead } from 'src/api/leads';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -58,7 +58,7 @@ const TABLE_HEAD = [
     { id: 'handover_date', label: 'Move in date', width: 50 },
     { id: 'email', label: 'Email', width: 100 },
     { id: 'Followup_date', label: 'Followup date', width: 30 },
-    // { id: 'status', label: 'Status', width: 100 },
+    { id: 'detail', label: 'Detail', width: 30 },
     // { id: '', width: 50 },
     // { id: '', width: 50 },
     // { id: '', width: 50 },
@@ -194,17 +194,17 @@ export default function PowerReportListView() {
         [enqueueSnackbar, tableData]
     );
 
-    const handleArchiveRow = useCallback(
-        async (id) => {
+    const handleUnarchiveRow = useCallback(
+        async (id, data) => {
             try {
-                await ArchiveLead(id, Token);
+                await UnarchiveLead(id, data, Token);
                 const deleteRow = tableData.filter((row) => row.id !== id);
 
-                enqueueSnackbar('Archeived success!');
+                enqueueSnackbar('Unarcheived success!');
 
                 setTableData(deleteRow);
             } catch (error) {
-                enqueueSnackbar('Archive failed!', { variant: 'error' });
+                enqueueSnackbar('Unarchive failed!', { variant: 'error' });
                 console.error(error);
             }
         },
@@ -363,7 +363,7 @@ export default function PowerReportListView() {
                                                 selected={table.selected.includes(row.id)}
                                                 onSelectRow={() => table.onSelectRow(row.id)}
                                                 onDeleteRow={() => handleDeleteRow(row.id)}
-                                                onArchiveRow={() => handleArchiveRow(row.id)}
+                                                onUnarchiveRow={(data) => handleUnarchiveRow(row.id, data)}
                                                 onEditRow={() => handleEditRow(row.id)}
 
                                             />

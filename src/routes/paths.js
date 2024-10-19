@@ -181,6 +181,13 @@ export const paths = {
       new: `${ROOTS.DASHBOARD}/invoice/new`,
       details: (id) => `${ROOTS.DASHBOARD}/invoice/${id}`,
       edit: (id) => `${ROOTS.DASHBOARD}/invoice/${id}/edit`,
-    }
+    },
+    opportunity: {
+      main: `${ROOTS.DASHBOARD}/prospects`,
+      root: `${ROOTS.DASHBOARD}/prospects/list`,
+      new: `${ROOTS.DASHBOARD}/prospects/new`,
+      details: (id) => `${ROOTS.DASHBOARD}/prospects/${id}`,
+      edit: (id) => `${ROOTS.DASHBOARD}/prospects/${id}/edit`,
+    },
   },
 };

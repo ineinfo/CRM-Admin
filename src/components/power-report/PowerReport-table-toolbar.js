@@ -286,7 +286,7 @@ export default function UserTableToolbar({ filters, onFilters }) {
             </CustomPopover>
 
             <Stack
-                spacing={2}
+                spacing={1}
                 alignItems={{ xs: 'flex-end', md: 'center' }}
                 direction={{
                     xs: 'column',
@@ -300,7 +300,7 @@ export default function UserTableToolbar({ filters, onFilters }) {
                 <FormControl
                     sx={{
                         flexShrink: 0,
-                        width: { xs: 1, md: 300 },
+                        width: { xs: 1, md: 450 },
                         p: 2,
                     }}
                 >

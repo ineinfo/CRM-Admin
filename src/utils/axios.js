@@ -18,6 +18,7 @@ import {
   SALES_ROUTE,
   CALENDAR_ROUTE,
   REPORT_ROUTE,
+  OPPORTUNITY_ROUTE,
 } from './apiendpoints';
 
 // ----------------------------------------------------------------------
@@ -109,17 +110,25 @@ export const endpoints = {
     list: LEADS_ROUTE,
     create: LEADS_ROUTE,
     details: (id) => `${LEADS_ROUTE}/${id}`,
+    updatenote: (id) => `${LEADS_ROUTE}/updatenote/${id}`,
     archive: (id) => `${LEADS_ROUTE}/archive/${id}`,
+    unarchive: (id) => `${LEADS_ROUTE}/active/${id}`,
     match: (id) => `${LEADS_ROUTE}/findproperty/${id}`,
     select: (id) => `${LEADS_ROUTE}/matchproperty/${id}`,
   },
   report: {
     list: REPORT_ROUTE,
+    details: (id) => `${REPORT_ROUTE}/${id}`,
   },
   propertypage: {
     list: PROPERTIES_ROUTE,
     create: PROPERTIES_ROUTE,
     details: (id) => `${PROPERTIES_ROUTE}/${id}`,
+  },
+  opportunity: {
+    list: OPPORTUNITY_ROUTE,
+    create: OPPORTUNITY_ROUTE,
+    details: (id) => `${OPPORTUNITY_ROUTE}/${id}`,
   },
   followup: {
     list: FOLLOWUP_ROUTE,

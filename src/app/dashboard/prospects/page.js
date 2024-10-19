@@ -1,9 +1,11 @@
-import { UserListView } from 'src/sections/developers/view';
+import { UserListView } from "src/sections/opportunities/view";
+
+
 
 // ----------------------------------------------------------------------
 
 export const metadata = {
-  title: 'Dashboard: Developers List',
+  title: 'Dashboard: Prospects List',
 };
 
 export default function UserListPage() {
