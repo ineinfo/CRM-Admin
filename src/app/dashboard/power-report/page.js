@@ -8,6 +8,8 @@ export const metadata = {
 
 
 const page = () => {
+    console.log('dta');
+
     return (
         <div>
             <PowerReportListView />

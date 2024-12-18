@@ -13,27 +13,19 @@ import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import { formatDate } from '@fullcalendar/core';
-import { useCountryData } from 'src/api/propertytype';
+import { useCountryData, UsegetPropertiesType } from 'src/api/propertytype';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { Link } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
-const developmentTypeMap = {
-  1: 'Houses',
-  2: 'Apartments',
-  3: 'Penthouses',
-  4: 'Bungalows',
-};
-
-
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
   const {
     first_name,
     last_name,
     country_id,
-    development_type,
+    property_type_id,
     mobile,
     followup,
     // sqft_starting_size,
@@ -43,6 +35,17 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
   const confirm = useBoolean();
   const popover = usePopover();
+  const { products: propertyTypes, productsLoading: propertyTypesLoading } = UsegetPropertiesType();
+  // State to manage "see more / see less" for each row
+  const [expandedRows, setExpandedRows] = useState({});
+
+  // Toggle function for "see more / see less"
+  const toggleExpand = (rowId) => {
+    setExpandedRows((prevExpandedRows) => ({
+      ...prevExpandedRows,
+      [rowId]: !prevExpandedRows[rowId],
+    }));
+  };
 
 
   return (
@@ -55,12 +58,12 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         <TableCell padding="checkbox">
           <Checkbox checked={selected} onClick={onSelectRow} />
         </TableCell>
-        <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <Link color="inherit" sx={{ cursor: "pointer" }} onClick={() => {
+        <TableCell sx={{ display: 'flex', alignItems: 'center', }}>
+          <Link color="inherit" sx={{ cursor: "pointer", minHeight: "100%" }} onClick={() => {
             onEditRow();
           }}><ListItemText
               primary={first_name ? ` ${first_name} ${last_name}` : ''}
-              secondary={country_id == 0 ? '-' : country_id}
+              secondary={country_id === 0 ? '-' : country_id}
               primaryTypographyProps={{ typography: 'body2' }}
               secondaryTypographyProps={{
                 component: 'span',
@@ -68,22 +71,37 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
               }}
             /></Link>
         </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          <TableCell sx={{ whiteSpace: 'nowrap' }}>
-            {development_type ? (
-              developmentTypeMap[development_type] || '-'
-            ) : (
-              <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
-            )}
-          </TableCell>
-        </TableCell>
-
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          {mobile ? (
-            mobile
+        <TableCell>
+          {property_type_id && property_type_id.length > 0 ? (
+            <>
+              {property_type_id
+                .slice(0, expandedRows[row.id] ? property_type_id.length : 3)
+                .map((typeId) => {
+                  const property = propertyTypes.find((prop) => prop.id === typeId);
+                  return property ? property.property_type : '-';
+                })
+                .join(', ')}
+              {property_type_id.length > 3 && (
+                <Link
+                  component="button"
+                  onClick={() => toggleExpand(row.id)}
+                  sx={{ color: 'primary.main', ml: 1 }}
+                >
+                  {expandedRows[row.id] ? 'See less' : 'See more'}
+                </Link>
+              )}
+            </>
           ) : (
             <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
           )}
+        </TableCell>
+
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          {
+            mobile
+            ||
+            <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
+          }
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
           {followup ? (

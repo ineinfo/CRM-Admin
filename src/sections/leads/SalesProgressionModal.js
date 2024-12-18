@@ -24,9 +24,9 @@ import { NumericFormat } from 'react-number-format';
 import { GetSalesStatus, UpdateLead, UpdateSalesStatus } from 'src/api/leads';
 import { useAuthContext } from 'src/auth/hooks';
 import { enqueueSnackbar } from 'notistack';
-import Invoice from './Invoice';
 import Iconify from 'src/components/iconify';
 import dayjs from 'dayjs';
+import Invoice from './Invoice';
 
 
 const steps = [
@@ -155,16 +155,16 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
     };
     const handleSave = () => {
         const currentValues = getValues(`stepsData[${activeStep}]`);
-        if (activeStep == 8) {
+        if (activeStep === 8) {
             setShowInvoice(true)
         }
         if (!currentValues) {
             return setError(true);
         }
-        if (activeStep == 2 && !getValues(`documentUpload[${activeStep}]`)) {
+        if (activeStep === 2 && !getValues(`documentUpload[${activeStep}]`)) {
             return setError(true);
         }
-        if (activeStep == 3 &&
+        if (activeStep === 3 &&
             (!getValues(`stepsData[${activeStep}].companyName`)?.trim() ||
                 !getValues(`stepsData[${activeStep}].address`)?.trim() ||
                 !getValues(`stepsData[${activeStep}].solicitorsName`)?.trim() ||
@@ -173,7 +173,7 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
             return setError(true);
         }
 
-        if (activeStep == 4) {
+        if (activeStep === 4) {
             console.log("mortgage", getValues(`stepsData[${activeStep}]`));
 
             // Check local state 'type' instead of using getValues
@@ -183,9 +183,9 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
         }
 
 
-        if (activeStep == 7) {
+        if (activeStep === 7) {
             let hasError = false;
-            let errorMessage = ''; // Track specific error messages
+            let errorMessage1 = ''; // Track specific error messages
 
             // Loop through each key in the invoiceFields
             Object.keys(invoiceFields).forEach((key) => {
@@ -194,7 +194,7 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
                 // Check if the field is empty
                 if (!fieldValue) {
                     hasError = true;
-                    errorMessage = 'All fields are required.';
+                    errorMessage1 = 'All fields are required.';
                 }
 
                 // Check if the field is a number for specific keys
@@ -202,29 +202,29 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
                     (key === 'inv_total_purchase_price' ||
                         key === 'inv_commission' ||
                         key === 'inv_selling_brokerage_commission')
-                    && isNaN(fieldValue)
+                    && Number.isNaN(fieldValue)
                 ) {
                     hasError = true;
-                    errorMessage = `The field ${key.replace(/^inv_/, '').replace(/_/g, ' ')} must be a valid number.`;
+                    errorMessage1 = `The field ${key.replace(/^inv_/, '').replace(/_/g, ' ')} must be a valid number.`;
                 }
             });
 
             // If any field has an error, set the error flag and show the specific message
             if (hasError) {
                 setError(true);
-                setErrorMessage(errorMessage); // You can set the error message to display the correct message
-                return;
+                setErrorMessage(errorMessage1); // You can set the error message to display the correct message
+                return true;
             }
         }
 
 
-        if (activeStep == 9 &&
+        if (activeStep === 9 &&
             (!getValues(`stepsData[${activeStep}].amount`)?.trim() ||
                 !getValues(`stepsData[${activeStep}].date`)?.trim())) {
             return setError(true);
         }
 
-        if (activeStep == 10 &&
+        if (activeStep === 10 &&
             (!getValues(`documentUpload[${activeStep}]`))) {
             return setError(true);
         }
@@ -236,15 +236,17 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
             return newSavedStatus;
         });
         handleSubmit(onSubmit)();
+
+        return true
     };
 
     const onSubmit = async () => {
-        let data = {
+        let data1 = {
 
         };
         if (activeStep === 0) {
             const stepDataValue = Number(getValues(`stepsData[${activeStep}]`).replace(/[^0-9.-]+/g, ""));
-            data = {
+            data1 = {
                 lead_id: row?.id,
                 [keys[activeStep]]: stepDataValue, // Use the converted number here
                 lead_status: activeStep + 1
@@ -252,27 +254,27 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
         }
 
         if (activeStep === 1) {
-            data = {
+            data1 = {
                 lead_id: row?.id,
                 lead_status: activeStep + 1
             };
         }
         if (activeStep === 2) {
-            data = new FormData();
-            data.append('lead_id', row?.id);
-            data.append('lead_status', activeStep + 1);
+            data1 = new FormData();
+            data1.append('lead_id', row?.id);
+            data1.append('lead_status', activeStep + 1);
 
             // Assuming document is the file to be uploaded
             const documentFile = await getValues(`documentUpload[${activeStep}]`);
             console.log("File", documentFile);
 
             if (documentFile) {
-                data.append('document', documentFile); // Append the document file
+                data1.append('document', documentFile); // Append the document file
             }
         }
 
         if (activeStep === 3) {
-            data = {
+            data1 = {
                 lead_id: row?.id,
                 company_name: getValues(`stepsData[${activeStep}].companyName`),
                 address: getValues(`stepsData[${activeStep}].address`),
@@ -283,7 +285,7 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
             }
         }
         if (activeStep === 4) {
-            data = {
+            data1 = {
                 lead_id: row?.id,
                 mortgage_status: type === "mortgage" ? 1 : 2,
                 mortgage_amount: getValues(`stepsData[${activeStep}].details`),
@@ -291,36 +293,36 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
             }
         }
         if (activeStep === 5) {
-            data = {
+            data1 = {
                 lead_id: row?.id,
                 servey_search: getValues(`stepsData[${activeStep}]`),
                 lead_status: activeStep + 1
             }
         }
         if (activeStep === 6) {
-            data = {
+            data1 = {
                 lead_id: row?.id,
                 conveyancing: getValues(`stepsData[${activeStep}]`),
                 lead_status: activeStep + 1
             }
         }
         if (activeStep === 7) {
-            // Start with the base data object
-            data = {
+            // Start with the base data1 object
+            data1 = {
                 lead_id: row?.id,
                 sales_invoice_credited: "yes",
                 lead_status: activeStep + 1,
             };
 
-            // Add the invoiceFields keys and their values to the data object
+            // Add the invoiceFields keys and their values to the data1 object
             Object.keys(invoiceFields).forEach((key) => {
                 const value = getValues(`stepsData[${activeStep}].${key}`);
 
                 // Convert to number if the key is inv_commission or inv_total_purchase_price
                 if (key === 'inv_commission' || key === 'inv_total_purchase_price' || key === 'inv_selling_brokerage_commission') {
-                    data[key] = Number(value) || 0; // Convert to number, default to 0 if NaN
+                    data1[key] = Number(value) || 0; // Convert to number, default to 0 if NaN
                 } else {
-                    data[key] = value; // Keep the original value
+                    data1[key] = value; // Keep the original value
                 }
             });
         }
@@ -345,7 +347,7 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
         }
 
         if (activeStep === 8) {
-            data = {
+            data1 = {
                 lead_id: row?.id,
                 commission_invoice_value: getValues(`stepsData[${activeStep}]`),
                 lead_status: activeStep + 1
@@ -354,7 +356,7 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
 
 
         if (activeStep === 9) {
-            data = {
+            data1 = {
                 lead_id: row?.id,
                 exchange_of_contract_amount: Number(getValues(`stepsData[${activeStep}].amount`).replace(/[^0-9.-]+/g, "")),
                 exchange_of_contract_date: getValues(`stepsData[${activeStep}].date`),
@@ -362,30 +364,30 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
             }
         }
         if (activeStep === 10) {
-            data = new FormData();
-            data.append('lead_id', row?.id);
-            data.append('lead_status', activeStep + 1);
+            data1 = new FormData();
+            data1.append('lead_id', row?.id);
+            data1.append('lead_status', activeStep + 1);
             const completionDate = await getValues(`stepsData[${activeStep}]`);
             if (completionDate) {
-                data.append('completion_date', completionDate);
+                data1.append('completion_date', completionDate);
             }
             const documentFile = await getValues(`documentUpload[${activeStep}]`);
             console.log("File", documentFile);
 
             if (documentFile) {
-                data.append('document', documentFile); // Append the document file
+                data1.append('document', documentFile); // Append the document file
             }
         }
 
 
         try {
-            await UpdateSalesStatus(data, Token)
+            await UpdateSalesStatus(data1, Token)
             if (activeStep < steps.length - 1) {
                 setActiveStep((prev) => prev + 1);
 
             }
-        } catch (error) {
-            console.log(error);
+        } catch (errr) {
+            console.log(errr);
 
         }
 
@@ -404,15 +406,15 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
                 value.forEach((item, index) => {
                     console.log('Item:', item); // Log item structure for debugging
 
-                    if (item.lead_status == 8) {
+                    if (item.lead_status === 8) {
                         Object.keys(invoiceFields).forEach((key) => {
-                            const value = item[key]; // Change item.key to item[key]
+                            const value1 = item[key]; // Change item.key to item[key]
 
                             // Set value in updatedFields
                             if (key === 'inv_commission' || key === 'inv_total_purchase_price' || key === 'inv_selling_brokerage_commission') {
-                                updatedFields[key] = Number(value) || 0; // Convert to number, default to 0 if NaN
+                                updatedFields[key] = Number(value1) || 0; // Convert to number, default to 0 if NaN
                             } else {
-                                updatedFields[key] = value || ""; // Set value, default to empty string if no value
+                                updatedFields[key] = value1 || ""; // Set value, default to empty string if no value
                             }
                         });
                         setInvoiceFields(updatedFields); // Update the state after the loop
@@ -425,12 +427,30 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
                     setActiveStep((prev) => prev + 1);
                 });
             }
-        } catch (error) {
-            console.error("Error fetching status:", error);
+        } catch (err) {
+            console.error("Error fetching status:", err);
         }
     };
 
 
+    const getStepLabelValue = (index) => {
+        if (index === 3) {
+            return getValues(`stepsData[${index}].companyName`);
+        }
+        if (index === 4) {
+            return type;
+        }
+        if (index === 8) {
+            return getValues(`stepsData[${index}].amount`);
+        }
+        if (index === 7) {
+            return 'Yes';
+        }
+        if (index === 9) {
+            return getValues(`stepsData[${index}].date`);
+        }
+        return getValues(`stepsData[${index}]`) || '';
+    };
 
 
     // Call getStatus on component mount or when row changes
@@ -476,8 +496,8 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
             // Make the API call to update the lead with formData
             await UpdateLead(row.id, formData, Token);
             enqueueSnackbar('Moved to previous buyer', { variant: 'success' });
-        } catch (error) {
-            enqueueSnackbar(error.response?.data?.message || 'Unknown error', { variant: 'error' });
+        } catch (errr) {
+            enqueueSnackbar(errr.response?.data?.message || 'Unknown error', { variant: 'error' });
         }
 
         setActiveStep(0);
@@ -508,8 +528,8 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
                                     variant="outlined"
                                     placeholder="Enter amount"
                                     allowNegative={false}
-                                    thousandSeparator={true}
-                                    isNumericString={true}
+                                    thousandSeparator
+                                    isNumericString
                                     decimalScale={0} // no decimals
                                     InputProps={{
                                         endAdornment: (
@@ -524,7 +544,7 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
                                                     value={currency}
                                                     onChange={(e) => setCurrency(e.target.value)}
                                                     displayEmpty
-                                                    renderValue={(selected) => selected ? selected : "Select Currency"}
+                                                    renderValue={(selected) => selected || "Select Currency"}
                                                 >
                                                     {countries.map((country) => (
                                                         <MenuItem key={country.id} value={country.currency}>
@@ -718,7 +738,7 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
                                         onChange={(e) => {
                                             // Allow only numbers and update field value
                                             const value = e.target.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-                                            field.onChange(value ? value : ''); // Update field value without the phone code
+                                            field.onChange(value || ''); // Update field value without the phone code
                                         }}
                                         value={field.value || ''} // Display number as is
                                     />
@@ -810,7 +830,7 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
                                         {...field}
                                         id={`stepsData[${index}]`} // Adding id for accessibility
                                         placeholder="Enter Details"
-                                        label={index == 5 ? 'Survey or Searches' : 'Conveyancing Enquiries'}
+                                        label={index === 5 ? 'Survey or Searches' : 'Conveyancing Enquiries'}
                                     />
                                 )}
                             />
@@ -914,7 +934,7 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
 
                         {error && (
                             <div style={{ color: "red", marginTop: "5px" }}>
-                                {errorMessage ? errorMessage : "Field is Required"}
+                                {errorMessage || "Field is Required"}
                             </div>
                         )}
                     </>
@@ -962,8 +982,8 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
                                     variant="outlined"
                                     placeholder="Enter amount"
                                     allowNegative={false}
-                                    thousandSeparator={true}
-                                    isNumericString={true}
+                                    thousandSeparator
+                                    isNumericString
                                     decimalScale={0} // no decimals
                                     InputProps={{
                                         endAdornment: <InputAdornment position="end">{currency}</InputAdornment>
@@ -1070,7 +1090,7 @@ const SalesProgressionModal = ({ open, onClose, row, data }) => {
                         {steps.map((label, index) => (
                             <Step key={label}>
                                 <StepLabel>
-                                    {label} {isSaved[index] && ` - ${index == 3 ? getValues(`stepsData[${index}].companyName`) : index == 4 ? type : index == 8 ? getValues(`stepsData[${index}].amount`) : index == 7 ? 'Yes' : index == 9 ? getValues(`stepsData[${index}].date`) : getValues(`stepsData[${index}]`) || ''}`}
+                                    {label} {isSaved[index] && ` - ${getStepLabelValue(index)}`}
                                 </StepLabel>
                                 {activeStep === index && !isSaved[index] && (
                                     <>

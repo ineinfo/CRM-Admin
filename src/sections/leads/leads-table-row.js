@@ -15,13 +15,11 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import { MatchLead, SelectedLead } from 'src/api/leads';
 import { enqueueSnackbar } from 'notistack';
-import PropertyDetailsModal from './PropertyDetailsModal'; // Adjust the path as needed
 import { useRouter } from 'next/navigation';
 import { alpha, Link } from '@mui/material';
 import OfferModal from './OfferModal';
-import Invoice from './Invoice';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import PropertyDetailsModal from './PropertyDetailsModal'; // Adjust the path as needed
+
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, onArchiveRow }) {
   const [modalOpen, setModalOpen] = useState(false);
@@ -85,13 +83,23 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
     router.push(`/dashboard/followup?id=${id}`)
   }
 
+  let backgroundColor;
+
+  if (status === 3) {
+    backgroundColor = 'transparent';
+  } else if (row?.sales_status) {
+    backgroundColor = alpha('#fda92d', 0.25);
+  } else {
+    backgroundColor = 'transparent';
+  }
+
   return (
     <>
       <TableRow
         hover
         selected={selected}
         sx={{
-          backgroundColor: status == 3 ? 'transparent' : (row?.sales_status ? alpha('#fda92d', 0.25) : 'transparent'),
+          backgroundColor,
           '&:hover': {
             backgroundColor: alpha('#4CAF50', 0.25),
           },
@@ -140,17 +148,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
             Property Match
           </Button>
         </TableCell>
-        {/* <TableCell sx={{ whiteSpace: 'nowrap' }}>
 
-
-          <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
-            <Invoice ref={invoiceRef} />
-          </div>
-
-          <Button onClick={triggerDownload} >
-            <Iconify icon="solar:import-bold" />
-          </Button>
-        </TableCell> */}
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
           <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />

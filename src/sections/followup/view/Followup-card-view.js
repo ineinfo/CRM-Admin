@@ -11,8 +11,8 @@ import { _userCards } from 'src/_mock';
 import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import FollowupForm from '../Followup-new-edit-form';
 import { UsegetFollowupDetail, UsegetFollowupProperty } from 'src/api/leads';
+import FollowupForm from '../Followup-new-edit-form';
 
 
 // ----------------------------------------------------------------------

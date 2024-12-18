@@ -42,13 +42,13 @@ import {
 } from 'src/components/table';
 
 import { useCountryData } from 'src/api/propertytype';
-import UserTableRow from '../leads-table-row';
+import { useAuthContext } from 'src/auth/hooks';
+import Label from 'src/components/label';
+import { alpha, Tab, Tabs } from '@mui/material';
 import UserTableToolbar from '../leads-table-toolbar';
 import UserTableFiltersResult from '../leads-table-filters-result';
-import { alpha, Tab, Tabs } from '@mui/material';
-import Label from 'src/components/label';
+import UserTableRow from '../leads-table-row';
 import Invoice from '../Invoice';
-import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -280,10 +280,10 @@ export default function UserListView() {
                     }}
                   >
                     {['active', 'inactive', 'previous'].includes(tab.value)
-                      ? tableData.filter((user) =>
-                        (tab.value === 'active' && user.status === 1) ||
-                        (tab.value === 'inactive' && user.status === 2) ||
-                        (tab.value === 'previous' && user.status === 3)
+                      ? tableData.filter((user1) =>
+                        (tab.value === 'active' && user1.status === 1) ||
+                        (tab.value === 'inactive' && user1.status === 2) ||
+                        (tab.value === 'previous' && user1.status === 3)
                       ).length
                       : tableData.length}
                   </Label>

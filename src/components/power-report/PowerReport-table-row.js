@@ -19,8 +19,8 @@ import { useRouter } from 'next/navigation';
 import { alpha, Link } from '@mui/material';
 import PropertyDetailsModal from 'src/sections/leads/PropertyDetailsModal';
 import OfferModal from 'src/sections/leads/OfferModal';
-import DetailsModal from './Detail-modal';
 import { useAuthContext } from 'src/auth/hooks';
+import DetailsModal from './Detail-modal';
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, onUnarchiveRow }) {
     const [modalOpen, setModalOpen] = useState(false);
@@ -61,7 +61,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
     const router = useRouter()
 
-    const handleDetail = async (id, token) => {
+    const handleDetail = async (Id, Token) => {
         // try {
         //     const Data = await SelectedLead(row?.id);
         //     setSelectedData(Data.data);
@@ -69,7 +69,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         //     console.log(error);
         // }
         try {
-            const res = await DetailLead(id, token);
+            const res = await DetailLead(Id, Token);
             console.log('Selected lead', res);
             setMatchedData(res.data);
 

@@ -34,9 +34,6 @@ import { useEvent, useCalendar } from '../hooks';
 import CalendarToolbar from '../calendar-toolbar';
 import CalendarFilters from '../calendar-filters';
 import CalendarFiltersResult from '../calendar-filters-result';
-import { differenceInMinutes, isBefore, isToday } from 'date-fns';
-import { Alert, IconButton, Snackbar } from '@mui/material';
-import { CloseIcon } from 'yet-another-react-lightbox';
 
 // ----------------------------------------------------------------------
 
@@ -135,26 +132,28 @@ export default function CalendarView() {
       sx={{ mb: { xs: 3, md: 5 } }}
     />
   );
+
   function darkenColor(color, percent) {
     // If the color is in hex format
     if (color.startsWith('#')) {
-      let r = parseInt(color.slice(1, 3), 16);
-      let g = parseInt(color.slice(3, 5), 16);
-      let b = parseInt(color.slice(5, 7), 16);
+      const r = parseInt(color.slice(1, 3), 16);
+      const g = parseInt(color.slice(3, 5), 16);
+      const b = parseInt(color.slice(5, 7), 16);
 
-      r = Math.floor(r * (1 - percent));
-      g = Math.floor(g * (1 - percent));
-      b = Math.floor(b * (1 - percent));
+      const newR = Math.floor(r * (1 - percent));
+      const newG = Math.floor(g * (1 - percent));
+      const newB = Math.floor(b * (1 - percent));
 
-      return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+      // Convert RGB values back to hex using padStart to ensure 2-digit format
+      return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
     }
 
     // If the color is in rgba format
     if (color.startsWith('rgba')) {
       const rgba = color.match(/\d+/g);
-      let r = Math.floor(parseInt(rgba[0]) * (1 - percent));
-      let g = Math.floor(parseInt(rgba[1]) * (1 - percent));
-      let b = Math.floor(parseInt(rgba[2]) * (1 - percent));
+      const r = Math.floor(parseInt(rgba[0], 10) * (1 - percent));
+      const g = Math.floor(parseInt(rgba[1], 10) * (1 - percent));
+      const b = Math.floor(parseInt(rgba[2], 10) * (1 - percent));
       const a = rgba[3]; // Keep the alpha value unchanged
 
       return `rgba(${r}, ${g}, ${b}, ${a})`;
@@ -162,6 +161,7 @@ export default function CalendarView() {
 
     return color; // If the format is unrecognized, return the original color
   }
+
 
   const renderEventContent = (eventInfo) => {
     const darkenedColor = darkenColor(eventInfo.backgroundColor, 0.2); // 20% darker

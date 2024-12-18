@@ -35,10 +35,10 @@ export const OPPORTUNITY_ROUTE = `${apiUrl}/opportunity`;
 // Followup MASTER
 export const FOLLOWUP_ROUTE = `${apiUrl}/followup`;
 
-//Sales 
+// Sales 
 export const SALES_ROUTE = `${apiUrl}/salesprogression`
 
-//calender
+// calender
 export const CALENDAR_ROUTE = `${apiUrl}/calender`
 
 // Country

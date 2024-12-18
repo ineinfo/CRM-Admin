@@ -174,6 +174,11 @@ export function useNavData() {
               { title: t('add prospect'), path: paths.dashboard.opportunity.new },
             ],
           },
+          {
+            title: t('Menu'),
+            path: [paths.dashboard.menu],
+            icon: ICONS.propertylogo,
+          },
         ],
       },
     ],

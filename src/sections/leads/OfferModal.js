@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, MenuItem, FormControl, Tooltip, Box } from '@mui/material';
 import { useForm, Controller, FormProvider } from 'react-hook-form';
 import { RHFTextField } from 'src/components/hook-form';
-import SalesProgressionModal from './SalesProgressionModal';
 import { useAuthContext } from 'src/auth/hooks';
 import { CreateSales, GetSales } from 'src/api/leads';
+import SalesProgressionModal from './SalesProgressionModal';
 
 const OfferModal = ({ row }) => {
     const [open, setOpen] = useState(false);
@@ -33,7 +33,7 @@ const OfferModal = ({ row }) => {
 
                 // If there are sales with status 1, prefill form values
                 if (salesData?.length > 0) {
-                    const sale = salesData.find(sale => sale.status === 1);
+                    const sale = salesData.find(sale2 => sale2.status === 1);
                     if (sale) {
                         methods.setValue('amount', sale.amount); // Prefill amount
                         methods.setValue('status', sale.status); // Prefill status
@@ -57,7 +57,7 @@ const OfferModal = ({ row }) => {
 
         // Prefill the form with sale data if available
         if (sales?.length > 0) {
-            const sale = sales.find(sale => sale.status === 1);
+            const sale = sales.find(sale1 => sale1.status === 1);
             if (sale) {
                 methods.setValue('amount', sale.amount);
                 methods.setValue('status', sale.status);
@@ -164,7 +164,7 @@ const OfferModal = ({ row }) => {
 
             <Button variant="outlined"
                 onClick={handleOpen}>
-                {row && row?.status == 3 ? 'Previous Buyer' : "Offer"}
+                {row && row?.status === 3 ? 'Previous Buyer' : "Offer"}
             </Button>
             <Dialog open={open} onClose={handleClose} fullWidth>
                 <DialogTitle>Offer Form</DialogTitle>

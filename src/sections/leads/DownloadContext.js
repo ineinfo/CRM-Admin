@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useRef } from 'react';
+import React, { createContext, useContext, useRef, useMemo } from 'react';
 
 const DownloadContext = createContext();
 
@@ -11,8 +11,11 @@ export const DownloadProvider = ({ children }) => {
         }
     };
 
+    // Wrap the value object in useMemo to prevent it from changing on every render
+    const contextValue = useMemo(() => ({ downloadPDF, invoiceRef }), [invoiceRef]);
+
     return (
-        <DownloadContext.Provider value={{ downloadPDF, invoiceRef }}>
+        <DownloadContext.Provider value={contextValue}>
             {children}
         </DownloadContext.Provider>
     );

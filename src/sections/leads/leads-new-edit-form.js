@@ -40,9 +40,9 @@ import {
   UsegetParkingType,
   UsegetPropertiesType,
   UsegetPropertySatatus,
-  useCityData,
+  UseCityData,
   useCountryData,
-  useStateData,
+  UseStateData,
 } from 'src/api/propertytype';
 import { CreateProperty, UpdateProperty } from 'src/api/properties';
 
@@ -229,7 +229,7 @@ export default function PropertyForm({ currentLead }) {
   // useEffect(() => {
   //   const FetchStates = async () => {
   //     try {
-  //       const data = await useStateData(id);
+  //       const data = await UseStateData(id);
   //       console.log('States Data:', data.data); // Log state data for debugging
   //       setStates(data.data);
   //     } catch (stateError) {
@@ -244,7 +244,7 @@ export default function PropertyForm({ currentLead }) {
   // useEffect(() => {
   //   const FetchCities = async () => {
   //     try {
-  //       const data = await useCityData(sid);
+  //       const data = await UseCityData(sid);
   //       console.log('Cities Data:', data.data); // Log city data for debugging
   //       setCities(data.data);
   //     } catch (cityError) {
@@ -293,7 +293,7 @@ export default function PropertyForm({ currentLead }) {
       }
 
       setShowParkingType(currentLead?.parking === 'yes');
-      setShowdate(currentLead?.lead_type == 1);
+      setShowdate(currentLead?.lead_type === 1);
       setIsCurrentLeadSet(true); // Mark that currentLead data has been set
     }
   }, [currentLead, setValue, countries]);
@@ -302,11 +302,11 @@ export default function PropertyForm({ currentLead }) {
     const FetchStates = async () => {
       try {
         if (id) {
-          const data = await useStateData(id);
+          const data = await UseStateData(id);
           setStates(data.data);
         }
-      } catch (error) {
-        console.error('Error fetching states:', error);
+      } catch (errore) {
+        console.error('Error fetching states:', errore);
       }
     };
     FetchStates();
@@ -316,11 +316,11 @@ export default function PropertyForm({ currentLead }) {
     const FetchCities = async () => {
       try {
         if (sid) {
-          const data = await useCityData(sid);
+          const data = await UseCityData(sid);
           setCities(data.data);
         }
-      } catch (error) {
-        console.error('Error fetching cities:', error);
+      } catch (err) {
+        console.error('Error fetching cities:', err);
       }
     };
     FetchCities();

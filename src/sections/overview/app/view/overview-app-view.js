@@ -1,4 +1,5 @@
 "use client"
+
 import React, { useEffect, useState } from 'react';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -9,19 +10,19 @@ import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { SeoIllustration } from 'src/assets/illustrations';
 import { _appAuthors, _appRelated, _appFeatured, _appInvoices, _appInstalled } from 'src/_mock';
 import { useSettingsContext } from 'src/components/settings';
+import { alpha, Card, CardContent, CardHeader, List, ListItem, Typography } from '@mui/material';
+import { useGetEvents } from 'src/api/calendar';
+import { isToday } from 'date-fns'; // Importing isToday for date comparison
+import AppTopInstalledCountries from '../app-top-installed-countries';
+import AppTopAuthors from '../app-top-authors';
+import AppWidgetSummary from '../app-widget-summary';
 import AppWidget from '../app-widget';
 import AppWelcome from '../app-welcome';
 import AppFeatured from '../app-featured';
 import AppNewInvoice from '../app-new-invoice';
-import AppTopAuthors from '../app-top-authors';
 import AppTopRelated from '../app-top-related';
 import AppAreaInstalled from '../app-area-installed';
 import AppCurrentDownload from '../app-current-download';
-import AppTopInstalledCountries from '../app-top-installed-countries';
-import { useGetEvents } from 'src/api/calendar';
-import { isToday } from 'date-fns'; // Importing isToday for date comparison
-import AppWidgetSummary from '../app-widget-summary';
-import { alpha, Card, CardContent, CardHeader, List, ListItem, Typography } from '@mui/material';
 
 // ----------------------------------------------------------------------
 

@@ -105,6 +105,7 @@ export const paths = {
     kanban: `${ROOTS.DASHBOARD}/kanban`,
     calendar: `${ROOTS.DASHBOARD}/calendar`,
     report: `${ROOTS.DASHBOARD}/power-report`,
+    menu: `${ROOTS.DASHBOARD}/menu`,
     fileManager: `${ROOTS.DASHBOARD}/file-manager`,
     permission: `${ROOTS.DASHBOARD}/permission`,
     general: {

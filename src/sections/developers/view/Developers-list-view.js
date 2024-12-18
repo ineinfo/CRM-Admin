@@ -55,8 +55,9 @@ const TABLE_HEAD = [
   { id: 'phone_number', label: 'Contact No', width: 80 },
   { id: 'handover_date', label: 'Handover Date', width: 100 },
   { id: 'furnished', label: 'Furnished', width: 80 },
-  // { id: 'sqft_starting_size', label: 'Sqft', width: 100 },
   { id: 'email', label: 'Email', width: 50 },
+  { id: 'action', label: 'Action', width: 50 },
+  // { id: 'sqft_starting_size', label: 'Sqft', width: 100 },
   { id: '', label: '', width: 0 },
 ];
 

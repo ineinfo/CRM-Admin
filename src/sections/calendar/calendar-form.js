@@ -64,7 +64,7 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }) {
   const onSubmit = handleSubmit(async (data) => {
     const eventData = {
       id: currentEvent?.id ? currentEvent?.id : uuidv4(),
-      color: data?.color == '' ? '#fda92d' : data?.color,
+      color: data?.color === '' ? '#fda92d' : data?.color,
       title: data?.title,
       allDay: data?.allDay,
       description: data?.description,

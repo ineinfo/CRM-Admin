@@ -39,9 +39,9 @@ import {
   UsegetParkingType,
   UsegetPropertiesType,
   UsegetPropertySatatus,
-  useCityData,
+  UseCityData,
   useCountryData,
-  useStateData,
+  UseStateData,
 } from 'src/api/propertytype';
 import { CreateProperty, UpdateProperty } from 'src/api/properties';
 
@@ -114,6 +114,7 @@ export default function PropertyForm({ currentProperty }) {
     // pincode: Yup.number().required('Pincode is required'),
     // council_tax_band: Yup.number().required('Council Tax Band is required'),
     // note: Yup.string(),
+    // description: Yup.string(),
   });
 
   const { user } = useAuthContext();
@@ -149,6 +150,7 @@ export default function PropertyForm({ currentProperty }) {
       account_type: currentProperty?.account_type || 'Freehold',
       leasehold_length: currentProperty?.leasehold_length || '0',
       note: currentProperty?.note || '',
+      description: currentProperty?.description || '',
       range_min: currentProperty?.range_min || '0',
       range_max: currentProperty?.range_max || '20000',
       council_tax_band: currentProperty?.council_tax_band || '0',
@@ -244,7 +246,7 @@ export default function PropertyForm({ currentProperty }) {
   useEffect(() => {
     const FetchStates = async () => {
       try {
-        const data = await useStateData(id);
+        const data = await UseStateData(id);
         setStates(data.data);
       } catch (error) {
         console.error('Error fetching states:', error);
@@ -258,7 +260,7 @@ export default function PropertyForm({ currentProperty }) {
   useEffect(() => {
     const FetchCities = async () => {
       try {
-        const data = await useCityData(sid);
+        const data = await UseCityData(sid);
         setCities(data.data);
       } catch (error) {
         console.error('Error fetching states:', error);
@@ -702,17 +704,52 @@ export default function PropertyForm({ currentProperty }) {
                         max={20000}
                       />
                       <Box display="flex" justifyContent="space-between" sx={{ mt: 1 }}>
-                        <Typography variant="body2">
-                          Min : {field.value ? `${field.value[0]} sqft` : '0 sqft'}
-                        </Typography>
-                        <Typography variant="body2">
-                          Max : {field.value ? `${field.value[1]} sqft` : '20000 sqft'}
-                        </Typography>
+                        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "2px" }}>
+                          Min :
+                          <TextField
+                            type="number"
+                            value={field.value ? field.value[0] : 0}
+                            onChange={(e) => {
+                              const min = Number(e.target.value);
+                              const max = field.value[1];
+                              const newValue = [Math.min(min, max), max]; // Ensure min <= max
+                              field.onChange(newValue);
+                              setValue('range_min', newValue[0]);
+                              setValue('range_max', newValue[1]);
+                            }}
+                            inputProps={{ min: 0, max: 20000, step: 100 }}
+                            variant="outlined"
+                            size="small"
+                            sx={{ width: '50%' }}
+                          /> sqft
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "2px" }}>
+                          Max :
+                          <TextField
+                            type="number"
+                            value={field.value ? field.value[1] : 20000}
+                            onChange={(e) => {
+                              const max = Number(e.target.value);
+                              const min = field.value[0];
+                              const newValue = [min, Math.max(min, max)]; // Ensure max >= min
+                              field.onChange(newValue);
+                              setValue('range_min', newValue[0]);
+                              setValue('range_max', newValue[1]);
+                            }}
+                            inputProps={{ min: 0, max: 20000, step: 100 }}
+                            variant="outlined"
+                            size="small"
+                            sx={{ width: '50%' }}
+                          /> sqft
+                        </div>
                       </Box>
                     </>
                   )}
                 />
               </FormControl>
+
+
+
               <FormControl>
                 {' '}
                 <Controller
@@ -785,6 +822,8 @@ export default function PropertyForm({ currentProperty }) {
                   />
                 </FormControl>
               )}
+
+
               <FormControl fullWidth>
                 <InputLabel>Furnished</InputLabel>
                 <Controller
@@ -803,6 +842,9 @@ export default function PropertyForm({ currentProperty }) {
                   )}
                 />
               </FormControl>
+
+
+
               <FormControl fullWidth>
                 <InputLabel>Leasehold/Freehold</InputLabel>
                 <Controller
@@ -811,8 +853,8 @@ export default function PropertyForm({ currentProperty }) {
                   render={({ field, fieldState }) => (
                     <>
                       <Select {...field} label="Leasehold/Freehold" error={!!fieldState.error}>
-                        <MenuItem value="Leasehold">Leasehold</MenuItem>
                         <MenuItem value="Freehold">Freehold</MenuItem>
+                        <MenuItem value="Leasehold">Leasehold</MenuItem>
                       </Select>
                       {fieldState.error && (
                         <FormHelperText>{fieldState.error.message}</FormHelperText>
@@ -975,6 +1017,12 @@ export default function PropertyForm({ currentProperty }) {
                   Note
                 </Typography>
                 <RHFTextField name="note" multiline rows={4} variant="outlined" fullWidth />
+              </Box>
+              <Box sx={{ gridColumn: 'span 2' }}>
+                <Typography variant="h6" sx={{ mb: 1 }}>
+                  Description
+                </Typography>
+                <RHFTextField name="description" multiline rows={4} variant="outlined" fullWidth />
               </Box>
             </Box>
 

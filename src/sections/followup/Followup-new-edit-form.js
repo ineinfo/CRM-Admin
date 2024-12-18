@@ -1,4 +1,5 @@
 "use client";
+
 import * as Yup from "yup";
 import PropTypes from "prop-types";
 import { useForm, Controller } from "react-hook-form";
@@ -75,7 +76,7 @@ export default function FollowupForm({ currentUser, id }) {
                 const res = await CreateFollowUp(formData, Lead);
                 console.log("res=====>", res);
 
-                enqueueSnackbar(res, { variant: res == "Follow-up Created successfully!" ? 'success' : 'error' });
+                enqueueSnackbar(res, { variant: res === "Follow-up Created successfully!" ? 'success' : 'error' });
             }
             router.push(`/dashboard/followup?id=${Lead}`);
             reset();

@@ -13,7 +13,7 @@ import {
   Checkbox,
   Button,
 } from '@mui/material';
-import { useCountryData, useStateData } from 'src/api/propertytype';
+import { useCountryData, UseStateData } from 'src/api/propertytype';
 import { SelectLead } from 'src/api/leads';
 import { enqueueSnackbar } from 'notistack';
 
@@ -27,7 +27,7 @@ const PropertyDetailsModal = ({ open, onClose, row, id, selected }) => {
   // Function to fetch state list for each row's location
   const FetchStateList = async (locationId) => {
     // Fetch the state data unconditionally using the hook
-    const { data: StateApi, error } = useStateData(locationId);
+    const { data: StateApi, error } = UseStateData(locationId);
 
     if (locationId && !stateLists[locationId]) {
       try {

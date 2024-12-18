@@ -86,7 +86,7 @@ export function UseSearchProperty(query) {
   return memoizedValue;
 }
 
-//create prospect
+// create prospect
 
 export const CreateProspect = async (formData, token) => {
   try {
@@ -106,7 +106,7 @@ export const CreateProspect = async (formData, token) => {
   }
 };
 
-//update prospect
+// update prospect
 export const UpdateProspect = async (id, formData, token) => {
   const response = await axios.put(endpoints.opportunity.details(id), formData, {
     headers: {

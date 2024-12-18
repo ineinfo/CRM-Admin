@@ -72,6 +72,9 @@ const defaultFilters = {
   range_max: 20000,
   parking: '',
   account_type: '',
+  location: '',
+  state: 0,
+  city: 0
 };
 
 // ----------------------------------------------------------------------
@@ -350,6 +353,8 @@ function applyFilter({ inputData, comparator, filters }) {
     parking,
     account_type,
     property_status,
+    location, state, city
+
   } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
@@ -374,6 +379,7 @@ function applyFilter({ inputData, comparator, filters }) {
       return nameParts.every(part => fullName.includes(part)) ||
         user.first_name?.toLowerCase().includes(name.toLowerCase()) ||
         user.last_name?.toLowerCase().includes(name.toLowerCase()) ||
+        user.note?.toLowerCase().includes(name.toLowerCase()) ||
         user.mobile?.toLowerCase().includes(name.toLowerCase()) ||
         user.email?.toLowerCase().includes(name.toLowerCase());
     });
@@ -432,6 +438,21 @@ function applyFilter({ inputData, comparator, filters }) {
   // if (property_status) {
   //   inputData = inputData.filter((user) => user.property_status === property_status);
   // }
+
+  // Filter by Country
+  if (location) {
+    inputData = inputData.filter((user) => user.country_id === location);
+  }
+
+  // Filter by State
+  if (state > 0) {
+    inputData = inputData.filter((user) => user.state_id === state);
+  }
+
+  // Filter by City
+  if (city > 0) {
+    inputData = inputData.filter((user) => user.city_id === city);
+  }
 
   return inputData;
 }

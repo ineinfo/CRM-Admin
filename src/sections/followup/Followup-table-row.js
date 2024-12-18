@@ -57,11 +57,11 @@ export default function FollowupTableRow({ row, selected, onEditRow, onSelectRow
                 ) : (
                     <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
                 )}</TableCell>
-                <TableCell sx={{ whiteSpace: 'nowrap' }}>{followup_status ? (
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>{
                     followup_status === 1 ? "In Progress" : "Completed"
-                ) : (
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
-                )}</TableCell>
+                        ||
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
+                }</TableCell>
                 <TableCell sx={{ maxWidth: 300, overflow: 'hidden' }}>
                     <div style={{ display: '-webkit-box', WebkitBoxOrient: 'vertical', overflow: 'hidden', WebkitLineClamp: isExpanded ? 'none' : 2 }}>
                         {displayedSummary}

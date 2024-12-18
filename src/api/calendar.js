@@ -14,9 +14,9 @@ const options = {
 };
 
 export function useGetEvents() {
-  const URL = endpoints.calendar.list;
+  const URL1 = endpoints.calendar.list;
 
-  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher);
+  const { data, isLoading, error, isValidating } = useSWR(URL1, fetcher);
 
   const memoizedValue = useMemo(
     () => ({

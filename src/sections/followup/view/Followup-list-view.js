@@ -43,10 +43,10 @@ import {
 
 import { useCountryData, UsegetPropertiesType } from 'src/api/propertytype';
 import UserTableRow from 'src/sections/clients/clients-table-row';
+import UserTableFiltersResult from 'src/sections/clients/clients-table-filters-result';
+import { DeleteFollowUp, DeleteMultipleFollowUp } from 'src/api/leads';
 import FollowupTableToolbar from '../Followup-table-toolbar';
 import FollowupTableRow from '../Followup-table-row';
-import { DeleteFollowUp, DeleteMultipleFollowUp } from 'src/api/leads';
-import UserTableFiltersResult from 'src/sections/clients/clients-table-filters-result';
 
 // ----------------------------------------------------------------------
 
@@ -174,10 +174,10 @@ export default function FollowupListView({ id }) {
     }, []);
 
     const handleDeleteRow = useCallback(
-        async (id) => {
+        async (iD) => {
             try {
                 await DeleteFollowUp(id); // Assuming deleteRole is an API function that deletes the role by ID
-                const deleteRow = tableData.filter((row) => row.id !== id);
+                const deleteRow = tableData.filter((row) => row.id !== iD);
 
                 enqueueSnackbar('Delete success!');
 
@@ -193,7 +193,8 @@ export default function FollowupListView({ id }) {
     const handleDeleteRows = useCallback(async () => {
         // Simulating an async operation, e.g., fetching data
         const fetchData = async () => {
-            // Replace this with your actual data fetching logic
+            console.log("data");
+
             return tableData;
         };
 
@@ -230,8 +231,8 @@ export default function FollowupListView({ id }) {
 
 
     const handleEditRow = useCallback(
-        (id) => {
-            router.push(`${paths.dashboard.followup.edit(id)}?id=${id}`);
+        (Id) => {
+            router.push(`${paths.dashboard.followup.edit(Id)}?id=${Id}`);
         },
         [router]
     );

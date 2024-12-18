@@ -3,15 +3,15 @@ import Box from '@mui/material/Box';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { useSettingsContext } from 'src/components/settings';
-import Main from './main';
-import Header from './header';
-import NavMini from './nav-mini';
-import NavVertical from './nav-vertical';
-import NavHorizontal from './nav-horizontal';
 import { useGetEvents } from 'src/api/calendar';
 import { useEffect, useState } from 'react';
 import { differenceInMinutes, isToday } from 'date-fns';
 import { Alert, Snackbar } from '@mui/material';
+import NavVertical from './nav-vertical';
+import NavHorizontal from './nav-horizontal';
+import Main from './main';
+import Header from './header';
+import NavMini from './nav-mini';
 
 // ----------------------------------------------------------------------
 
@@ -61,6 +61,8 @@ export default function DashboardLayout({ children }) {
   };
 
   const renderSnackbars = () => {
+    console.log("data");
+
     return reminders?.map((event, index) => (
       <Snackbar
         key={event.id}

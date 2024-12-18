@@ -1,4 +1,5 @@
 "use client";
+
 import { useSearchParams } from 'next/navigation';
 import React from 'react';
 import FollowupListView from 'src/sections/followup/view/Followup-list-view';

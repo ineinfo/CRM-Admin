@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import Stack from '@mui/material/Stack';
 import Select from '@mui/material/Select';
@@ -14,7 +14,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-import { UsegetPropertiesType, UsegetPropertySatatus } from 'src/api/propertytype'; // Assuming this fetches the property type data
+import { UseCityData, useCountryData, UsegetPropertiesType, UsegetPropertySatatus, UseStateData } from 'src/api/propertytype'; // Assuming this fetches the property type data
 import { UsegetAmenities } from 'src/api/amenities'; // Assuming this fetches the amenities data
 import { Slider } from '@mui/material';
 
@@ -22,6 +22,13 @@ import { Slider } from '@mui/material';
 
 export default function UserTableToolbar({ filters, onFilters }) {
   const popover = usePopover();
+  const getCountries = useCountryData();
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [countryId, setCountryId] = useState(null);
+  const [stateId, setStateId] = useState(null);
+
 
   // Fetch property types
   const { products: propertyTypes } = UsegetPropertiesType();
@@ -29,6 +36,37 @@ export default function UserTableToolbar({ filters, onFilters }) {
   // Fetch amenities
   const { products: amenities } = UsegetAmenities();
   const { propertyStatus: propertyStatuses } = UsegetPropertySatatus();
+
+
+  useEffect(() => {
+    if (getCountries.data) {
+      setCountries(getCountries.data.data);
+    }
+  }, [getCountries.data]);
+
+  useEffect(() => {
+    if (countryId) {
+
+      const filteredCountry = countries.filter((country) => country.name === countryId);
+      console.log("Countryyryr", filteredCountry[0].id);
+
+      const c_id = filteredCountry[0].id || 0
+      UseStateData(c_id).then((response) => setStates(response.data));
+    } else {
+      setStates([]);
+    }
+  }, [countryId]);
+
+  // Fetch cities when stateId changes
+  useEffect(() => {
+    if (stateId) {
+      UseCityData(stateId).then((response) => setCities(response.data));
+    } else {
+      setCities([]);
+    }
+  }, [stateId]);
+
+  console.log("Filter", filters);
 
   // Mapping property type options from property types data
   const propertyTypeOptions = propertyTypes.map((type) => ({
@@ -45,6 +83,22 @@ export default function UserTableToolbar({ filters, onFilters }) {
   const propertyStatusesOption = propertyStatuses.map((type) => ({
     id: type.id,
     name: type.title,
+  }));
+
+  const countryOptions = countries.map((type) => ({
+    id: type.id,
+    name: type.name,
+  }));
+
+  const stateOptions = states?.map((type) => ({
+    id: type.id,
+    name: type.name,
+  }));
+  console.log("States", states);
+
+  const cityOptions = cities?.map((type) => ({
+    id: type.id,
+    name: type.name,
   }));
 
   // Generate a list of bedroom numbers (1 to 10)
@@ -90,6 +144,26 @@ export default function UserTableToolbar({ filters, onFilters }) {
   const handleRangeChange = (event, newValue) => {
     onFilters('range_min', newValue[0]); // Save range_min value
     onFilters('range_max', newValue[1]); // Save range_max value
+  };
+
+  const handleCountryChange = (event) => {
+    const selectedCountryId = event.target.value;
+    setCountryId(selectedCountryId);
+    setStates([])
+    onFilters('location', selectedCountryId);
+    setStateId(null); // Reset state and city when country changes
+    setCities([]);
+  };
+
+  const handleStateChange = (event) => {
+    const selectedStateId = event.target.value;
+    setStateId(selectedStateId);
+    onFilters('state', selectedStateId);
+  };
+
+  const handleCityChange = (event) => {
+    const selectedCityId = event.target.value;
+    onFilters('city', selectedCityId);
   };
 
   return (
@@ -229,10 +303,63 @@ export default function UserTableToolbar({ filters, onFilters }) {
             }}
           />
 
-          <IconButton onClick={popover.onOpen}>
-            <Iconify icon="eva:more-vertical-fill" />
-          </IconButton>
+
         </Stack>
+
+        <FormControl sx={{ flexShrink: 0, width: { xs: 1, md: 200 } }}>
+          <InputLabel>Country</InputLabel>
+          <Select
+            value={filters.location || ''}
+            onChange={handleCountryChange}
+            input={<OutlinedInput label="Country" />}
+          >
+            {countryOptions.map((option) => (
+              <MenuItem key={option.id} value={option.name}>
+                {option.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {/* State Dropdown */}
+        <FormControl sx={{ flexShrink: 0, width: { xs: 1, md: 200 } }} disabled={!countryId}>
+          <InputLabel>State</InputLabel>
+          <Select
+            value={filters.state || ''}
+            onChange={handleStateChange}
+            input={<OutlinedInput label="State" />}
+          >
+            {stateOptions?.length > 0 ? stateOptions?.map((option) => (
+              <MenuItem key={option.id} value={option.id}>
+                {option.name}
+              </MenuItem>
+            )) : <MenuItem disabled>
+              No States Available
+            </MenuItem>}
+          </Select>
+        </FormControl>
+
+        {/* City Dropdown */}
+        <FormControl sx={{ flexShrink: 0, width: { xs: 1, md: 200 } }} disabled={!stateId}>
+          <InputLabel>City</InputLabel>
+          <Select
+            value={filters.city || ''}
+            onChange={handleCityChange}
+            input={<OutlinedInput label="City" />}
+          >
+            {cityOptions?.length > 0 ? cityOptions.map((option) => (
+              <MenuItem key={option.id} value={option.id}>
+                {option.name}
+              </MenuItem>
+            )) : <MenuItem disabled>
+              No Cities Available
+            </MenuItem>}
+          </Select>
+        </FormControl>
+
+        <IconButton onClick={popover.onOpen}>
+          <Iconify icon="eva:more-vertical-fill" />
+        </IconButton>
       </Stack>
 
       <CustomPopover

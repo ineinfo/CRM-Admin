@@ -1,37 +1,44 @@
 import PropTypes from 'prop-types';
-
-import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
-import TableRow from '@mui/material/TableRow';
-import Checkbox from '@mui/material/Checkbox';
-import TableCell from '@mui/material/TableCell';
-import IconButton from '@mui/material/IconButton';
-import ListItemText from '@mui/material/ListItemText';
-
+import React, { useState } from 'react';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Link,
+  ListItemText,
+  MenuItem,
+  TableCell,
+  TableRow,
+  Typography,
+} from '@mui/material';
 import { useBoolean } from 'src/hooks/use-boolean';
 import Iconify from 'src/components/iconify';
-import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-import { formatDate } from '@fullcalendar/core';
-import { useCountryData } from 'src/api/propertytype';
-import { useEffect, useState } from 'react';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 import dayjs from 'dayjs';
-import { Link } from '@mui/material';
+import DownloadDetailsModal from './DownloadDetailsModal';
+
 
 // ----------------------------------------------------------------------
+
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
   const {
     developer_name,
-    location, // This is your location value
+    location,
     starting_price,
     parking,
     phone_number,
     handover_date,
     furnished,
-    // sqft_starting_size,
     email,
   } = row;
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const confirm = useBoolean();
   const popover = usePopover();
@@ -46,20 +53,22 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
     return new Intl.NumberFormat('en-US').format(price); // Below million, show with commas
   }
 
+  const handleModalOpen = () => setIsModalOpen(true);
+  const handleModalClose = () => setIsModalOpen(false);
+
   return (
     <>
-      <TableRow
-        hover
-        selected={selected}
-
-      >
+      <TableRow hover selected={selected}>
         <TableCell padding="checkbox">
           <Checkbox checked={selected} onClick={onSelectRow} />
         </TableCell>
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <Link color="inherit" sx={{ cursor: "pointer" }} onClick={() => {
-            onEditRow();
-          }}><ListItemText
+          <Link
+            color="inherit"
+            sx={{ cursor: 'pointer' }}
+            onClick={onEditRow}
+          >
+            <ListItemText
               primary={developer_name ? ` ${developer_name}` : ''}
               secondary={location}
               primaryTypographyProps={{ typography: 'body2' }}
@@ -67,7 +76,8 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
                 component: 'span',
                 color: 'text.disabled',
               }}
-            /></Link>
+            />
+          </Link>
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
           {starting_price ? (
@@ -77,14 +87,12 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           )}
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          {<div style={{ display: 'flex', justifyContent: 'center' }}> {parking.charAt(0).toUpperCase() + parking.slice(1)}</div>}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            {parking?.charAt(0).toUpperCase() + parking?.slice(1)}
+          </div>
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          {phone_number ? (
-            phone_number
-          ) : (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>
-          )}
+          {phone_number || <div style={{ display: 'flex', justifyContent: 'center' }}>-</div>}
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
           {handover_date ? (
@@ -94,11 +102,16 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           )}
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          <div style={{ display: 'flex', justifyContent: 'center' }}>{furnished.charAt(0).toUpperCase() + furnished.slice(1)}</div>
-
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            {furnished?.charAt(0).toUpperCase() + furnished?.slice(1)}
+          </div>
         </TableCell>
-        {/* <TableCell sx={{ whiteSpace: 'nowrap' }}>{sqft_starting_size}</TableCell> */}
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{email}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          <Button variant="contained" color="secondary" onClick={handleModalOpen}>
+            <Iconify icon="eva:download-fill" />
+          </Button>
+        </TableCell>
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
           <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />
@@ -143,6 +156,8 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           </Button>
         }
       />
+
+      <DownloadDetailsModal open={isModalOpen} onClose={handleModalClose} row={row} />
     </>
   );
 }

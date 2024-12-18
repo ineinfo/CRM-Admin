@@ -34,9 +34,10 @@ import { useRouter } from 'src/routes/hooks';
 import { useAuthContext } from 'src/auth/hooks';
 import {
   UsegetPropertySatatus,
-  useCityData,
+  UseCityData,
   useCountryData,
-  useStateData,
+  UseStateData,
+  UsegetPropertiesType,
 } from 'src/api/propertytype';
 import { CreateProspect, UpdateProspect } from 'src/api/properties';
 
@@ -47,6 +48,7 @@ export default function PropertyForm({ currentProperty }) {
   const router = useRouter();
   const { propertyStatus: propertyStatuses } = UsegetPropertySatatus();
   console.log('propertyStatuses', propertyStatuses);
+  const { products: propertyTypes, productsLoading: propertyTypesLoading } = UsegetPropertiesType();
 
   const { enqueueSnackbar } = useSnackbar();
   const [id, setId] = useState(0);
@@ -70,7 +72,11 @@ export default function PropertyForm({ currentProperty }) {
     // countryId: Yup.string().required('countryId is required'),
     // stateId: Yup.string().required('State is required'),
     // cityId: Yup.string().required('City is required'),
-    developmentType: Yup.string().required('Development Type is required'),
+    propertyTypes: Yup.array()
+      .of(Yup.string().required('Each development type is required'))
+      .min(1, 'At least one Development Type is required')
+      .required('Development Type is required'),
+
     email: Yup.string().email('Invalid email format').required('Email is required'),
     mobileNumber: Yup.string().required('Mobile number is required'),
     followupDate: Yup.string().required('Follow Up Date is required'),
@@ -85,6 +91,7 @@ export default function PropertyForm({ currentProperty }) {
 
 
   const defaultValues = useMemo(() => {
+    console.log("Data");
 
     return {
       firstName: currentProperty?.first_name || '',
@@ -93,7 +100,7 @@ export default function PropertyForm({ currentProperty }) {
       countryId: currentProperty?.country_id || 0,
       stateId: currentProperty?.state_id || 0,
       cityId: currentProperty?.city_id || 0,
-      developmentType: currentProperty?.development_type || '',
+      propertyTypes: currentProperty?.property_type_id || [],
       followupDate: currentProperty?.followup ? dayjs(currentProperty.followup).format('DD-MM-YYYY') : null,
       email: currentProperty?.email || '',
       mobileNumber: currentProperty?.mobile || '',
@@ -170,7 +177,7 @@ export default function PropertyForm({ currentProperty }) {
   useEffect(() => {
     const FetchStates = async () => {
       try {
-        const data = await useStateData(id);
+        const data = await UseStateData(id);
         setStates(data.data);
       } catch (error) {
         console.error('Error fetching states:', error);
@@ -184,7 +191,7 @@ export default function PropertyForm({ currentProperty }) {
   useEffect(() => {
     const FetchCities = async () => {
       try {
-        const data = await useCityData(sid);
+        const data = await UseCityData(sid);
         setCities(data.data);
       } catch (error) {
         console.error('Error fetching states:', error);
@@ -210,7 +217,7 @@ export default function PropertyForm({ currentProperty }) {
     const modifiedData = {
       ...data,
       mobileNumber: Number(data.mobileNumber),
-      developmentType: Number(data.developmentType),
+      propertyTypes: data.propertyTypes.map((item) => Number(item)),
     };
     console.log('data+++++++++++=>', modifiedData);
 
@@ -385,10 +392,10 @@ export default function PropertyForm({ currentProperty }) {
                 />
               </FormControl>
 
-              <FormControl fullWidth > {/* Set error based on validation */}
+              {/* <FormControl fullWidth >
                 <InputLabel id="property-type-label">Development Type</InputLabel>
                 <Controller
-                  name="developmentType"
+                  name="propertyTypes"
                   control={control}
                   render={({ field, fieldState: { error } }) => (
                     <>
@@ -398,12 +405,11 @@ export default function PropertyForm({ currentProperty }) {
                         labelId="property-type-label"
                         id="property-type-select"
                         label="Development Type"
-                        value={field.value || ''} // Ensure the value is a single string
+                        value={field.value || ''} 
                         onChange={(event) => {
                           field.onChange(event.target.value);
                         }}
                       >
-                        {/* Custom options */}
                         <MenuItem value="1">Houses</MenuItem>
                         <MenuItem value="2">Apartments</MenuItem>
                         <MenuItem value="3">Penthouses</MenuItem>
@@ -416,7 +422,48 @@ export default function PropertyForm({ currentProperty }) {
                     </>
                   )}
                 />
+              </FormControl> */}
+
+              <FormControl fullWidth>
+                <InputLabel id="property-type-label">Property Type</InputLabel>
+                <Controller
+                  name="propertyTypes"
+                  control={control}
+                  render={({ field, fieldState: { error } }) => (
+                    <>
+                      <Select
+                        {...field}
+                        multiple // Enable multiple selections
+                        error={!!error}
+                        labelId="property-type-label"
+                        id="property-type-select"
+                        label="Development Type"
+                        value={field.value || []} // Ensure the value is an array
+                        onChange={(event) => {
+                          // Update field value as an array
+                          const selectedValues = event.target.value;
+                          field.onChange(selectedValues);
+                        }}
+                        renderValue={(selected) => selected.map((id1) => {
+                          const selectedProperty = propertyTypes.find((property) => property.id === id1);
+                          return selectedProperty ? selectedProperty.property_type : '';
+                        }).join(', ')}
+                      >
+                        {propertyTypes.map((property) => (
+                          <MenuItem key={property.id} value={property.id}>
+                            <Checkbox checked={field.value.includes(property.id)} />
+                            <ListItemText primary={property.property_type} />
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {error && (
+                        <FormHelperText error>{error.message}</FormHelperText>
+                      )}
+                    </>
+                  )}
+                />
               </FormControl>
+
 
 
               <FormControl fullWidth>

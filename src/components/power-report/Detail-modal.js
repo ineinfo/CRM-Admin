@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Box, Typography, Button, Grid, CircularProgress, TextField } from '@mui/material';
 import dayjs from 'dayjs';
-import { useCityData, useCountryData, useStateData } from 'src/api/propertytype';
+import { UseCityData, useCountryData, UseStateData } from 'src/api/propertytype';
 import { UpdateLeadNote } from 'src/api/leads';
 import { useAuthContext } from 'src/auth/hooks';
 import { enqueueSnackbar } from 'notistack';
@@ -59,10 +59,10 @@ const DetailsModal = ({ open, handleClose, propertyData, unarchive }) => {
         const fetchState = async (id) => {
             setLoading((prev) => ({ ...prev, state: true }));
             try {
-                const state = await useStateData(id);
+                const state = await UseStateData(id);
                 console.log("City1", state.data);
                 const states = state.data;
-                const matchedState = states.find(state => state.id === state_id);
+                const matchedState = states.find(state1 => state1.id === state_id);
                 setStateName(matchedState ? matchedState.name : 'State not found');
             } catch (err) {
                 setError((prev) => ({ ...prev, state: 'Failed to load state' }));
@@ -74,10 +74,10 @@ const DetailsModal = ({ open, handleClose, propertyData, unarchive }) => {
         const fetchCity = async (id) => {
             setLoading((prev) => ({ ...prev, city: true }));
             try {
-                const city = await useCityData(id);
+                const city = await UseCityData(id);
                 console.log("City2", city);
                 const cities = city.data;
-                const matchedCity = cities.find(city => city.id === city_id);
+                const matchedCity = cities.find(city1 => city1.id === city_id);
                 setCityName(matchedCity ? matchedCity.name : 'City not found');
             } catch (err) {
                 setError((prev) => ({ ...prev, city: 'Failed to load city' }));
@@ -104,10 +104,21 @@ const DetailsModal = ({ open, handleClose, propertyData, unarchive }) => {
             unarchive(data)
             enqueueSnackbar('Note updated successfully!', { variant: 'success' });
             handleClose()
-        } catch (error) {
-            console.error('Error updating the note:', error);
+        } catch (er) {
+            console.error('Error updating the note:', er);
         }
     };
+
+    const renderContent = (loading1, error2, value) => {
+        if (loading1) {
+            return <CircularProgress size={16} />;
+        }
+        if (error2) {
+            return error2;
+        }
+        return value;
+    };
+
 
     return (
         <Modal
@@ -218,11 +229,11 @@ const DetailsModal = ({ open, handleClose, propertyData, unarchive }) => {
                         </Typography>
                     </Grid>
 
-                    {/* Country */}
+
                     <Grid item xs={12} sm={6}>
                         <Typography variant="body1" sx={{ fontWeight: 500 }}>Country</Typography>
                         <Typography variant="body2" color="textSecondary">
-                            {loading.country ? <CircularProgress size={16} /> : error.country ? error.country : countryName}
+                            {renderContent(loading.country, error.country, countryName)}
                         </Typography>
                     </Grid>
 
@@ -230,7 +241,7 @@ const DetailsModal = ({ open, handleClose, propertyData, unarchive }) => {
                     <Grid item xs={12} sm={6}>
                         <Typography variant="body1" sx={{ fontWeight: 500 }}>State</Typography>
                         <Typography variant="body2" color="textSecondary">
-                            {loading.state ? <CircularProgress size={16} /> : error.state ? error.state : stateName}
+                            {renderContent(loading.state, error.state, stateName)}
                         </Typography>
                     </Grid>
 
@@ -238,7 +249,7 @@ const DetailsModal = ({ open, handleClose, propertyData, unarchive }) => {
                     <Grid item xs={12} sm={6}>
                         <Typography variant="body1" sx={{ fontWeight: 500 }}>City</Typography>
                         <Typography variant="body2" color="textSecondary">
-                            {loading.city ? <CircularProgress size={16} /> : error.city ? error.city : cityName}
+                            {renderContent(loading.city, error.city, cityName)}
                         </Typography>
                     </Grid>
 

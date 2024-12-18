@@ -197,7 +197,7 @@ export const SelectedLead = async (id) => {
 };
 
 
-//Create Follow Up by lead_id
+// Create Follow Up by lead_id
 export const CreateFollowUp = async (data, id) => {
   try {
     // Add lead_id to the data object
@@ -283,7 +283,7 @@ export const DeleteMultipleFollowUp = async (ids) => {
 
 
 
-//Sales Progression
+// Sales Progression
 export const CreateSales = async (formData, token) => {
   try {
     console.log(formData, token);
@@ -313,10 +313,12 @@ export const GetSales = async (id, token) => {
   } catch (error) {
     console.error(error); // Handle the error
   }
+
+  return true
 };
 
 
-//Update Sales status
+// Update Sales status
 export const UpdateSalesStatus = async (data, token) => {
   try {
     // Determine if data is FormData (multipart)
@@ -332,11 +334,13 @@ export const UpdateSalesStatus = async (data, token) => {
     return response.data;
   } catch (error) {
     console.error('Error updating property:', error);
-    return null;
+
   }
+  return true
+
 };
 
-//Get sales status
+// Get sales status
 export const GetSalesStatus = async (id, token) => {
   try {
     const response = await axios.get(endpoints.sales.status(id), {
@@ -348,4 +352,5 @@ export const GetSalesStatus = async (id, token) => {
   } catch (error) {
     console.error(error); // Handle the error
   }
+  return true
 };

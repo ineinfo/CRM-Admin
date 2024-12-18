@@ -199,7 +199,7 @@ export function useCountryData() {
 }
 
 // State Data
-export const useStateData = async (id = '101') => {
+export const UseStateData = async (id = '101') => {
   try {
     const response = await axios.get(`${STATE_ROUTE}/${id}`);
     return response.data || [];
@@ -209,7 +209,7 @@ export const useStateData = async (id = '101') => {
 };
 
 // City Data
-export const useCityData = async (id = '4025') => {
+export const UseCityData = async (id = '4025') => {
   try {
     const response = await axios.get(`${CITY_ROUTE}/${id}`);
     return response.data || [];
