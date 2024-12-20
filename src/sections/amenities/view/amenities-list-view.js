@@ -40,6 +40,7 @@ import {
   RenderCellCreatedAt,
   RenderCelldescription,
 } from '../amenities-table-row';
+import { useAuthContext } from 'src/auth/hooks';
 
 
 // ----------------------------------------------------------------------
@@ -73,6 +74,9 @@ export default function ProductListView() {
   const [selectedRowIds, setSelectedRowIds] = useState([]);
   const [columnVisibilityModel, setColumnVisibilityModel] = useState(HIDE_COLUMNS);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const { user } = useAuthContext()
+  // console.log("Nehal", user?.editable);
+  const show = user?.editable
   useEffect(() => {
     if (products.length) {
       setTableData(products);
@@ -173,16 +177,16 @@ export default function ProductListView() {
       sortable: false,
       filterable: false,
       disableColumnMenu: true,
-      getActions: (params) => [
+      getActions: (params) => show ? [
         <GridActionsCellItem
-        key={`edit-${params.row.id}`} // Add key prop here
+          key={`edit-${params.row.id}`} // Add key prop here
           showInMenu
           icon={<Iconify icon="solar:pen-bold" />}
           label="Edit"
           onClick={() => handleEditRow(params.row.id)}
         />,
         <GridActionsCellItem
-        key={`delete-${params.row.id}`} // Add key prop here
+          key={`delete-${params.row.id}`} // Add key prop here
           showInMenu
           icon={<Iconify icon="solar:trash-bin-trash-bold" />}
           label="Delete"
@@ -191,7 +195,13 @@ export default function ProductListView() {
           }}
           sx={{ color: 'error.main' }}
         />,
-      ],
+      ] : [<GridActionsCellItem
+        key={`edit-${params.row.id}`} // Add key prop here
+        showInMenu
+        icon={<Iconify icon="solar:pen-bold" />}
+        label="Edit"
+        onClick={() => handleEditRow(params.row.id)}
+      />,],
     },
   ];
 
@@ -297,14 +307,14 @@ export default function ProductListView() {
                       )}
 
                       <GridToolbarColumnsButton key="columns-button" />
-                      <GridToolbarFilterButton key="filter-button"  />
+                      <GridToolbarFilterButton key="filter-button" />
                       <GridToolbarExport key="export-button" />
                     </Stack>
                   </GridToolbarContainer>
 
                   {canReset && (
                     <ProductTableFiltersResult
-                     key="filters-result"
+                      key="filters-result"
                       filters={filters}
                       onFilters={handleFilters}
                       onResetFilters={handleResetFilters}

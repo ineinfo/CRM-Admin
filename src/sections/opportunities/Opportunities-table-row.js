@@ -17,6 +17,7 @@ import { useCountryData, UsegetPropertiesType } from 'src/api/propertytype';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { Link } from '@mui/material';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -38,7 +39,9 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
   const { products: propertyTypes, productsLoading: propertyTypesLoading } = UsegetPropertiesType();
   // State to manage "see more / see less" for each row
   const [expandedRows, setExpandedRows] = useState({});
-
+  const { user } = useAuthContext()
+  // console.log("Nehal", user?.editable);
+  const show = user?.editable
   // Toggle function for "see more / see less"
   const toggleExpand = (rowId) => {
     setExpandedRows((prevExpandedRows) => ({
@@ -133,16 +136,18 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           <Iconify icon="solar:pen-bold" />
           Edit
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            confirm.onTrue();
-            popover.onClose();
-          }}
-          sx={{ color: 'error.main' }}
-        >
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
-        </MenuItem>
+        {show ? (
+          <MenuItem
+            onClick={() => {
+              confirm.onTrue();
+              popover.onClose();
+            }}
+            sx={{ color: 'error.main' }}
+          >
+            <Iconify icon="solar:trash-bin-trash-bold" />
+            Delete
+          </MenuItem>
+        ) : ''}
       </CustomPopover>
 
       <ConfirmDialog

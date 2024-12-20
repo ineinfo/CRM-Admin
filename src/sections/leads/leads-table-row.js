@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import { alpha, Link } from '@mui/material';
 import OfferModal from './OfferModal';
 import PropertyDetailsModal from './PropertyDetailsModal'; // Adjust the path as needed
+import { useAuthContext } from 'src/auth/hooks';
 
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, onArchiveRow }) {
@@ -29,7 +30,9 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
   const confirmArchive = useBoolean();
   const popover = usePopover();
   const invoiceRef = useRef();
-
+  const { user } = useAuthContext()
+  // console.log("Nehal", user?.editable);
+  const show = user?.editable
 
   const triggerDownload = () => {
     if (invoiceRef.current) {
@@ -182,16 +185,18 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           Archive
         </MenuItem>
 
-        <MenuItem
-          onClick={() => {
-            confirm.onTrue();
-            popover.onClose();
-          }}
-          sx={{ color: 'error.main' }}
-        >
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
-        </MenuItem>
+        {show ? (
+          <MenuItem
+            onClick={() => {
+              confirm.onTrue();
+              popover.onClose();
+            }}
+            sx={{ color: 'error.main' }}
+          >
+            <Iconify icon="solar:trash-bin-trash-bold" />
+            Delete
+          </MenuItem>
+        ) : ''}
 
 
       </CustomPopover>

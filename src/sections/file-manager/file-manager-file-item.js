@@ -28,6 +28,7 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerFileDetails from './file-manager-file-details';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -49,6 +50,9 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
   const favorite = useBoolean(file.isFavorited);
 
   const popover = usePopover();
+  const { user } = useAuthContext()
+  // console.log("Nehal", user?.editable);
+  const show = user?.editable
 
   const handleChangeInvite = useCallback((event) => {
     setInviteEmail(event.target.value);
@@ -209,16 +213,18 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        <MenuItem
-          onClick={() => {
-            confirm.onTrue();
-            popover.onClose();
-          }}
-          sx={{ color: 'error.main' }}
-        >
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
-        </MenuItem>
+        {show ? (
+          <MenuItem
+            onClick={() => {
+              confirm.onTrue();
+              popover.onClose();
+            }}
+            sx={{ color: 'error.main' }}
+          >
+            <Iconify icon="solar:trash-bin-trash-bold" />
+            Delete
+          </MenuItem>
+        ) : ''}
       </CustomPopover>
 
       <FileManagerFileDetails

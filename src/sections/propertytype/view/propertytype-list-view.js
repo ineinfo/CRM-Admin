@@ -40,6 +40,7 @@ import {
   RenderCellCreatedAt,
   RenderCelldescription,
 } from '../propertytype-table-row';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -72,7 +73,9 @@ export default function ProductListView() {
   const [filters, setFilters] = useState(defaultFilters);
   const [selectedRowIds, setSelectedRowIds] = useState([]);
   const [columnVisibilityModel, setColumnVisibilityModel] = useState(HIDE_COLUMNS);
-
+  const { user } = useAuthContext();
+  // console.log("Nehal", user?.editable);
+  const show = user?.editable;
   useEffect(() => {
     if (products.length) {
       setTableData(products);
@@ -97,12 +100,9 @@ export default function ProductListView() {
     setFilters(defaultFilters);
   }, []);
 
-  const handleDeleteRow = useCallback(
-    (id) => {
-      setConfirmDeleteId(id); // Set the ID for confirmation
-    },
-    []
-  );
+  const handleDeleteRow = useCallback((id) => {
+    setConfirmDeleteId(id); // Set the ID for confirmation
+  }, []);
 
   const handleDeleteRowById = useCallback(
     async (id) => {
@@ -173,25 +173,36 @@ export default function ProductListView() {
       sortable: false,
       filterable: false,
       disableColumnMenu: true,
-      getActions: (params) => [
-        <GridActionsCellItem
-        key={`edit-${params.row.id}`}
-          showInMenu
-          icon={<Iconify icon="solar:pen-bold" />}
-          label="Edit"
-          onClick={() => handleEditRow(params.row.id)}
-        />,
-        <GridActionsCellItem
-        key={`delete-${params.row.id}`}
-          showInMenu
-          icon={<Iconify icon="solar:trash-bin-trash-bold" />}
-          label="Delete"
-          onClick={() => {
-            handleDeleteRow(params.row.id);
-          }}
-          sx={{ color: 'error.main' }}
-        />,
-      ],
+      getActions: (params) =>
+        show
+          ? [
+            <GridActionsCellItem
+              key={`edit-${params.row.id}`}
+              showInMenu
+              icon={<Iconify icon="solar:pen-bold" />}
+              label="Edit"
+              onClick={() => handleEditRow(params.row.id)}
+            />,
+            <GridActionsCellItem
+              key={`delete-${params.row.id}`}
+              showInMenu
+              icon={<Iconify icon="solar:trash-bin-trash-bold" />}
+              label="Delete"
+              onClick={() => {
+                handleDeleteRow(params.row.id);
+              }}
+              sx={{ color: 'error.main' }}
+            />,
+          ]
+          : [
+            <GridActionsCellItem
+              key={`edit-${params.row.id}`}
+              showInMenu
+              icon={<Iconify icon="solar:pen-bold" />}
+              label="Edit"
+              onClick={() => handleEditRow(params.row.id)}
+            />,
+          ],
     },
   ];
 

@@ -40,6 +40,7 @@ import {
   RenderCellCreatedAt,
   RenderCelldescription,
 } from '../roles-table-row';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -72,7 +73,9 @@ export default function ProductListView() {
   const [selectedRowIds, setSelectedRowIds] = useState([]);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [columnVisibilityModel, setColumnVisibilityModel] = useState(HIDE_COLUMNS);
-
+  const { user } = useAuthContext()
+  // console.log("Nehal", user?.editable);
+  const show = user?.editable
   useEffect(() => {
     if (products.length) {
       setTableData(products);
@@ -174,7 +177,7 @@ export default function ProductListView() {
       sortable: false,
       filterable: false,
       disableColumnMenu: true,
-      getActions: (params) => [
+      getActions: (params) => show ? [
         <GridActionsCellItem
           key={`edit-${params.row.id}`}
           showInMenu
@@ -192,7 +195,13 @@ export default function ProductListView() {
           }}
           sx={{ color: 'error.main' }}
         />
-      ],
+      ] : [<GridActionsCellItem
+        key={`edit-${params.row.id}`}
+        showInMenu
+        icon={<Iconify icon="solar:pen-bold" />}
+        label="Edit"
+        onClick={() => handleEditRow(params.row.id)}
+      />]
     },
   ];
 

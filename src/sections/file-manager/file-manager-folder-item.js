@@ -26,6 +26,7 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import FileManagerShareDialog from './file-manager-share-dialog';
 import FileManagerFileDetails from './file-manager-file-details';
 import FileManagerNewFolderDialog from './file-manager-new-folder-dialog';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -56,7 +57,9 @@ export default function FileManagerFolderItem({
   const confirm = useBoolean();
 
   const details = useBoolean();
-
+  const { user } = useAuthContext()
+  // console.log("Nehal", user?.editable);
+  const show = user?.editable
   const favorite = useBoolean(folder.isFavorited);
 
   const handleChangeInvite = useCallback((event) => {
@@ -235,16 +238,19 @@ export default function FileManagerFolderItem({
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        <MenuItem
-          onClick={() => {
-            confirm.onTrue();
-            popover.onClose();
-          }}
-          sx={{ color: 'error.main' }}
-        >
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
-        </MenuItem>
+
+        {show ? (
+          <MenuItem
+            onClick={() => {
+              confirm.onTrue();
+              popover.onClose();
+            }}
+            sx={{ color: 'error.main' }}
+          >
+            <Iconify icon="solar:trash-bin-trash-bold" />
+            Delete
+          </MenuItem>
+        ) : ''}
       </CustomPopover>
 
       <FileManagerFileDetails

@@ -12,7 +12,7 @@ import NavList from './nav-list';
 function NavSectionVertical({ data, slotProps, ...other }) {
   return (
     <Stack component="nav" id="nav-section-vertical" {...other}>
-      {data.map((group, index) => (
+      {data?.map((group, index) => (
         <Group
           key={group.subheader || index}
           subheader={group.subheader}

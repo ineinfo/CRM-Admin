@@ -166,8 +166,8 @@ export default function DownloadDetailsModal({ open, onClose, row }) {
         ))
         handleOpen()
     };
-    console.log("Dataaaa", formData);
-    console.log("Dataaaa2", cities);
+    // console.log("Dataaaa", formData);
+    // console.log("Dataaaa2", cities);
 
     return (
         <>

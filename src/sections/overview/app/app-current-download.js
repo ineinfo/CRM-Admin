@@ -1,17 +1,13 @@
 import PropTypes from 'prop-types';
-
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import { styled, useTheme } from '@mui/material/styles';
-
 import { fNumber } from 'src/utils/format-number';
-
 import Chart, { useChart } from 'src/components/chart';
 
 // ----------------------------------------------------------------------
 
 const CHART_HEIGHT = 400;
-
 const LEGEND_HEIGHT = 72;
 
 const StyledChart = styled(Chart)(({ theme }) => ({
@@ -28,12 +24,16 @@ const StyledChart = styled(Chart)(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-export default function AppCurrentDownload({ title, subheader, chart, ...other }) {
+export default function AppCurrentDownload({ title, subheader, chart, targetValue, ...other }) {
   const theme = useTheme();
 
   const { colors, series, options } = chart;
 
   const chartSeries = series.map((i) => i.value);
+
+  const totalValue = chartSeries.reduce((a, b) => a + b, 0);
+  const targetRemaining = targetValue - totalValue;
+  const isComplete = totalValue >= targetValue;
 
   const chartOptions = useChart({
     chart: {
@@ -84,6 +84,18 @@ export default function AppCurrentDownload({ title, subheader, chart, ...other }
     <Card {...other}>
       <CardHeader title={title} subheader={subheader} sx={{ mb: 5 }} />
 
+      {/* Display completion status */}
+      <div style={{ padding: '16px' }}>
+        <h4>Total: {fNumber(totalValue)}</h4>
+        {isComplete ? (
+          <p style={{ color: 'green' }}>Complete! You have exceeded the target by {fNumber(targetRemaining * -1)}.</p>
+        ) : (
+          <p style={{ color: 'red' }}>
+            Incomplete! You need {fNumber(targetRemaining)} more to reach the target of {fNumber(targetValue)}.
+          </p>
+        )}
+      </div>
+
       <StyledChart
         dir="ltr"
         type="donut"
@@ -100,4 +112,5 @@ AppCurrentDownload.propTypes = {
   chart: PropTypes.object,
   subheader: PropTypes.string,
   title: PropTypes.string,
+  targetValue: PropTypes.number.isRequired,  // New prop for the target value
 };

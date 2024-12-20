@@ -8,6 +8,7 @@ import { AUTH_ROUTE, CHANGE_PASSWORD, LOGIN_ROUTE } from 'src/utils/apiendpoints
 
 import { AuthContext } from './auth-context';
 import { setSession, isValidToken } from './utils';
+import { UsegetRoles } from 'src/api/roles';
 
 // ----------------------------------------------------------------------
 /**
@@ -56,6 +57,7 @@ const STORAGE_KEY = 'accessToken';
 
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { products: roles } = UsegetRoles();
 
   const initialize = useCallback(async () => {
     try {
@@ -63,58 +65,97 @@ export function AuthProvider({ children }) {
       if (accessToken && isValidToken(accessToken)) {
         setSession(accessToken);
         const response = await axios.get(AUTH_ROUTE);
-        const { user } = response.data;
-        dispatch({
-          type: 'INITIAL',
-          payload: {
-            user: {
-              ...user,
-              accessToken,
+        const user = response.data;
+
+        const role_id = user?.data?.role_id;
+        console.log("Role ID:", role_id);
+        console.log("Roles:", roles);
+
+        if (roles && roles.length > 0) {
+          const matchedRoleName = roles.find((role) => role.id === role_id)?.role_name;
+          console.log("Nikhil25", matchedRoleName);
+
+
+          const canEdit =
+            matchedRoleName === "Administrator " || matchedRoleName === "Admin"
+              ? user.isEditable ? user.isEditable : true
+              : false;
+          console.log("Nikhil25", canEdit);
+
+          dispatch({
+            type: 'INITIAL',
+            payload: {
+              user: {
+                ...user,
+                accessToken,
+                editable: canEdit,
+              },
             },
-          },
-        });
+          });
+        } else {
+          dispatch({
+            type: 'INITIAL',
+            payload: { user: null },
+          });
+        }
       } else {
         dispatch({
           type: 'INITIAL',
-          payload: {
-            user: null,
-          },
+          payload: { user: null },
         });
       }
     } catch (error) {
       console.error(error);
       dispatch({
         type: 'INITIAL',
-        payload: {
-          user: null,
-        },
+        payload: { user: null },
       });
     }
-  }, []);
+  }, [roles]);
+
 
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    if (roles && roles.length > 0) {
+      initialize();
+    }
+  }, [roles, initialize]);
 
   // LOGIN
   const login = useCallback(async (email, password) => {
-    const data = {
-      email,
-      password,
-    };
-    const response = await axios.post(LOGIN_ROUTE, data);
-    const { accessToken, user } = await response.data;
-    setSession(accessToken);
-    dispatch({
-      type: 'LOGIN',
-      payload: {
-        user: {
-          ...user,
-          accessToken,
+    try {
+      const data = { email, password };
+      const response = await axios.post(LOGIN_ROUTE, data);
+      const { accessToken, user } = response.data;
+      console.log("Nikhil11", user);
+
+      sessionStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ accessToken, user })
+      );
+      const role_id = user?.data?.role_id
+
+      const matchedRoleName = roles?.find((role) => role.id === role_id)?.role_name;
+
+      const canEdit =
+        matchedRoleName === "Administrator " || matchedRoleName === "Admin"
+          ? user.isEditable ? user.isEditable : true
+          : false;
+
+      setSession(accessToken);
+      dispatch({
+        type: 'LOGIN',
+        payload: {
+          user: {
+            ...user,
+            accessToken,
+            editable: canEdit
+          },
         },
-      },
-    });
-  }, []);
+      });
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
+  }, [roles]);
 
   // REGISTER
   const register = useCallback(async (email, password, firstName, lastName) => {
@@ -145,6 +186,7 @@ export function AuthProvider({ children }) {
   // LOGOUT
   const logout = useCallback(async () => {
     setSession(null);
+    sessionStorage.removeItem(STORAGE_KEY);
     dispatch({
       type: 'LOGOUT',
     });

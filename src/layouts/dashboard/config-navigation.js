@@ -5,6 +5,8 @@ import { paths } from 'src/routes/paths';
 import { useTranslate } from 'src/locales';
 
 import SvgColor from 'src/components/svg-color';
+import { useAuthContext } from 'src/auth/hooks';
+import { UsegetRoles } from 'src/api/roles';
 
 // ----------------------------------------------------------------------
 
@@ -49,140 +51,281 @@ const ICONS = {
 
 export function useNavData() {
   const { t } = useTranslate();
+  const { products: roles } = UsegetRoles();
+
+  const { user } = useAuthContext();
+  const role_id = user?.data?.role_id
+  console.log("Nikhil25", user);
+
+  const matchedRoleName = roles?.find((role) => role.id === role_id)?.role_name;
+
+
 
   const data = useMemo(
-    () => [
-      {
-        subheader: t('overview'),
-        items: [
+    () =>
+      matchedRoleName === "Administrator " || matchedRoleName === "Admin" ?
+        [
           {
-            title: t('Dashboard'),
-            path: paths.dashboard.root,
-            icon: ICONS.dashboard,
+            subheader: t('overview'),
+            items: [
+              {
+                title: t('Dashboard'),
+                path: paths.dashboard.root,
+                icon: ICONS.dashboard,
+              },
+            ],
+          },
+          {
+            subheader: t('management'),
+            items: [
+              {
+                title: t('Raw masters'),
+                icon: ICONS.label,
+                path: [
+                  paths.dashboard.roles.root,
+                  paths.dashboard.roles.new,
+                  paths.dashboard.amenities.root,
+                  paths.dashboard.amenities.new,
+                  paths.dashboard.propertytype.root,
+                  paths.dashboard.propertytype.new,
+                ],
+                children: [
+                  {
+                    title: t('Roles'),
+                    path: paths.dashboard.roles.root,
+                    icon: ICONS.role,
+                    children: [
+                      { title: t('list'), path: paths.dashboard.roles.root },
+                      { title: t('create new role'), path: paths.dashboard.roles.new },
+                    ],
+                  },
+                  {
+                    title: t('Amenities'),
+                    path: paths.dashboard.amenities.root,
+                    icon: ICONS.amenity,
+                    children: [
+                      { title: t('list'), path: paths.dashboard.amenities.root },
+                      { title: t('create new amenity'), path: paths.dashboard.amenities.new },
+                    ],
+                  },
+                  {
+                    title: t('Property type'),
+                    path: paths.dashboard.propertytype.root,
+                    icon: ICONS.property,
+                    children: [
+                      { title: t('list'), path: paths.dashboard.propertytype.root },
+                      { title: t('create new property type'), path: paths.dashboard.propertytype.new },
+                    ],
+                  },
+                ],
+              },
+              {
+                title: t('user'),
+                path: paths.dashboard.user.root,
+                icon: ICONS.user,
+                children: [
+                  { title: t('colleagues'), path: paths.dashboard.user.list },
+                  { title: t('create new user'), path: paths.dashboard.user.new },
+                ],
+              },
+              // {
+              //   title: t('Clients'),
+              //   path: paths.dashboard.clients.root,
+              //   icon: ICONS.clients,
+              //   children: [
+              //     { title: t('list'), path: paths.dashboard.clients.list },
+              //     { title: t('create'), path: paths.dashboard.clients.new }
+              //   ],
+              // },
+              {
+                title: t('Leads'),
+                path: [paths.dashboard.leads.root, paths.dashboard.followup.new, paths.dashboard.followup.root],
+                icon: ICONS.leads,
+                children: [
+                  { title: t('list'), path: paths.dashboard.leads.list },
+                  { title: t('create new lead'), path: paths.dashboard.leads.new },
+                ],
+              },
+              // {
+              //   title: t('Follow Up'),
+              //   path: paths.dashboard.followup.root,
+              //   icon: ICONS.propertylogo,
+              //   children: [
+              //     { title: t('list'), path: paths.dashboard.followup.root },
+              //     { title: t('create new Follow Up'), path: paths.dashboard.followup.new },
+              //   ],
+              // },
+              {
+                title: t('Developers'),
+                path: [paths.dashboard.propertypage.main],
+                icon: ICONS.job,
+                children: [
+                  { title: t('list'), path: paths.dashboard.propertypage.root },
+                  { title: t('create new developer'), path: paths.dashboard.propertypage.new },
+                ],
+              },
+              {
+                title: t('Calender'),
+                path: [paths.dashboard.calendar],
+                icon: ICONS.calendar,
+                // children: [
+                //   { title: t('list'), path: paths.dashboard.calendar },
+                //   { title: t('create new developer'), path: paths.dashboard.propertypage.new },
+                // ],
+              },
+              {
+                title: t('Power Report'),
+                path: [paths.dashboard.report],
+                icon: ICONS.blog,
+              },
+              {
+                title: t('Future prospects'),
+                path: [paths.dashboard.opportunity.main],
+                icon: ICONS.lock,
+                children: [
+                  { title: t('list'), path: paths.dashboard.opportunity.root },
+                  { title: t('add prospect'), path: paths.dashboard.opportunity.new },
+                ],
+              },
+              // {
+              //   title: t('Menu'),
+              //   path: [paths.dashboard.menu],
+              //   icon: ICONS.propertylogo,
+              // },
+            ],
+          },
+        ] : [
+          {
+            subheader: t('overview'),
+            items: [
+              {
+                title: t('Dashboard'),
+                path: paths.dashboard.root,
+                icon: ICONS.dashboard,
+              },
+            ],
+          },
+          {
+            subheader: t('management'),
+            items: [
+              {
+                title: t('Raw masters'),
+                icon: ICONS.label,
+                path: [
+                  paths.dashboard.roles.root,
+                  paths.dashboard.roles.new,
+                  paths.dashboard.amenities.root,
+                  paths.dashboard.amenities.new,
+                  paths.dashboard.propertytype.root,
+                  paths.dashboard.propertytype.new,
+                ],
+                children: [
+                  {
+                    title: t('Roles'),
+                    path: paths.dashboard.roles.root,
+                    icon: ICONS.role,
+                    children: [
+                      { title: t('list'), path: paths.dashboard.roles.root },
+                      { title: t('create new role'), path: paths.dashboard.roles.new },
+                    ],
+                  },
+                  {
+                    title: t('Amenities'),
+                    path: paths.dashboard.amenities.root,
+                    icon: ICONS.amenity,
+                    children: [
+                      { title: t('list'), path: paths.dashboard.amenities.root },
+                      { title: t('create new amenity'), path: paths.dashboard.amenities.new },
+                    ],
+                  },
+                  {
+                    title: t('Property type'),
+                    path: paths.dashboard.propertytype.root,
+                    icon: ICONS.property,
+                    children: [
+                      { title: t('list'), path: paths.dashboard.propertytype.root },
+                      { title: t('create new property type'), path: paths.dashboard.propertytype.new },
+                    ],
+                  },
+                ],
+              },
+              {
+                title: t('user'),
+                path: paths.dashboard.user.root,
+                icon: ICONS.user,
+                children: [
+                  { title: t('colleagues'), path: paths.dashboard.user.list },
+                  { title: t('create new user'), path: paths.dashboard.user.new },
+                ],
+              },
+              // {
+              //   title: t('Clients'),
+              //   path: paths.dashboard.clients.root,
+              //   icon: ICONS.clients,
+              //   children: [
+              //     { title: t('list'), path: paths.dashboard.clients.list },
+              //     { title: t('create'), path: paths.dashboard.clients.new }
+              //   ],
+              // },
+              {
+                title: t('Leads'),
+                path: [paths.dashboard.leads.root, paths.dashboard.followup.new, paths.dashboard.followup.root],
+                icon: ICONS.leads,
+                children: [
+                  { title: t('list'), path: paths.dashboard.leads.list },
+                  { title: t('create new lead'), path: paths.dashboard.leads.new },
+                ],
+              },
+              // {
+              //   title: t('Follow Up'),
+              //   path: paths.dashboard.followup.root,
+              //   icon: ICONS.propertylogo,
+              //   children: [
+              //     { title: t('list'), path: paths.dashboard.followup.root },
+              //     { title: t('create new Follow Up'), path: paths.dashboard.followup.new },
+              //   ],
+              // },
+              {
+                title: t('Developers'),
+                path: [paths.dashboard.propertypage.main],
+                icon: ICONS.job,
+                children: [
+                  { title: t('list'), path: paths.dashboard.propertypage.root },
+                  { title: t('create new developer'), path: paths.dashboard.propertypage.new },
+                ],
+              },
+              {
+                title: t('Calender'),
+                path: [paths.dashboard.calendar],
+                icon: ICONS.calendar,
+                // children: [
+                //   { title: t('list'), path: paths.dashboard.calendar },
+                //   { title: t('create new developer'), path: paths.dashboard.propertypage.new },
+                // ],
+              },
+              {
+                title: t('Power Report'),
+                path: [paths.dashboard.report],
+                icon: ICONS.blog,
+              },
+              {
+                title: t('Future prospects'),
+                path: [paths.dashboard.opportunity.main],
+                icon: ICONS.lock,
+                children: [
+                  { title: t('list'), path: paths.dashboard.opportunity.root },
+                  { title: t('add prospect'), path: paths.dashboard.opportunity.new },
+                ],
+              },
+              // {
+              //   title: t('Menu'),
+              //   path: [paths.dashboard.menu],
+              //   icon: ICONS.propertylogo,
+              // },
+            ],
           },
         ],
-      },
-      {
-        subheader: t('management'),
-        items: [
-          {
-            title: t('Raw masters'),
-            icon: ICONS.label,
-            path: [
-              paths.dashboard.roles.root,
-              paths.dashboard.roles.new,
-              paths.dashboard.amenities.root,
-              paths.dashboard.amenities.new,
-              paths.dashboard.propertytype.root,
-              paths.dashboard.propertytype.new,
-            ],
-            children: [
-              {
-                title: t('Roles'),
-                path: paths.dashboard.roles.root,
-                icon: ICONS.role,
-                children: [
-                  { title: t('list'), path: paths.dashboard.roles.root },
-                  { title: t('create new role'), path: paths.dashboard.roles.new },
-                ],
-              },
-              {
-                title: t('Amenities'),
-                path: paths.dashboard.amenities.root,
-                icon: ICONS.amenity,
-                children: [
-                  { title: t('list'), path: paths.dashboard.amenities.root },
-                  { title: t('create new amenity'), path: paths.dashboard.amenities.new },
-                ],
-              },
-              {
-                title: t('Property type'),
-                path: paths.dashboard.propertytype.root,
-                icon: ICONS.property,
-                children: [
-                  { title: t('list'), path: paths.dashboard.propertytype.root },
-                  { title: t('create new property type'), path: paths.dashboard.propertytype.new },
-                ],
-              },
-            ],
-          },
-          {
-            title: t('user'),
-            path: paths.dashboard.user.root,
-            icon: ICONS.user,
-            children: [
-              { title: t('colleagues'), path: paths.dashboard.user.list },
-              { title: t('create new user'), path: paths.dashboard.user.new },
-            ],
-          },
-          // {
-          //   title: t('Clients'),
-          //   path: paths.dashboard.clients.root,
-          //   icon: ICONS.clients,
-          //   children: [
-          //     { title: t('list'), path: paths.dashboard.clients.list },
-          //     { title: t('create'), path: paths.dashboard.clients.new }
-          //   ],
-          // },
-          {
-            title: t('Leads'),
-            path: [paths.dashboard.leads.root, paths.dashboard.followup.new, paths.dashboard.followup.root],
-            icon: ICONS.leads,
-            children: [
-              { title: t('list'), path: paths.dashboard.leads.list },
-              { title: t('create new lead'), path: paths.dashboard.leads.new },
-            ],
-          },
-          // {
-          //   title: t('Follow Up'),
-          //   path: paths.dashboard.followup.root,
-          //   icon: ICONS.propertylogo,
-          //   children: [
-          //     { title: t('list'), path: paths.dashboard.followup.root },
-          //     { title: t('create new Follow Up'), path: paths.dashboard.followup.new },
-          //   ],
-          // },
-          {
-            title: t('Developers'),
-            path: [paths.dashboard.propertypage.main],
-            icon: ICONS.job,
-            children: [
-              { title: t('list'), path: paths.dashboard.propertypage.root },
-              { title: t('create new developer'), path: paths.dashboard.propertypage.new },
-            ],
-          },
-          {
-            title: t('Calender'),
-            path: [paths.dashboard.calendar],
-            icon: ICONS.calendar,
-            // children: [
-            //   { title: t('list'), path: paths.dashboard.calendar },
-            //   { title: t('create new developer'), path: paths.dashboard.propertypage.new },
-            // ],
-          },
-          {
-            title: t('Power Report'),
-            path: [paths.dashboard.report],
-            icon: ICONS.blog,
-          },
-          {
-            title: t('Future prospects'),
-            path: [paths.dashboard.opportunity.main],
-            icon: ICONS.lock,
-            children: [
-              { title: t('list'), path: paths.dashboard.opportunity.root },
-              { title: t('add prospect'), path: paths.dashboard.opportunity.new },
-            ],
-          },
-          {
-            title: t('Menu'),
-            path: [paths.dashboard.menu],
-            icon: ICONS.propertylogo,
-          },
-        ],
-      },
-    ],
-    [t]
+    [t, matchedRoleName]
   );
 
   return data;

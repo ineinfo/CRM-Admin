@@ -3,9 +3,9 @@ import { flattenArray } from 'src/utils/flatten-array';
 // ----------------------------------------------------------------------
 
 export function getAllItems({ data }) {
-  const reduceItems = data.map((list) => handleLoop(list.items, list.subheader)).flat();
+  const reduceItems = data?.map((list) => handleLoop(list.items, list.subheader)).flat();
 
-  const items = flattenArray(reduceItems).map((option) => {
+  const items = flattenArray(reduceItems)?.map((option) => {
     const group = splitPath(reduceItems, option.path);
 
     return {
@@ -74,7 +74,7 @@ export function handleLoop(array, subheader) {
 // ----------------------------------------------------------------------
 
 export function groupedData(array) {
-  const group = array.reduce((groups, item) => {
+  const group = array?.reduce((groups, item) => {
     groups[item.group] = groups[item.group] || [];
 
     groups[item.group].push(item);

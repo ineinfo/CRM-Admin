@@ -76,75 +76,79 @@ function Searchbar() {
   const renderItems = () => {
     const data = groupedData(dataFiltered);
 
-    return Object.keys(data)
-      .sort((a, b) => -b.localeCompare(a))
-      .map((group, index) => (
-        <List key={group || index} disablePadding>
-          {data[group].map((item) => {
-            const { title, path } = item;
+    if (data) {
+      return Object.keys(data)
+        .sort((a, b) => -b.localeCompare(a))
+        .map((group, index) => (
+          <List key={group || index} disablePadding>
+            {data[group].map((item) => {
+              const { title, path } = item;
 
-            const partsTitle = parse(title, match(title, searchQuery));
+              const partsTitle = parse(title, match(title, searchQuery));
 
-            const partsPath = parse(path, match(path, searchQuery));
+              const partsPath = parse(path, match(path, searchQuery));
 
-            return (
-              <ResultItem
-                path={partsPath}
-                title={partsTitle}
-                key={`${title}${path}`}
-                groupLabel={searchQuery && group}
-                onClickItem={() => handleClick(path)}
-              />
-            );
-          })}
-        </List>
-      ));
+              return (
+                <ResultItem
+                  path={partsPath}
+                  title={partsTitle}
+                  key={`${title}${path}`}
+                  groupLabel={searchQuery && group}
+                  onClickItem={() => handleClick(path)}
+                />
+              );
+            })}
+          </List>
+        ));
+    } else {
+      return
+    }
   };
   return (
-      <Dialog
-        fullWidth
-        maxWidth="sm"
-        open={search.value}
-        onClose={handleClose}
-        transitionDuration={{
-          enter: theme.transitions.duration.shortest,
-          exit: 0,
-        }}
-        PaperProps={{
-          sx: {
-            mt: 15,
-            overflow: 'unset',
-          },
-        }}
-        sx={{
-          [`& .${dialogClasses.container}`]: {
-            alignItems: 'flex-start',
-          },
-        }}
-      >
-        <Box sx={{ p: 3, borderBottom: `solid 1px ${theme.palette.divider}` }}>
-          <InputBase
-            fullWidth
-            autoFocus
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={handleSearch}
-            startAdornment={
-              <InputAdornment position="start">
-                <Iconify icon="eva:search-fill" width={24} sx={{ color: 'text.disabled' }} />
-              </InputAdornment>
-            }
-            endAdornment={<Label sx={{ letterSpacing: 1, color: 'text.secondary' }}>esc</Label>}
-            inputProps={{
-              sx: { typography: 'h6' },
-            }}
-          />
-        </Box>
+    <Dialog
+      fullWidth
+      maxWidth="sm"
+      open={search.value}
+      onClose={handleClose}
+      transitionDuration={{
+        enter: theme.transitions.duration.shortest,
+        exit: 0,
+      }}
+      PaperProps={{
+        sx: {
+          mt: 15,
+          overflow: 'unset',
+        },
+      }}
+      sx={{
+        [`& .${dialogClasses.container}`]: {
+          alignItems: 'flex-start',
+        },
+      }}
+    >
+      <Box sx={{ p: 3, borderBottom: `solid 1px ${theme.palette.divider}` }}>
+        <InputBase
+          fullWidth
+          autoFocus
+          placeholder="Search..."
+          value={searchQuery}
+          onChange={handleSearch}
+          startAdornment={
+            <InputAdornment position="start">
+              <Iconify icon="eva:search-fill" width={24} sx={{ color: 'text.disabled' }} />
+            </InputAdornment>
+          }
+          endAdornment={<Label sx={{ letterSpacing: 1, color: 'text.secondary' }}>esc</Label>}
+          inputProps={{
+            sx: { typography: 'h6' },
+          }}
+        />
+      </Box>
 
-        <Scrollbar sx={{ p: 3, pt: 2, height: 400 }}>
-          {notFound ? <SearchNotFound query={searchQuery} sx={{ py: 10 }} /> : renderItems()}
-        </Scrollbar>
-      </Dialog>
+      <Scrollbar sx={{ p: 3, pt: 2, height: 400 }}>
+        {notFound ? <SearchNotFound query={searchQuery} sx={{ py: 10 }} /> : renderItems()}
+      </Scrollbar>
+    </Dialog>
   );
 }
 

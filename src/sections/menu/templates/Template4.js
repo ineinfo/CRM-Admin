@@ -608,124 +608,148 @@ const Template4 = ({ onClose, data, currency }) => {
 
 
 
+
+
+
+
             pdf.addPage();
 
+            // Define position for "Layout"
+            const layoutXPosition = 10; // Left-aligned position
+            const layoutYPosition = 40; // Starting Y position
 
+            // Add "Layout" text
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(16);
+            pdf.setTextColor(0, 0, 0); // Black text
+            pdf.text("Layout", layoutXPosition, layoutYPosition);
 
+            // Define position for "Bedrooms" text
+            const bedroomDetailsText = `Bedrooms: ${data?.no_of_bedrooms.toString()}   ${data?.range_min}-${data?.range_max} sqft   ${formatCurrency(data?.starting_price)} ${currency}`;
+            const bedroomTextXPosition =
+                pageWidth - 10 - pdf.getTextWidth(bedroomDetailsText); // Right-aligned position
+            const bedroomTextYPosition = layoutYPosition; // Same Y position as "Layout"
 
-            const boxWidth = 130;
-            const boxHeight = 100;
-
-            const boxXPos = (pageWidth - boxWidth) / 2;
-            const boxYPos = (pageHeight - boxHeight) / 2;
-
-            pdf.setFillColor(242, 243, 244);
-            pdf.rect(boxXPos, boxYPos, boxWidth, boxHeight, "F");
-
-            const imageWidth = 30;
-            const imageHeight = 30;
-
-            const padding = 10;
-            const imageXPos = boxXPos + padding;
-            const imageYPos = boxYPos + padding;
-
-            pdf.setFillColor(237, 237, 237);
-
-
-
-
-            // const displayWidth1 = imageWidth; // Displayed image width in the PDF
-            // const displayHeight1 = imageHeight; // Displayed image height in the PDF
-            // const radius1 = 5; // Corner radius1 for rounded rectangle
-
-            // // Set canvas resolution based on device pixel ratio for higher quality
-            // const resolutionMultiplier1 = 3; // Scale up for higher quality
-            // const canvas1 = document.createElement("canvas1");
-            // canvas1.width = displayWidth1 * resolutionMultiplier1;
-            // canvas1.height = displayHeight1 * resolutionMultiplier1;
-            // const ctx1 = canvas.getContext("2d");
-            // ctx1.scale(resolutionMultiplier1, resolutionMultiplier1);
-
-            // // Draw rounded rectangle
-            // ctx1.beginPath();
-            // ctx1.moveTo(radius1, 0);
-            // ctx1.lineTo(displayWidth1 - radius1, 0);
-            // ctx1.quadraticCurveTo(displayWidth1, 0, displayWidth1, radius1);
-            // ctx1.lineTo(displayWidth1, displayHeight1 - radius1);
-            // ctx1.quadraticCurveTo(displayWidth1, displayHeight1, displayWidth1 - radius1, displayHeight1);
-            // ctx1.lineTo(radius1, displayHeight1);
-            // ctx1.quadraticCurveTo(0, displayHeight1, 0, displayHeight1 - radius1);
-            // ctx1.lineTo(0, radius1);
-            // ctx1.quadraticCurveTo(0, 0, radius1, 0);
-            // ctx1.closePath();
-            // ctx1.clip();
-
-            // // Draw the image inside the rounded rectangle
-            // const img1 = new Image();
-            // img1.src = profile.src; // Pass the source of the logo as a prop
-            // await new Promise((resolve) => (img1.onload = resolve)); // Wait for the image to load
-            // ctx1.drawImage(img1, 0, 0, displayWidth1, displayHeight1);
-
-            // // Convert the canvas1 to a high-quality base64 image
-            // const roundedImage1 = canvas.toDataURL(profile, 1.0); // Quality factor set to 1.0
-
-            // // Add the high-quality image to the PDF
-            // // pdf.addImage(roundedImage, "JPEG", x, y, displayWidth1, displayHeight1);
-
-            // pdf.addImage(
-            //     roundedImage1,
-            //     "JPEG",
-            //     imageXPos - 5,
-            //     imageYPos - 3,
-            //     displayWidth1,
-            //     displayHeight1
-            // );
-
-
-
-            await addRoundedImageToPdf(pdf, logo1, imageXPos - 4, imageYPos - 4, imageWidth + 2, imageHeight + 2, 5);
-
-
-            // pdf.addImage(
-            //     profile.src,
-            //     "JPEG",
-            //     imageXPos - 5,
-            //     imageYPos - 3,
-            //     imageWidth,
-            //     imageHeight,
-            //     10,
-            //     10,
-            //     "F"
-            // );
-
-            const textXPos = imageXPos + imageWidth + 30;
-            const lineSpacing = 7;
-
-            pdf.setFontSize(14);
-            pdf.text("Contacts", textXPos, imageYPos + 5);
-
-            pdf.setFontSize(10);
-            pdf.text("Phone :", textXPos, imageYPos + 15);
-            pdf.setFontSize(9);
-            pdf.text("0208 050 4150", textXPos, imageYPos + 20);
-
-            pdf.setFontSize(10);
-            pdf.text("Email :", textXPos, imageYPos + 30);
-            pdf.setFontSize(9);
-            pdf.text("admin@sovereigninternational.uk", textXPos, imageYPos + 35);
-
-            const leftTextXPos = boxXPos + padding;
+            // Add "Bedrooms" text
+            pdf.setFont("helvetica", "normal");
             pdf.setFontSize(12);
-            pdf.text("Sovereign International", leftTextXPos, imageYPos + 50);
-            pdf.setFontSize(12);
-            pdf.text("Real Estate", leftTextXPos, imageYPos + 55);
+            pdf.text(bedroomDetailsText, bedroomTextXPosition, bedroomTextYPosition);
 
-            pdf.setFontSize(12);
-            pdf.text("Thank you for your attention and we are happy to help guide", leftTextXPos, imageYPos + 70);
-            pdf.text("you on your next property investment.", leftTextXPos, imageYPos + 75);
+            // Add space below "Layout"
+            const roundedBoxYStart = layoutYPosition + 15; // 15px below the "Layout" text
+
+            // Define dimensions and properties for the rounded box
+            const roundedBoxXPosition = layoutXPosition; // Left margin
+            const roundedBoxWidth = 90; // Width of the box
+            const roundedBoxHeight = 100; // Height of the box
+            const roundedBoxCornerRadius = 8; // Radius for rounded corners
+
+            // Draw a rounded border box
+            pdf.setDrawColor(0, 0, 0); // Black border color
+            pdf.setLineWidth(0.1); // Border thickness
+            pdf.roundedRect(
+                roundedBoxXPosition,
+                roundedBoxYStart,
+                roundedBoxWidth,
+                roundedBoxHeight,
+                roundedBoxCornerRadius,
+                roundedBoxCornerRadius,
+                "D"
+            );
+
+            // Define position and dimensions for the image inside the rounded box
+            const boxImageX = roundedBoxXPosition + 10; // Padding from the left side of the box
+            const boxImageY = roundedBoxYStart + 10; // Padding from the top of the box
+            const boxImageWidth = 70; // Width of the image
+            const boxImageHeight = 80; // Height of the image
+
+            // Add the image inside the rounded box
+            pdf.addImage(map3.src, boxImageX, boxImageY, boxImageWidth, boxImageHeight);
+
+            // Add space to the right of the rounded box
+            const rightSectionStartX = roundedBoxXPosition + roundedBoxWidth + 3; // Space to the right of the box
+            let rightSectionStartY = roundedBoxYStart + 5; // Start slightly below the top of the box
+
+            // Define the text blocks array
+            const textBlocks74 = [
+                { label: "Price", value: `${formatCurrency(data?.starting_price)} ${currency}` },
+                { label: "S total", value: `${data?.range_max} sqft` },
+                { label: "Bedrooms", value: `${data?.no_of_bedrooms.toString()}` },
+                { label: "Bathrooms", value: `${data?.no_of_bathrooms.toString()}` },
+                { label: "Finishing", value: `${data?.furnished}` },
+                { label: "Windows", value: "Panoramic" },
+                { label: "View", value: "city" },
+                { label: "Balcony", value: "Open" },
+                { label: "Layout model", value: "1BR" },
+            ];
+
+            const pageWidth3 = pdf.internal.pageSize.getWidth();
+            const rightMargin3 = 20; // Adjust this value as needed
+
+            // Loop through the text blocks array to add the text dynamically
+            textBlocks74.forEach((block, index) => {
+                // Add a smaller light blue circle as background
+                pdf.setFillColor(246, 243, 243); // Light blue color (RGB)
+                const circleRadius = 4; // Smaller radius
+                pdf.circle(
+                    rightSectionStartX + circleRadius,
+                    rightSectionStartY,
+                    circleRadius,
+                    "F"
+                );
+
+                // Define dimensions and position for the smaller image inside the circle
+                const circleImageX = rightSectionStartX + circleRadius - 3; // Center the image in the circle horizontally
+                const circleImageY = rightSectionStartY - 3; // Center the image in the circle vertically
+                const circleImageWidth = 6; // Smaller width for the image
+                const circleImageHeight = 6; // Smaller height for the image
+
+                // Add the smaller image on top of the circle
+                pdf.addImage(
+                    restaurant.src, // Replace with the small image source
+                    circleImageX,
+                    circleImageY,
+                    circleImageWidth,
+                    circleImageHeight
+                );
+
+                // Add label text next to the circle
+                const labelX = rightSectionStartX + circleRadius * 2 + 2; // Positioning right next to the circle with a small space
+                const labelY = rightSectionStartY + 1; // Vertically center the text
+
+                pdf.setFont("helvetica", "bold");
+                pdf.setFontSize(8);
+                pdf.setTextColor(0, 0, 0); // Black color for text
+                pdf.text(block.label, labelX, labelY); // Add the label text
+
+                // Calculate value position for right alignment
+                pdf.setFont("helvetica", "normal");
+                const valueWidth = pdf.getTextWidth(block.value);
+                const valueX = pageWidth3 - rightMargin3 - valueWidth; // Right-align the value
+                const lineStartX = labelX + pdf.getTextWidth(block.label) + 2;
+                const lineEndX = valueX - 3; // End the line just before the value
+
+                // Draw a thin line after the label text
+                const lineY = labelY - 0.7;
+                pdf.setDrawColor(0, 0, 0); // Black color for the line
+                pdf.setLineWidth(0.1); // Thin line
+                pdf.line(lineStartX, lineY, lineEndX, lineY);
+
+                // Add the value text
+                pdf.text(block.value, valueX, labelY);
+
+                // Update the Y position for the next text block
+                rightSectionStartY += 10; // Adjust this value for spacing between blocks
+            });
 
             addBorders(pdf, pageWidth, pageHeight);
+
+
+
+
             pdf.addPage();
+
+
 
             const locationXPos = 20;
             const locationYPos = 40;
@@ -971,7 +995,7 @@ const Template4 = ({ onClose, data, currency }) => {
             // Function to convert image URL to Base64
             const getBase64ImageFromUrl = async (imageUrl) => {
                 try {
-                    const response = await fetch(proxyUrl + encodeURIComponent(image));
+                    const response = await fetch(proxyUrl + encodeURIComponent(imageUrl));
                     if (!response.ok) {
                         throw new Error('Failed to fetch the image.');
                     }
@@ -991,29 +1015,12 @@ const Template4 = ({ onClose, data, currency }) => {
                 // Convert the image to Base64
                 const base64Image = await getBase64ImageFromUrl(image);
                 // Add the image to the PDF
-                pdf.addImage(base64Image, "JPEG", xPos, yPos, imgWidth2, imgHeight2);
+                pdf.addImage(image, "JPEG", xPos, yPos, imgWidth2, imgHeight2);
                 // await addRoundedImageToPdf(pdf, base64Image, imageXPos - 5, imageYPos - 3, imageWidth, imageHeight, 5);
                 // Trigger download
             } catch (error) {
                 console.error("Error generating the PDF:", error);
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1117,135 +1124,127 @@ const Template4 = ({ onClose, data, currency }) => {
 
 
             addBorders(pdf, pageWidth, pageHeight);
+
+
             pdf.addPage();
 
-            // Define position for "Layout"
-            const layoutXPosition = 10; // Left-aligned position
-            const layoutYPosition = 40; // Starting Y position
 
-            // Add "Layout" text
-            pdf.setFont("helvetica", "bold");
-            pdf.setFontSize(16);
-            pdf.setTextColor(0, 0, 0); // Black text
-            pdf.text("Layout", layoutXPosition, layoutYPosition);
 
-            // Define position for "Bedrooms" text
-            const bedroomDetailsText = `Bedrooms: ${data?.no_of_bedrooms.toString()}   ${data?.range_min}-${data?.range_max} sqft   ${formatCurrency(data?.starting_price)} ${currency}`;
-            const bedroomTextXPosition =
-                pageWidth - 10 - pdf.getTextWidth(bedroomDetailsText); // Right-aligned position
-            const bedroomTextYPosition = layoutYPosition; // Same Y position as "Layout"
 
-            // Add "Bedrooms" text
-            pdf.setFont("helvetica", "normal");
+            const boxWidth = 130;
+            const boxHeight = 100;
+
+            const boxXPos = (pageWidth - boxWidth) / 2;
+            const boxYPos = (pageHeight - boxHeight) / 2;
+
+            pdf.setFillColor(242, 243, 244);
+            pdf.rect(boxXPos, boxYPos, boxWidth, boxHeight, "F");
+
+            const imageWidth = 30;
+            const imageHeight = 30;
+
+            const padding = 10;
+            const imageXPos = boxXPos + padding;
+            const imageYPos = boxYPos + padding;
+
+            pdf.setFillColor(237, 237, 237);
+
+
+
+
+            // const displayWidth1 = imageWidth; // Displayed image width in the PDF
+            // const displayHeight1 = imageHeight; // Displayed image height in the PDF
+            // const radius1 = 5; // Corner radius1 for rounded rectangle
+
+            // // Set canvas resolution based on device pixel ratio for higher quality
+            // const resolutionMultiplier1 = 3; // Scale up for higher quality
+            // const canvas1 = document.createElement("canvas1");
+            // canvas1.width = displayWidth1 * resolutionMultiplier1;
+            // canvas1.height = displayHeight1 * resolutionMultiplier1;
+            // const ctx1 = canvas.getContext("2d");
+            // ctx1.scale(resolutionMultiplier1, resolutionMultiplier1);
+
+            // // Draw rounded rectangle
+            // ctx1.beginPath();
+            // ctx1.moveTo(radius1, 0);
+            // ctx1.lineTo(displayWidth1 - radius1, 0);
+            // ctx1.quadraticCurveTo(displayWidth1, 0, displayWidth1, radius1);
+            // ctx1.lineTo(displayWidth1, displayHeight1 - radius1);
+            // ctx1.quadraticCurveTo(displayWidth1, displayHeight1, displayWidth1 - radius1, displayHeight1);
+            // ctx1.lineTo(radius1, displayHeight1);
+            // ctx1.quadraticCurveTo(0, displayHeight1, 0, displayHeight1 - radius1);
+            // ctx1.lineTo(0, radius1);
+            // ctx1.quadraticCurveTo(0, 0, radius1, 0);
+            // ctx1.closePath();
+            // ctx1.clip();
+
+            // // Draw the image inside the rounded rectangle
+            // const img1 = new Image();
+            // img1.src = profile.src; // Pass the source of the logo as a prop
+            // await new Promise((resolve) => (img1.onload = resolve)); // Wait for the image to load
+            // ctx1.drawImage(img1, 0, 0, displayWidth1, displayHeight1);
+
+            // // Convert the canvas1 to a high-quality base64 image
+            // const roundedImage1 = canvas.toDataURL(profile, 1.0); // Quality factor set to 1.0
+
+            // // Add the high-quality image to the PDF
+            // // pdf.addImage(roundedImage, "JPEG", x, y, displayWidth1, displayHeight1);
+
+            // pdf.addImage(
+            //     roundedImage1,
+            //     "JPEG",
+            //     imageXPos - 5,
+            //     imageYPos - 3,
+            //     displayWidth1,
+            //     displayHeight1
+            // );
+
+
+
+            await addRoundedImageToPdf(pdf, logo1, imageXPos - 4, imageYPos - 4, imageWidth + 2, imageHeight + 2, 5);
+
+
+            // pdf.addImage(
+            //     profile.src,
+            //     "JPEG",
+            //     imageXPos - 5,
+            //     imageYPos - 3,
+            //     imageWidth,
+            //     imageHeight,
+            //     10,
+            //     10,
+            //     "F"
+            // );
+
+            const textXPos = imageXPos + imageWidth + 30;
+            const lineSpacing = 7;
+
+            pdf.setFontSize(14);
+            pdf.text("Contacts", textXPos, imageYPos + 5);
+
+            pdf.setFontSize(10);
+            pdf.text("Phone :", textXPos, imageYPos + 15);
+            pdf.setFontSize(9);
+            pdf.text("0208 050 4150", textXPos, imageYPos + 20);
+
+            pdf.setFontSize(10);
+            pdf.text("Email :", textXPos, imageYPos + 30);
+            pdf.setFontSize(9);
+            pdf.text("admin@sovereigninternational.uk", textXPos, imageYPos + 35);
+
+            const leftTextXPos = boxXPos + padding;
             pdf.setFontSize(12);
-            pdf.text(bedroomDetailsText, bedroomTextXPosition, bedroomTextYPosition);
+            pdf.text("Sovereign International", leftTextXPos, imageYPos + 50);
+            pdf.setFontSize(12);
+            pdf.text("Real Estate", leftTextXPos, imageYPos + 55);
 
-            // Add space below "Layout"
-            const roundedBoxYStart = layoutYPosition + 15; // 15px below the "Layout" text
+            pdf.setFontSize(12);
+            pdf.text("Thank you for your attention and we are happy to help guide", leftTextXPos, imageYPos + 70);
+            pdf.text("you on your next property investment.", leftTextXPos, imageYPos + 75);
 
-            // Define dimensions and properties for the rounded box
-            const roundedBoxXPosition = layoutXPosition; // Left margin
-            const roundedBoxWidth = 90; // Width of the box
-            const roundedBoxHeight = 100; // Height of the box
-            const roundedBoxCornerRadius = 8; // Radius for rounded corners
+            addBorders(pdf, pageWidth, pageHeight);
 
-            // Draw a rounded border box
-            pdf.setDrawColor(0, 0, 0); // Black border color
-            pdf.setLineWidth(0.1); // Border thickness
-            pdf.roundedRect(
-                roundedBoxXPosition,
-                roundedBoxYStart,
-                roundedBoxWidth,
-                roundedBoxHeight,
-                roundedBoxCornerRadius,
-                roundedBoxCornerRadius,
-                "D"
-            );
 
-            // Define position and dimensions for the image inside the rounded box
-            const boxImageX = roundedBoxXPosition + 10; // Padding from the left side of the box
-            const boxImageY = roundedBoxYStart + 10; // Padding from the top of the box
-            const boxImageWidth = 70; // Width of the image
-            const boxImageHeight = 80; // Height of the image
-
-            // Add the image inside the rounded box
-            pdf.addImage(map3.src, boxImageX, boxImageY, boxImageWidth, boxImageHeight);
-
-            // Add space to the right of the rounded box
-            const rightSectionStartX = roundedBoxXPosition + roundedBoxWidth + 3; // Space to the right of the box
-            let rightSectionStartY = roundedBoxYStart + 5; // Start slightly below the top of the box
-
-            // Define the text blocks array
-            const textBlocks74 = [
-                { label: "Price", value: `${formatCurrency(data?.starting_price)} ${currency}` },
-                { label: "S total", value: `${data?.range_max} sqft` },
-                { label: "Bedrooms", value: `${data?.no_of_bedrooms.toString()}` },
-                { label: "Bathrooms", value: `${data?.no_of_bathrooms.toString()}` },
-                { label: "Finishing", value: `${data?.furnished}` },
-                { label: "Windows", value: "Panoramic" },
-                { label: "View", value: "city" },
-                { label: "Balcony", value: "Open" },
-                { label: "Layout model", value: "1BR" },
-            ];
-
-            const pageWidth3 = pdf.internal.pageSize.getWidth();
-            const rightMargin3 = 20; // Adjust this value as needed
-
-            // Loop through the text blocks array to add the text dynamically
-            textBlocks74.forEach((block, index) => {
-                // Add a smaller light blue circle as background
-                pdf.setFillColor(246, 243, 243); // Light blue color (RGB)
-                const circleRadius = 4; // Smaller radius
-                pdf.circle(
-                    rightSectionStartX + circleRadius,
-                    rightSectionStartY,
-                    circleRadius,
-                    "F"
-                );
-
-                // Define dimensions and position for the smaller image inside the circle
-                const circleImageX = rightSectionStartX + circleRadius - 3; // Center the image in the circle horizontally
-                const circleImageY = rightSectionStartY - 3; // Center the image in the circle vertically
-                const circleImageWidth = 6; // Smaller width for the image
-                const circleImageHeight = 6; // Smaller height for the image
-
-                // Add the smaller image on top of the circle
-                pdf.addImage(
-                    restaurant.src, // Replace with the small image source
-                    circleImageX,
-                    circleImageY,
-                    circleImageWidth,
-                    circleImageHeight
-                );
-
-                // Add label text next to the circle
-                const labelX = rightSectionStartX + circleRadius * 2 + 2; // Positioning right next to the circle with a small space
-                const labelY = rightSectionStartY + 1; // Vertically center the text
-
-                pdf.setFont("helvetica", "bold");
-                pdf.setFontSize(8);
-                pdf.setTextColor(0, 0, 0); // Black color for text
-                pdf.text(block.label, labelX, labelY); // Add the label text
-
-                // Calculate value position for right alignment
-                pdf.setFont("helvetica", "normal");
-                const valueWidth = pdf.getTextWidth(block.value);
-                const valueX = pageWidth3 - rightMargin3 - valueWidth; // Right-align the value
-                const lineStartX = labelX + pdf.getTextWidth(block.label) + 2;
-                const lineEndX = valueX - 3; // End the line just before the value
-
-                // Draw a thin line after the label text
-                const lineY = labelY - 0.7;
-                pdf.setDrawColor(0, 0, 0); // Black color for the line
-                pdf.setLineWidth(0.1); // Thin line
-                pdf.line(lineStartX, lineY, lineEndX, lineY);
-
-                // Add the value text
-                pdf.text(block.value, valueX, labelY);
-
-                // Update the Y position for the next text block
-                rightSectionStartY += 10; // Adjust this value for spacing between blocks
-            });
 
 
 

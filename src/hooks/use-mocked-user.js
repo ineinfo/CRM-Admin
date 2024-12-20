@@ -16,14 +16,16 @@ import { useAuthContext } from 'src/auth/hooks';
 
 export function useMockedUser() {
   const User = useAuthContext();
-  const data = User.user;
+  console.log("===>2", User);
+
+  const data = User?.user?.data;
 
   // Memoize the user data fetched from useAuthContext
   const user = useMemo(() => {
     if (data) {
       return {
         id: data.id || '8864c717-587d-472a-929a-8e5f298024da-0',
-        displayName: data.first_name || 'Jaydon Frankie',
+        displayName: data?.first_name || 'Jaydon Frankie',
         email: data.email || 'Sovereign',
         password: data.password || 'demo1234',
         photoURL: data.photoURL || _mock.image.avatar(24),
