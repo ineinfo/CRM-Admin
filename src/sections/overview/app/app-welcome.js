@@ -89,13 +89,55 @@ export default function AppWelcome({ title, description, action, img, ...other }
     const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
     return (
-      <TableContainer component={Paper} elevation={3} sx={{ borderRadius: 2, overflow: 'hidden', }}>
+      <TableContainer
+        component={Paper}
+        elevation={3}
+        sx={{
+          borderRadius: 2,
+          overflow: 'hidden',
+          backgroundColor: '#f9f9f9', // Subtle off-white background
+        }}
+      >
         <Table>
-          <TableHead sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.1) }}>
+          <TableHead
+            sx={{
+              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+            }}
+          >
             <TableRow>
-              <TableCell width={300} align="left" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Name</TableCell>
-              <TableCell width={180} align="left" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Date</TableCell>
-              <TableCell width={600} align="left" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Details</TableCell>
+              <TableCell
+                width={300}
+                align="left"
+                sx={{
+                  fontWeight: 'bold',
+                  color: theme.palette.primary.main,
+                  backgroundColor: '#f9f9f9',
+                }}
+              >
+                Name
+              </TableCell>
+              <TableCell
+                width={180}
+                align="left"
+                sx={{
+                  fontWeight: 'bold',
+                  color: theme.palette.primary.main,
+                  backgroundColor: '#f9f9f9',
+                }}
+              >
+                Date
+              </TableCell>
+              <TableCell
+                width={600}
+                align="left"
+                sx={{
+                  fontWeight: 'bold',
+                  color: theme.palette.primary.main,
+                  backgroundColor: '#f9f9f9',
+                }}
+              >
+                Details
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -104,13 +146,19 @@ export default function AppWelcome({ title, description, action, img, ...other }
                 key={index}
                 sx={{
                   '&:nth-of-type(odd)': {
-                    backgroundColor: alpha(theme.palette.primary.light, 0.05),
+                    backgroundColor: alpha(theme.palette.primary.light, 0.5),
                   },
                 }}
               >
-                <TableCell align="left">{`${item.lead_first_name} ${item.lead_last_name}`}</TableCell>
-                <TableCell align="left">{dayjs(item.followup_date).format('DD-MM-YYYY')}</TableCell>
-                <TableCell align="left" width={'50%'}>{item.summary}</TableCell>
+                <TableCell align="left" sx={{ color: '#333' }}>
+                  {`${item.lead_first_name} ${item.lead_last_name}`}
+                </TableCell>
+                <TableCell align="left" sx={{ color: '#333' }}>
+                  {dayjs(item.followup_date).format('DD-MM-YYYY')}
+                </TableCell>
+                <TableCell align="left" width="50%" sx={{ color: '#333' }}>
+                  {item.summary}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -128,6 +176,7 @@ export default function AppWelcome({ title, description, action, img, ...other }
           </TableFooter>
         </Table>
       </TableContainer>
+
     );
   };
 
