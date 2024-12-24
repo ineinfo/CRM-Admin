@@ -217,12 +217,39 @@ export default function AppWelcome({ title, description, action, img, ...other }
           Your Task
         </Typography>
 
-        <Tabs value={tabIndex} onChange={handleChange} centered>
+        <Tabs
+          value={tabIndex}
+          onChange={handleChange}
+          centered
+          sx={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+
+            '& .MuiTab-root': {
+              color: 'Black',
+              textTransform: 'none',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              transition: 'background-color 0.3s ease',
+              '&:hover': {
+                backgroundColor: 'darkgrey', // Slightly lighter black on hover
+
+              },
+            },
+            '& .Mui-selected': {
+              backgroundColor: 'darkgrey', // Different shade for the selected tab
+              color: '#f5b557',
+            },
+          }}
+        >
           <Tab label={`Today (${todayData.length})`} />
           <Tab label={`Upcoming (${futureData.length})`} />
           <Tab label={`Completed (${previousData.length})`} />
           <Tab label={`All (${allData.length})`} />
         </Tabs>
+
 
         <Box sx={{ py: 1, borderRadius: 2 }}>
           {tabIndex === 0 && (todayData.length > 0 ? renderTable(todayData) : <>No Data</>)}
