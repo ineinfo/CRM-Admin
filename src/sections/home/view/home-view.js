@@ -14,12 +14,9 @@ export default function HomeView() {
   const { scrollYProgress } = useScroll();
   const router = useRouter();
 
-  router.push('/dashboard');
+  useEffect(() => {
+    router.push('/dashboard');
+  }, [router]);
 
-  // return (
-  //   <MainLayout>
-  //     <ScrollProgress scrollYProgress={scrollYProgress} />
-  //     <HomeHero />
-  //   </MainLayout>
-  // );
+  return null; // Ensure no other UI is rendered since it's redirecting
 }
