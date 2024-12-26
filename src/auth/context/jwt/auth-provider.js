@@ -6,7 +6,7 @@ import { useMemo, useEffect, useReducer, useCallback } from 'react';
 import axios, { endpoints } from 'src/utils/axios';
 import { AUTH_ROUTE, CHANGE_PASSWORD, LOGIN_ROUTE } from 'src/utils/apiendpoints';
 
-import { AuthContext } from './auth-context';
+import { AuthContext } from './auth-context'; // Ensure AuthContext is imported correctly
 import { setSession, isValidToken } from './utils';
 import { UsegetRoles } from 'src/api/roles';
 
@@ -244,9 +244,15 @@ export function AuthProvider({ children }) {
 
   console.log("AuthProvider state:", state); // Add logging to track state
 
-  return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={memoizedValue}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 AuthProvider.propTypes = {
   children: PropTypes.node,
 };
+
+// Ensure AuthProvider is wrapping the components that need to use the context
