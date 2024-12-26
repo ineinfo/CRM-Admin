@@ -20,35 +20,38 @@ import { UsegetRoles } from 'src/api/roles';
 
 const initialState = {
   user: null,
-  loading: true,
+  loading: false,
 };
 
 const reducer = (state, action) => {
-  if (action.type === 'INITIAL') {
-    return {
-      loading: false,
-      user: action.payload.user,
-    };
+  console.log('Reducer action:', action); // Add logging to track actions
+  switch (action.type) {
+    case 'INITIAL':
+      return {
+        user: action.payload.user,
+        loading: false,
+      };
+    case 'LOGIN':
+      return {
+        ...state,
+        user: action.payload.user,
+        loading: false, // Ensure loading is set to false on login
+      };
+    case 'REGISTER':
+      return {
+        ...state,
+        user: action.payload.user,
+        loading: false, // Ensure loading is set to false on register
+      };
+    case 'LOGOUT':
+      return {
+        ...state,
+        user: null,
+        loading: false, // Ensure loading is set to false on logout
+      };
+    default:
+      return state;
   }
-  if (action.type === 'LOGIN') {
-    return {
-      ...state,
-      user: action.payload.user,
-    };
-  }
-  if (action.type === 'REGISTER') {
-    return {
-      ...state,
-      user: action.payload.user,
-    };
-  }
-  if (action.type === 'LOGOUT') {
-    return {
-      ...state,
-      user: null,
-    };
-  }
-  return state;
 };
 
 // ----------------------------------------------------------------------
@@ -74,7 +77,6 @@ export function AuthProvider({ children }) {
         if (roles && roles.length > 0) {
           const matchedRoleName = roles.find((role) => role.id === role_id)?.role_name;
           console.log("Nikhil25", matchedRoleName);
-
 
           const canEdit =
             matchedRoleName === "Administrator " || matchedRoleName === "Admin"
@@ -112,7 +114,6 @@ export function AuthProvider({ children }) {
       });
     }
   }, [roles]);
-
 
   useEffect(() => {
     if (roles && roles.length > 0) {
@@ -220,26 +221,28 @@ export function AuthProvider({ children }) {
   );
 
   // ----------------------------------------------------------------------
-
   const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';
 
   const status = state.loading ? 'loading' : checkAuthenticated;
+  console.log("Nikhil", state);
 
   const memoizedValue = useMemo(
     () => ({
       user: state.user,
       method: 'jwt',
-      loading: status === 'loading',
-      authenticated: status === 'authenticated',
-      unauthenticated: status === 'unauthenticated',
+      loading: state.loading, // Use state.loading directly
+      authenticated: state.user ? true : false,
+      unauthenticated: !state.user,
       //
       login,
       register,
       logout,
       changePassword,
     }),
-    [login, logout, changePassword, register, state.user, status]
+    [login, logout, changePassword, register, state.user, state.loading]
   );
+
+  console.log("AuthProvider state:", state); // Add logging to track state
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;
 }
