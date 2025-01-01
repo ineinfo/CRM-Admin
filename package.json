@@ -47,6 +47,7 @@
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.5",
+    "file-loader": "^6.2.0",
     "firebase": "^10.7.1",
     "framer-motion": "^10.16.16",
     "highlight.js": "^11.9.0",
