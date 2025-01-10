@@ -40,6 +40,13 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
     }
   };
 
+  const getLatestFollowupDate = (followups) => {
+    if (followups.length === 0) return null;
+    const latestFollowup = followups.reduce((latest, current) => {
+      return dayjs(current.followup_date).isAfter(dayjs(latest.followup_date)) ? current : latest;
+    });
+    return latestFollowup.followup_date;
+  };
 
   const {
     developer_name,
@@ -55,7 +62,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
     sqft_starting_size,
     email,
     id,
-    status
+    status, followup
   } = row;
 
   const router = useRouter()
@@ -137,9 +144,16 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
 
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          <Button variant="contained" color="secondary" onClick={handlefollowupDate}>
-            <Iconify icon="eva:calendar-outline" />
-          </Button>
+          {followup.length > 0 ? (
+            <Button Button variant="contained" color="secondary" onClick={handlefollowupDate}>
+              {dayjs(getLatestFollowupDate(followup)).format('DD-MM-YYYY')}
+            </Button>
+
+          ) : (
+            <Button variant="contained" color="secondary" onClick={handlefollowupDate}>
+              Create Followup
+            </Button>
+          )}
         </TableCell>
 
         <TableCell sx={{ whiteSpace: 'nowrap' }}>

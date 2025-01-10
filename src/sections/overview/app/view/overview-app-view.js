@@ -206,7 +206,7 @@ export default function OverviewAppView() {
           <AppWelcome
             title={`Welcome back, ${user?.displayName} 👋 `}
             description="If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything."
-            img={<SeoIllustration />}
+
             action={
               <Button variant="contained" color="primary">
                 Go Now
@@ -221,8 +221,8 @@ export default function OverviewAppView() {
         <Grid xs={12} md={4}>
           <AppFeatured list={_appFeatured} />
         </Grid> */}
-        <Grid xs={24} md={12}>
-          {/* 
+        {/* <Grid xs={24} md={12}> */}
+        {/* 
           <Tabs value={tabIndex} onChange={handleChange} centered>
             <Tabs
               value={tabIndex}
@@ -284,7 +284,7 @@ export default function OverviewAppView() {
             {tabIndex === 2 && renderTable(previousData)}
             {tabIndex === 3 && renderTable(allData)}
           </Box> */}
-        </Grid>
+        {/* </Grid> */}
 
 
         <Grid xs={12} md={4}>
@@ -327,13 +327,13 @@ export default function OverviewAppView() {
             title="Total Sales"
             chart={{
               series: [
-                { label: 'Sale 1', value: 12244 },
-                { label: 'Sale 2', value: 53345 },
-                { label: 'Sale 3', value: 44313 },
-                { label: 'Sale 4', value: 78343 },
+                { label: 'Sale 1', value: 2500 },
+                { label: 'Sale 2', value: 2500 },
+                { label: 'Sale 3', value: 2500 },
+                { label: 'Sale 4', value: 3000 },
               ],
             }}
-            targetValue={150000}  // Set your target value here
+            targetValue={10000}  // Set your target value here
           />
         </Grid>
 

@@ -52,7 +52,12 @@ import Invoice from '../Invoice';
 
 // ----------------------------------------------------------------------
 
-const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...USER_STATUS_OPTIONS];
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'All' },
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+  { value: 'previous', label: 'Previous' },
+];
 const TABLE_HEAD = [
   { id: 'customer_name', label: 'Name', width: 180 },
   { id: 'customer_mobile', label: 'Phone', width: 180 },
@@ -153,6 +158,8 @@ export default function UserListView() {
     const fetchData = async () => {
       try {
         const response = await axios.get(endpoints.leads.list); // Update with your API endpoint
+        console.log('required_response', response.data.data);
+
         setTableData(response.data.data);
       } catch (err) {
         console.log(err);
@@ -280,10 +287,23 @@ export default function UserListView() {
                     }}
                   >
                     {['active', 'inactive', 'previous'].includes(tab.value)
-                      ? tableData.filter((user1) =>
-                        (tab.value === 'active' && user1.status === 1) ||
-                        (tab.value === 'inactive' && user1.status === 2) ||
-                        (tab.value === 'previous' && user1.status === 3)
+                      ? tableData.filter((user) =>
+                        user?.followup?.some((followup) => {
+                          const followupDate = new Date(followup.followup_date);
+                          const today = new Date();
+                          const oneWeekFromNow = new Date(today);
+                          oneWeekFromNow.setDate(today.getDate() + 7);
+                          const thirtyDaysFromNow = new Date(today);
+                          thirtyDaysFromNow.setDate(today.getDate() + 30);
+                          if (tab.value === 'active') {
+                            return followupDate >= today && followupDate <= oneWeekFromNow;
+                          } else if (tab.value === 'inactive') {
+                            return followupDate > oneWeekFromNow && followupDate <= thirtyDaysFromNow;
+                          } else if (tab.value === 'previous') {
+                            return followupDate < today;
+                          }
+                          return false;
+                        })
                       ).length
                       : tableData.length}
                   </Label>
@@ -437,17 +457,30 @@ function applyFilter({ inputData, comparator, filters }) {
     });
   }
 
-  // Filter by status
-  if (status !== 'all') {
-    if (status === 'active') {
-      inputData = inputData.filter((user) => user.status === 1);
-    } else if (status === 'inactive') {
-      inputData = inputData.filter((user) => user.status === 2);
-    } else if (status === 'previous') {
-      inputData = inputData.filter((user) => user.status === 3); // Adjust this value based on your data structure
-    }
-  }
+  // Filter by followup_date
+  const today = new Date();
+  const oneWeekFromNow = new Date(today);
+  oneWeekFromNow.setDate(today.getDate() + 7);
+  const thirtyDaysFromNow = new Date(today);
+  thirtyDaysFromNow.setDate(today.getDate() + 30);
 
+  if (status !== 'all') {
+    inputData = inputData.filter((user) => {
+      if (user?.followup?.length === 0) return false;
+
+      return user?.followup?.some((followup) => {
+        const followupDate = new Date(followup.followup_date);
+        if (status === 'active') {
+          return followupDate >= today && followupDate <= oneWeekFromNow;
+        } else if (status === 'inactive') {
+          return followupDate > oneWeekFromNow && followupDate <= thirtyDaysFromNow;
+        } else if (status === 'previous') {
+          return followupDate < today;
+        }
+        return false;
+      });
+    });
+  }
 
   // Filter by role
   if (role.length) {

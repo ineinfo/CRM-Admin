@@ -6,10 +6,12 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { useState } from 'react';
 
 // Function to format number with commas
-const formatNumberWithCommas = (value) => {
+export const formatNumberWithCommas = (value) => {
   if (!value) return '';
-  const stringValue = value.toString().replace(/\D/g, '');
-  return stringValue.replace(/^0+/, '').replace(/\B(?=(\d{3})+(?!\d))/g, ','); // Remove leading zeros and format with commas
+  const stringValue = value.toString().replace(/[^\d.]/g, ''); // Allow digits and decimal point
+  const parts = stringValue.split('.');
+  parts[0] = parts[0].replace(/^0+/, '').replace(/\B(?=(\d{3})+(?!\d))/g, ','); // Remove leading zeros and format with commas
+  return parts.join('.');
 };
 
 // Function to format date to DD-MM-YYYY

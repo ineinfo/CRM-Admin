@@ -49,6 +49,7 @@ import { CreateProperty, UpdateProperty } from 'src/api/properties';
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField, RHFUpload } from 'src/components/hook-form';
 import { CreateLead, UpdateLead } from 'src/api/leads';
+import { formatNumberWithCommas } from 'src/components/hook-form/rhf-text-field';
 
 export default function PropertyForm({ currentLead }) {
   const router = useRouter();
@@ -81,6 +82,7 @@ export default function PropertyForm({ currentLead }) {
   const [showParkingType, setShowParkingType] = useState(false);
   const [isCurrentLeadSet, setIsCurrentLeadSet] = useState(false);
   const [showdate, setShowdate] = useState(false);
+  const [startingPriceLabel, setStartingPriceLabel] = useState('Budget');
 
   const handleParkingChange = (event) => {
     const value = event.target.value;
@@ -89,6 +91,16 @@ export default function PropertyForm({ currentLead }) {
     }
     if (value === 'no') {
       setShowParkingType(false);
+    }
+  };
+
+  const handleLeadTypeChange = (selectedValue) => {
+    if (selectedValue === '1') {
+      setShowdate(true); // Show date for "Buyer"
+      setStartingPriceLabel('Budget');
+    } else if (selectedValue === '2') {
+      setShowdate(false); // Hide date for "Seller"
+      setStartingPriceLabel('Selling Price');
     }
   };
 
@@ -566,7 +578,7 @@ export default function PropertyForm({ currentLead }) {
               <FormControl fullWidth>
                 <RHFTextField
                   name="starting_price"
-                  label="Budget"
+                  label={startingPriceLabel}
                   variant="outlined"
                   type="number"
                   InputProps={{
@@ -614,13 +626,7 @@ export default function PropertyForm({ currentLead }) {
                         onChange={(event) => {
                           const selectedValue = event.target.value;
                           field.onChange(selectedValue);
-
-                          // Set showDate based on the selected lead type
-                          if (selectedValue === '1') {
-                            setShowdate(true); // Show date for "Buyer"
-                          } else if (selectedValue === '2') {
-                            setShowdate(false); // Hide date for "Seller"
-                          }
+                          handleLeadTypeChange(selectedValue);
                         }}
                         error={!!leadError} // Display error styling if validation fails
                       >
@@ -813,9 +819,11 @@ export default function PropertyForm({ currentLead }) {
                         value={Array.isArray(field.value) ? field.value : [0, 20000]}
                         onChange={(_, newValue) => {
                           const [min, max] = newValue;
-                          field.onChange(newValue);
-                          setValue('range_min', min); // Update range_min field
-                          setValue('range_max', max); // Update range_max field
+                          if (min >= 0 && max <= 20000) {
+                            field.onChange(newValue);
+                            setValue('range_min', min); // Update range_min field
+                            setValue('range_max', max); // Update range_max field
+                          }
                         }}
                         valueLabelDisplay="auto"
                         step={100}
@@ -823,17 +831,40 @@ export default function PropertyForm({ currentLead }) {
                         max={20000}
                       />
                       <Box display="flex" justifyContent="space-between" sx={{ mt: 1 }}>
-                        <Typography variant="body2">
-                          Min : {field.value ? `${field.value[0]} sqft` : '0 sqft'}
-                        </Typography>
-                        <Typography variant="body2">
-                          Max : {field.value ? `${field.value[1]} sqft` : '20000 sqft'}
-                        </Typography>
+                        <TextField
+                          label="Min"
+                          type="number"
+                          value={field.value[0]}
+                          onChange={(e) => {
+                            let min = e.target.value.replace(/^0+/, '') || '0';
+                            min = parseInt(min, 10);
+                            if (min < 0) min = 0;
+                            if (min > 20000) min = 20000;
+                            field.onChange([min, field.value[1]]);
+                            setValue('range_min', min);
+                          }}
+                          inputProps={{ min: 0, max: 20000 }}
+                        />
+                        <TextField
+                          label="Max"
+                          type="number"
+                          value={field.value[1]}
+                          onChange={(e) => {
+                            let max = e.target.value.replace(/^0+/, '') || '0';
+                            max = parseInt(max, 10);
+                            if (max < 0) max = 0;
+                            if (max > 20000) max = 20000;
+                            field.onChange([field.value[0], max]);
+                            setValue('range_max', max);
+                          }}
+                          inputProps={{ min: 0, max: 20000 }}
+                        />
                       </Box>
                     </>
                   )}
                 />
               </FormControl>
+
               <FormControl>
                 {' '}
                 <Controller
@@ -1007,6 +1038,12 @@ export default function PropertyForm({ currentLead }) {
                         </TextField>
                       </InputAdornment>
                     ),
+                    inputProps: { step: '0.01' } // Allow decimal values
+                  }}
+                  value={formatNumberWithCommas(values.service_charges)}
+                  onChange={(event) => {
+                    const rawValue = event.target.value.replace(/,/g, '');
+                    setValue('service_charges', rawValue);
                   }}
                   fullWidth
                 />

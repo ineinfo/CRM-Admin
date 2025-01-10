@@ -163,7 +163,7 @@ export default function UserListView() {
           heading="List"
           links={[
             { name: 'Dashboard', href: paths.dashboard.root },
-            { name: 'User', href: paths.dashboard.user.root },
+            { name: 'CRM Users', href: paths.dashboard.user.root },
             { name: 'List' },
           ]}
           action={
@@ -282,7 +282,10 @@ export default function UserListView() {
           </>
         }
         action={
-          <Button variant="contained" color="error" onClick={handleDeleteRows}>
+          <Button variant="contained" color="error" onClick={() => {
+            handleDeleteRows();
+            confirm.onFalse();
+          }}>
             Delete
           </Button>
         }

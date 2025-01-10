@@ -106,7 +106,6 @@ export default function AppWelcome({ title, description, action, img, ...other }
           >
             <TableRow>
               <TableCell
-                width={300}
                 align="left"
                 sx={{
                   fontWeight: 'bold',
@@ -239,8 +238,9 @@ export default function AppWelcome({ title, description, action, img, ...other }
               },
             },
             '& .Mui-selected': {
-              backgroundColor: 'darkgrey', // Different shade for the selected tab
-              color: '#f5b557',
+              backgroundColor: '#907f7f', // Different shade for the selected tab
+              color: theme.palette.primary.main,
+
             },
           }}
         >

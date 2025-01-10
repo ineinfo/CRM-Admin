@@ -26,8 +26,9 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
   const popover = usePopover();
   const { user } = useAuthContext()
-  // console.log("Nehal", user?.editable);
   const show = user?.editable
+  console.log('User:', user);
+
   return (
     <>
       <TableRow hover selected={selected}>

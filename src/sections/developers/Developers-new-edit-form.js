@@ -562,9 +562,13 @@ export default function PropertyForm({ currentProperty }) {
                       }}
                       renderValue={(selected) => selected.join(', ')}
                     >
-                      {Array.from({ length: 10 }, (_, index) => (
-                        <MenuItem key={index + 1} value={index + 1}>
-                          <Checkbox checked={field.value.includes(index + 1)} />
+                      <MenuItem value={'studio'}>
+                        <Checkbox checked={field.value.includes('studio')} />
+                        <ListItemText primary='Studio' />
+                      </MenuItem>
+                      {Array.from({ length: 11 }, (_, index) => (
+                        <MenuItem key={index + 1} value={index + 2}>
+                          <Checkbox checked={field.value.includes(index + 2)} />
                           <ListItemText primary={index + 1} />
                         </MenuItem>
                       ))}
@@ -699,7 +703,7 @@ export default function PropertyForm({ currentProperty }) {
                           setValue('range_max', max); // Update range_max field
                         }}
                         valueLabelDisplay="auto"
-                        step={100}
+                        step={10}
                         min={0}
                         max={20000}
                       />

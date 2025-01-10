@@ -45,9 +45,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
   const popover = usePopover();
 
   const { user } = useAuthContext()
-  // console.log("Nehal", user?.editable);
   const show = user?.editable
-
 
   function formatPrice(price) {
     if (price >= 1_000_000_000) {

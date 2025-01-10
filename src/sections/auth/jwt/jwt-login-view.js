@@ -61,15 +61,23 @@ export default function JwtLoginView() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       const log = await login?.(data.email, data.password);
-      console.log('LOG', log);
+      console.log('Login response:', log);
 
-      router.push(returnTo || PATH_AFTER_LOGIN);
+      // Check if the user is authenticated
+      if (log && log.user) {
+        console.log('User authenticated, navigating to:', returnTo || PATH_AFTER_LOGIN);
+        router.push(returnTo || PATH_AFTER_LOGIN);
+      } else {
+        console.error('User not authenticated');
+        setErrorMsg('Authentication failed. Please try again.');
+      }
     } catch (error) {
-      console.error(error);
+      console.error('Login error:', error);
       reset();
       setErrorMsg(typeof error === 'string' ? error : error.message);
     }
   });
+
   const renderForm = (
     <Stack spacing={2.5}>
       <RHFTextField name="email" label="Email address" />

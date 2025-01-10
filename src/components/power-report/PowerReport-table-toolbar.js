@@ -24,7 +24,7 @@ export default function UserTableToolbar({ filters, onFilters }) {
     const popover = usePopover();
     const getCountries = useCountryData();
     const [countries, setCountries] = useState([]);
-
+    const [currency, setCurrency] = useState();
 
     // Fetch property types
     const { products: propertyTypes } = UsegetPropertiesType();
@@ -62,6 +62,7 @@ export default function UserTableToolbar({ filters, onFilters }) {
     const CountryOption = countries.map((type) => ({
         id: type.id,
         name: type.name,
+        currency: type.currency,
     }));
 
 
@@ -117,6 +118,20 @@ export default function UserTableToolbar({ filters, onFilters }) {
         onFilters('range_min', newValue[0]); // Save range_min value
         onFilters('range_max', newValue[1]); // Save range_max value
     };
+
+    const handleFilterCountry = useCallback(
+        (event) => {
+            const selectedCountry = event.target.value;
+            onFilters('location', selectedCountry);
+            const selectedCountryData = CountryOption.find((country) => country.name === selectedCountry);
+            console.log("Selected Country", selectedCountryData);
+
+            if (selectedCountryData) {
+                setCurrency(selectedCountryData.currency);
+            }
+        },
+        [onFilters, CountryOption]
+    );
 
     return (
         <>
@@ -304,7 +319,7 @@ export default function UserTableToolbar({ filters, onFilters }) {
                         p: 2,
                     }}
                 >
-                    <InputLabel shrink>Price Range</InputLabel>
+                    <InputLabel shrink>Price Range {currency ? `in ${currency}` : ''}</InputLabel>
                     <Slider
                         value={[filters.range_min || 0, filters.range_max || 20000]}
                         onChange={handleRangeChange}
@@ -411,7 +426,7 @@ export default function UserTableToolbar({ filters, onFilters }) {
                     <InputLabel>Country</InputLabel>
                     <Select
                         value={filters.location || ''}
-                        onChange={(event) => onFilters('location', event.target.value)}
+                        onChange={handleFilterCountry}
                         input={<OutlinedInput label="Country" />}
                     >
                         {CountryOption.map((option) => (

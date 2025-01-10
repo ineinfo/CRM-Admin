@@ -79,7 +79,7 @@ export function useNavData() {
             subheader: t('management'),
             items: [
               {
-                title: t('Raw masters'),
+                title: t('Admin Centre'),
                 icon: ICONS.label,
                 path: [
                   paths.dashboard.roles.root,
@@ -209,7 +209,7 @@ export function useNavData() {
             subheader: t('management'),
             items: [
               {
-                title: t('Raw masters'),
+                title: t('Admin Centre'),
                 icon: ICONS.label,
                 path: [
                   paths.dashboard.roles.root,

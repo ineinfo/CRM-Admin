@@ -64,36 +64,44 @@ export function AuthProvider({ children }) {
 
   const initialize = useCallback(async () => {
     try {
-      const accessToken = sessionStorage.getItem(STORAGE_KEY);
-      if (accessToken && isValidToken(accessToken)) {
-        setSession(accessToken);
-        const response = await axios.get(AUTH_ROUTE);
-        const user = response.data;
+      const storedData = sessionStorage.getItem(STORAGE_KEY);
+      if (storedData) {
+        const { accessToken, user } = JSON.parse(storedData);
+        if (accessToken && isValidToken(accessToken)) {
+          setSession(accessToken);
+          const response = await axios.get(AUTH_ROUTE);
+          const userData = response.data;
 
-        const role_id = user?.data?.role_id;
-        console.log("Role ID:", role_id);
-        console.log("Roles:", roles);
+          const role_id = userData?.data?.role_id;
+          console.log("Role ID:", role_id);
+          console.log("Roles:", roles);
 
-        if (roles && roles.length > 0) {
-          const matchedRoleName = roles.find((role) => role.id === role_id)?.role_name;
-          console.log("Nikhil25", matchedRoleName);
+          if (roles && roles.length > 0) {
+            const matchedRoleName = roles.find((role) => role.id === role_id)?.role_name;
+            console.log("Nikhil25", matchedRoleName);
 
-          const canEdit =
-            matchedRoleName === "Administrator " || matchedRoleName === "Admin"
-              ? user.isEditable ? user.isEditable : true
-              : false;
-          console.log("Nikhil25", canEdit);
+            const canEdit =
+              matchedRoleName === "Administrator " || matchedRoleName === "Admin"
+                ? userData.isEditable ? userData.isEditable : true
+                : false;
+            console.log("Nikhil1111111", canEdit);
 
-          dispatch({
-            type: 'INITIAL',
-            payload: {
-              user: {
-                ...user,
-                accessToken,
-                editable: canEdit,
+            dispatch({
+              type: 'INITIAL',
+              payload: {
+                user: {
+                  ...userData,
+                  accessToken,
+                  editable: canEdit,
+                },
               },
-            },
-          });
+            });
+          } else {
+            dispatch({
+              type: 'INITIAL',
+              payload: { user: null },
+            });
+          }
         } else {
           dispatch({
             type: 'INITIAL',
@@ -127,13 +135,13 @@ export function AuthProvider({ children }) {
       const data = { email, password };
       const response = await axios.post(LOGIN_ROUTE, data);
       const { accessToken, user } = response.data;
-      console.log("Nikhil11", user);
+      console.log("Login successful:", user);
 
       sessionStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({ accessToken, user })
       );
-      const role_id = user?.data?.role_id
+      const role_id = user?.role_id
 
       const matchedRoleName = roles?.find((role) => role.id === role_id)?.role_name;
 
@@ -141,6 +149,7 @@ export function AuthProvider({ children }) {
         matchedRoleName === "Administrator " || matchedRoleName === "Admin"
           ? user.isEditable ? user.isEditable : true
           : false;
+      console.log("Nikhil11111112", canEdit);
 
       setSession(accessToken);
       dispatch({
@@ -153,8 +162,12 @@ export function AuthProvider({ children }) {
           },
         },
       });
+
+      // Return the user data for further checks
+      return { user };
     } catch (error) {
       console.error('Login failed:', error);
+      throw error;
     }
   }, [roles]);
 
