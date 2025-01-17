@@ -1111,7 +1111,7 @@ export default function PropertyForm({ currentLead }) {
                 <RHFUpload
                   multiple
                   name="documents" // Ensure this matches your form field name
-                  maxSize={5242880} // 5MB limit for PDFs
+                  maxSize={10485760} // 10MB limit for PDFs
                   accept="application/pdf"
                   onDrop={handleDropPdf}
                   onRemove={handleRemovePdf}
@@ -1144,7 +1144,7 @@ export default function PropertyForm({ currentLead }) {
                   sx={{ mt: 2, display: 'block', textAlign: 'center', color: 'text.secondary' }}
                 >
                   Allowed *.pdf
-                  <br /> max size of 5MB
+                  <br /> max size of 10MB
                 </Typography>
               </Box>
               <Box sx={{ gridColumn: 'span 2' }}>

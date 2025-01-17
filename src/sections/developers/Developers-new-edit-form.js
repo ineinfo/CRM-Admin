@@ -698,54 +698,46 @@ export default function PropertyForm({ currentProperty }) {
                         value={Array.isArray(field.value) ? field.value : [0, 20000]}
                         onChange={(_, newValue) => {
                           const [min, max] = newValue;
-                          field.onChange(newValue);
-                          setValue('range_min', min); // Update range_min field
-                          setValue('range_max', max); // Update range_max field
+                          if (min >= 0 && max <= 20000) {
+                            field.onChange(newValue);
+                            setValue('range_min', min); // Update range_min field
+                            setValue('range_max', max); // Update range_max field
+                          }
                         }}
                         valueLabelDisplay="auto"
-                        step={10}
+                        step={100}
                         min={0}
                         max={20000}
                       />
                       <Box display="flex" justifyContent="space-between" sx={{ mt: 1 }}>
-                        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "2px" }}>
-                          Min :
-                          <TextField
-                            type="number"
-                            value={field.value ? field.value[0] : 0}
-                            onChange={(e) => {
-                              const min = Number(e.target.value);
-                              const max = field.value[1];
-                              const newValue = [Math.min(min, max), max]; // Ensure min <= max
-                              field.onChange(newValue);
-                              setValue('range_min', newValue[0]);
-                              setValue('range_max', newValue[1]);
-                            }}
-                            inputProps={{ min: 0, max: 20000, step: 100 }}
-                            variant="outlined"
-                            size="small"
-                            sx={{ width: '50%' }}
-                          /> sqft
-                        </div>
-                        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "2px" }}>
-                          Max :
-                          <TextField
-                            type="number"
-                            value={field.value ? field.value[1] : 20000}
-                            onChange={(e) => {
-                              const max = Number(e.target.value);
-                              const min = field.value[0];
-                              const newValue = [min, Math.max(min, max)]; // Ensure max >= min
-                              field.onChange(newValue);
-                              setValue('range_min', newValue[0]);
-                              setValue('range_max', newValue[1]);
-                            }}
-                            inputProps={{ min: 0, max: 20000, step: 100 }}
-                            variant="outlined"
-                            size="small"
-                            sx={{ width: '50%' }}
-                          /> sqft
-                        </div>
+                        <TextField
+                          label="Min"
+                          type="number"
+                          value={field.value[0]}
+                          onChange={(e) => {
+                            let min = e.target.value.replace(/^0+/, '') || '0';
+                            min = parseInt(min, 10);
+                            if (min < 0) min = 0;
+                            if (min > 20000) min = 20000;
+                            field.onChange([min, field.value[1]]);
+                            setValue('range_min', min);
+                          }}
+                          inputProps={{ min: 0, max: 20000 }}
+                        />
+                        <TextField
+                          label="Max"
+                          type="number"
+                          value={field.value[1]}
+                          onChange={(e) => {
+                            let max = e.target.value.replace(/^0+/, '') || '0';
+                            max = parseInt(max, 10);
+                            if (max < 0) max = 0;
+                            if (max > 20000) max = 20000;
+                            field.onChange([field.value[0], max]);
+                            setValue('range_max', max);
+                          }}
+                          inputProps={{ min: 0, max: 20000 }}
+                        />
                       </Box>
                     </>
                   )}
@@ -1000,7 +992,7 @@ export default function PropertyForm({ currentProperty }) {
                   <RHFUpload
                     multiple
                     name="documents" // Ensure this matches your form field name
-                    maxSize={5242880} // 5MB limit for PDFs
+                    maxSize={10485760} // 10MB limit for PDFs
                     accept="application/pdf"
                     onDrop={handleDropPdf}
                     onRemove={handleRemovePdf}
@@ -1012,7 +1004,7 @@ export default function PropertyForm({ currentProperty }) {
                     sx={{ mt: 2, display: 'block', textAlign: 'center', color: 'text.secondary' }}
                   >
                     Allowed *.pdf
-                    <br /> max size of 5MB
+                    <br /> max size of 10MB
                   </Typography>
                 </FormControl>
               </Box>

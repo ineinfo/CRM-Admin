@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 import PropTypes from 'prop-types';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useMemo, useEffect, useCallback } from 'react';
+import { useMemo, useEffect, useCallback, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -37,6 +37,8 @@ export default function UserNewEditForm({ currentUser }) {
   const { products: roles } = UsegetRoles();
   const { enqueueSnackbar } = useSnackbar();
   // const password = useBoolean(); // Commenting out since we are removing the password field
+
+  const [selectedRoleDescription, setSelectedRoleDescription] = useState('');
 
   const NewUserSchema = Yup.object().shape({
     first_name: Yup.string().required('First Name is required'),
@@ -76,6 +78,15 @@ export default function UserNewEditForm({ currentUser }) {
   useEffect(() => {
     reset(defaultValues);
   }, [currentUser, reset, defaultValues]);
+
+  useEffect(() => {
+    if (currentUser && currentUser.role_id) {
+      const currentRole = roles.find((role) => role.id === currentUser.role_id);
+      if (currentRole) {
+        setSelectedRoleDescription(currentRole.description);
+      }
+    }
+  }, [currentUser, roles]);
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -117,6 +128,15 @@ export default function UserNewEditForm({ currentUser }) {
     },
     [setValue]
   );
+
+  const handleRoleChange = (event) => {
+    const selectedRoleId = event.target.value;
+    const selectedRole = roles.find((role) => role.id === selectedRoleId);
+    if (selectedRole) {
+      setSelectedRoleDescription(selectedRole.description);
+    }
+    setValue('role_id', selectedRoleId, { shouldValidate: true });
+  };
 
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
@@ -172,7 +192,7 @@ export default function UserNewEditForm({ currentUser }) {
                       {...field}
                       label="Role"
                       value={field.value || ''}
-                      onChange={(event) => field.onChange(event.target.value)}
+                      onChange={handleRoleChange}
                     >
                       {roles.map((role) => (
                         <MenuItem key={role.id} value={role.id}>
@@ -184,6 +204,7 @@ export default function UserNewEditForm({ currentUser }) {
                 )}
               />
               <RHFTextField name="mobile_number" type="mobile" label="Mobile Number" />
+
 
               {/* Commenting out the Password field */}
               {/* <RHFTextField
@@ -201,6 +222,31 @@ export default function UserNewEditForm({ currentUser }) {
                 }}
               /> */}
             </Box>
+
+
+            <Box
+              rowGap={3}
+              columnGap={1}
+              display="grid"
+              gridTemplateColumns={{
+                xs: 'repeat(1, 1fr)',
+                sm: 'repeat(1, 1fr)',
+              }}
+              style={{ marginTop: '20px' }}
+            >
+              <RHFTextField
+                name="role_description"
+                label="Role Description"
+                value={selectedRoleDescription}
+                InputProps={{
+                  readOnly: true,
+                }}
+                multiline
+                rows={4}
+              />
+
+            </Box>
+
 
             <Stack alignItems="flex-end" sx={{ mt: 3 }}>
               <LoadingButton type="submit" variant="contained" loading={isSubmitting}>

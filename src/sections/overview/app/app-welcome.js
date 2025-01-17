@@ -193,7 +193,8 @@ export default function AppWelcome({ title, description, action, img, ...other }
         position: 'relative',
         color: 'primary.darker',
         backgroundColor: 'common.white',
-        width: "100%"
+        width: "100%",
+        // minHeight: '100vh', 
       }}
       {...other}
     >
@@ -207,6 +208,7 @@ export default function AppWelcome({ title, description, action, img, ...other }
             md: theme.spacing(5),
           },
           textAlign: { xs: 'center', md: 'left' },
+          width: '100%', // Ensure the inner stack takes full width
         }}
       >
         <Typography variant="h4" sx={{ mb: 2, whiteSpace: 'pre-line' }}>
@@ -223,7 +225,7 @@ export default function AppWelcome({ title, description, action, img, ...other }
           sx={{
             backgroundColor: 'white',
             borderRadius: '8px',
-
+            width: '100%', // Ensure the Tabs take full width
             '& .MuiTab-root': {
               color: 'Black',
               textTransform: 'none',
@@ -233,14 +235,12 @@ export default function AppWelcome({ title, description, action, img, ...other }
               borderRadius: '8px',
               transition: 'background-color 0.3s ease',
               '&:hover': {
-                backgroundColor: 'darkgrey', // Slightly lighter black on hover
-
+                backgroundColor: 'darkgrey',
               },
             },
             '& .Mui-selected': {
-              backgroundColor: '#907f7f', // Different shade for the selected tab
+              backgroundColor: '#907f7f',
               color: theme.palette.primary.main,
-
             },
           }}
         >
@@ -251,7 +251,7 @@ export default function AppWelcome({ title, description, action, img, ...other }
         </Tabs>
 
 
-        <Box sx={{ py: 1, borderRadius: 2 }}>
+        <Box sx={{ py: 1, borderRadius: 2, width: '100%' }}>
           {tabIndex === 0 && (todayData.length > 0 ? renderTable(todayData) : <>No Data</>)}
           {tabIndex === 1 && (futureData.length > 0 ? renderTable(futureData) : <>No Data</>)}
           {tabIndex === 2 && (previousData.length > 0 ? renderTable(previousData) : <>No Data</>)}

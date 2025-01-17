@@ -72,7 +72,7 @@ export function RHFUpload({ name, multiple, helperText, ...other }) {
             helperText={
               (!!error || helperText) && (
                 <FormHelperText error={!!error} sx={{ px: 2 }}>
-                  {error ? error?.message : helperText}
+                  {error ? (error.message.includes('10485760') ? 'File is larger than 10MB' : error.message) : helperText}
                 </FormHelperText>
               )
             }
@@ -86,7 +86,7 @@ export function RHFUpload({ name, multiple, helperText, ...other }) {
             helperText={
               (!!error || helperText) && (
                 <FormHelperText error={!!error} sx={{ px: 2 }}>
-                  {error ? error?.message : helperText}
+                  {error ? (error.message.includes('10485760') || helperText.includes('10485760') ? 'File is larger than 10MB' : error.message) : helperText}
                 </FormHelperText>
               )
             }
