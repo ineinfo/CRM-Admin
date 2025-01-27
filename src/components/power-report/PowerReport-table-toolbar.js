@@ -14,8 +14,8 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-import { useCountryData, UsegetFinance, UsegetPropertiesType, UsegetPropertySatatus } from 'src/api/propertytype'; // Assuming this fetches the property type data
-import { UsegetAmenities } from 'src/api/amenities'; // Assuming this fetches the amenities data
+import { useCountryData, useStateData, useCityData, UsegetFinance, UsegetPropertiesType, UsegetPropertySatatus } from 'src/api/propertytype';
+import { UsegetAmenities } from 'src/api/amenities';
 import { Slider } from '@mui/material';
 
 // ----------------------------------------------------------------------
@@ -34,11 +34,31 @@ export default function UserTableToolbar({ filters, onFilters }) {
     const { propertyStatus: propertyStatuses } = UsegetPropertySatatus();
     const { finance: finances } = UsegetFinance();
 
+    const [selectedCountry, setSelectedCountry] = useState('');
+    const [selectedState, setSelectedState] = useState('');
+    const [states, setStates] = useState([]);
+    const [cities, setCities] = useState([]);
+
+    const getStates = useStateData(selectedCountry);
+    const getCities = useCityData(selectedState);
+
     useEffect(() => {
         if (getCountries.data) {
             setCountries(getCountries.data.data);
         }
     }, [getCountries.data]);
+
+    useEffect(() => {
+        if (getStates.data) {
+            setStates(getStates.data.data);
+        }
+    }, [getStates.data]);
+
+    useEffect(() => {
+        if (getCities.data) {
+            setCities(getCities.data.data);
+        }
+    }, [getCities.data]);
 
     console.log("Filter", filters);
 
@@ -122,15 +142,36 @@ export default function UserTableToolbar({ filters, onFilters }) {
     const handleFilterCountry = useCallback(
         (event) => {
             const selectedCountry = event.target.value;
-            onFilters('location', selectedCountry);
-            const selectedCountryData = CountryOption.find((country) => country.name === selectedCountry);
+            const selectedCountryData = CountryOption.find((country) => country.id === selectedCountry);
+            onFilters('location', selectedCountryData.name);
             console.log("Selected Country", selectedCountryData);
 
             if (selectedCountryData) {
                 setCurrency(selectedCountryData.currency);
+                setSelectedCountry(selectedCountryData.id);
+                setSelectedState('');
+                setCities([]);
             }
         },
         [onFilters, CountryOption]
+    );
+
+    const handleFilterState = useCallback(
+        (event) => {
+            const selectedState = event.target.value;
+            onFilters('stateId', selectedState);
+            setSelectedState(selectedState);
+            setCities([]);
+        },
+        [onFilters]
+    );
+
+    const handleFilterCity = useCallback(
+        (event) => {
+            const selectedCity = event.target.value;
+            onFilters('cityId', selectedCity);
+        },
+        [onFilters]
     );
 
     return (
@@ -425,12 +466,54 @@ export default function UserTableToolbar({ filters, onFilters }) {
                 >
                     <InputLabel>Country</InputLabel>
                     <Select
-                        value={filters.location || ''}
+                        value={selectedCountry || ''}
                         onChange={handleFilterCountry}
                         input={<OutlinedInput label="Country" />}
                     >
                         {CountryOption.map((option) => (
-                            <MenuItem key={option.id} value={option.name}>
+                            <MenuItem key={option.id} value={option.id}>
+                                {option.name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+
+                <FormControl
+                    sx={{
+                        flexShrink: 0,
+                        width: { xs: 1, md: 200 },
+                    }}
+                    disabled={!selectedCountry}
+                >
+                    <InputLabel>State</InputLabel>
+                    <Select
+                        value={selectedState || ''}
+                        onChange={handleFilterState}
+                        input={<OutlinedInput label="State" />}
+                    >
+                        {states.map((option) => (
+                            <MenuItem key={option.id} value={option.id}>
+                                {option.name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+
+                <FormControl
+                    sx={{
+                        flexShrink: 0,
+                        width: { xs: 1, md: 200 },
+                    }}
+                    disabled={!selectedState}
+                >
+                    <InputLabel>City</InputLabel>
+                    <Select
+                        value={filters.cityId || ''}
+                        onChange={handleFilterCity}
+                        input={<OutlinedInput label="City" />}
+                    >
+                        {cities.map((option) => (
+                            <MenuItem key={option.id} value={option.id}>
                                 {option.name}
                             </MenuItem>
                         ))}

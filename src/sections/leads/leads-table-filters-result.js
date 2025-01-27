@@ -42,6 +42,18 @@ export default function UserTableFiltersResult({
     onFilters('last_name', '');
   }, [onFilters]);
 
+  const handleRemoveLocation = useCallback(() => {
+    onFilters('location', '');
+  }, [onFilters]);
+
+  const handleRemoveStateId = useCallback(() => {
+    onFilters('stateId', '');
+  }, [onFilters]);
+
+  const handleRemoveCityId = useCallback(() => {
+    onFilters('cityId', '');
+  }, [onFilters]);
+
   return (
     <Stack spacing={1.5} {...other}>
       <Box sx={{ typography: 'body2' }}>
@@ -83,6 +95,24 @@ export default function UserTableFiltersResult({
             <Chip label={filters.last_name} size="small" onDelete={handleRemoveLastName} />
           </Block>
         )}
+
+        {/* {!!filters.location && (
+          <Block label="Location:">
+            <Chip label={filters.location} size="small" onDelete={handleRemoveLocation} />
+          </Block>
+        )}
+
+        {!!filters.stateId && (
+          <Block label="State:">
+            <Chip label={filters.stateId} size="small" onDelete={handleRemoveStateId} />
+          </Block>
+        )}
+
+        {!!filters.cityId && (
+          <Block label="City:">
+            <Chip label={filters.cityId} size="small" onDelete={handleRemoveCityId} />
+          </Block>
+        )} */}
 
         <Button
           color="error"

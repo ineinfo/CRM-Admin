@@ -241,7 +241,7 @@ export default function FollowupListView({ id }) {
         <>
             <Container maxWidth={settings.themeStretch ? false : 'lg'}>
                 <CustomBreadcrumbs
-                    heading="List"
+                    heading="Lead"
                     links={[
                         { name: 'Dashboard', href: paths.dashboard.root },
                         report ? {
@@ -251,8 +251,8 @@ export default function FollowupListView({ id }) {
                             name: 'Leads',
                             href: paths.dashboard.leads.list,
                         },
-                        { name: 'Followup', href: `${paths.dashboard.followup.root}?id=${id}` },
-                        { name: 'List' },
+                        { name: 'Follow-up', href: `${paths.dashboard.followup.root}?id=${id}` },
+                        { name: 'Follow-up History' },
                     ]}
                     action={
                         report ? "" : <Button

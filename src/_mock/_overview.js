@@ -328,3 +328,17 @@ export const _bookingNew = [...Array(5)].map((_, index) => ({
   avatarUrl: _mock.image.avatar(index),
   coverUrl: _mock.image.travel(index),
 }));
+
+export const _topUsers = [...Array(5)]
+  .map((_, index) => ({
+    id: _mock.id(index),
+    name: _mock.fullName(index),
+    avatarUrl: _mock.image.avatar(index) || '/assets/icons/user.svg', // Default user icon if no image
+    sales: _mock.number.price(index),
+    lastMonthPosition: `Top ${index + 1}`, // Position for last month
+  }))
+  .sort((a, b) => b.sales - a.sales) // Sort by sales in descending order
+  .map((user, index) => ({
+    ...user,
+    thisMonthPosition: index + 1, // Automatically set position based on sorted order
+  }));

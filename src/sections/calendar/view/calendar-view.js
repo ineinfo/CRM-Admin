@@ -34,6 +34,7 @@ import { useEvent, useCalendar } from '../hooks';
 import CalendarToolbar from '../calendar-toolbar';
 import CalendarFilters from '../calendar-filters';
 import CalendarFiltersResult from '../calendar-filters-result';
+import { usePathname } from 'next/navigation';
 
 // ----------------------------------------------------------------------
 
@@ -56,13 +57,11 @@ export default function CalendarView() {
 
   const [filters, setFilters] = useState(defaultFilters);
 
-
+  const pathname = usePathname();
 
   const { events, eventsLoading } = useGetEvents();
 
   console.log("Events", events);
-
-
 
   const dateError = isAfter(filters.startDate, filters.endDate);
 
@@ -117,8 +116,6 @@ export default function CalendarView() {
     dateError,
   });
 
-
-
   const renderResults = (
     <CalendarFiltersResult
       filters={filters}
@@ -162,7 +159,6 @@ export default function CalendarView() {
     return color; // If the format is unrecognized, return the original color
   }
 
-
   const renderEventContent = (eventInfo) => {
     const darkenedColor = darkenColor(eventInfo.backgroundColor, 0.2); // 20% darker
     console.log('eventInfo', eventInfo);
@@ -196,14 +192,18 @@ export default function CalendarView() {
             mb: { xs: 3, md: 5 },
           }}
         >
-          <Typography variant="h4">Calendar</Typography>
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="mingcute:add-line" />}
-            onClick={onOpenForm}
-          >
-            New Event
-          </Button>
+          {pathname.includes('calendar') && (
+            <>
+              <Typography variant="h4">Calendar</Typography>
+              <Button
+                variant="contained"
+                startIcon={<Iconify icon="mingcute:add-line" />}
+                onClick={onOpenForm}
+              >
+                New Event
+              </Button>
+            </>
+          )}
         </Stack>
 
         {canReset && renderResults}
@@ -295,8 +295,6 @@ export default function CalendarView() {
         colorOptions={CALENDAR_COLOR_OPTIONS}
         onClickEvent={onClickEventInFilters}
       />
-
-
     </>
   );
 }

@@ -33,7 +33,7 @@ export default function FollowupCardsView({ id }) {
     return (
         <Container maxWidth={settings.themeStretch ? false : 'lg'}>
             <CustomBreadcrumbs
-                heading="User Cards"
+                heading="Lead Follow-up Status"
                 links={[
                     { name: 'Dashboard', href: paths.dashboard.root }, {
                         name: 'Leads',

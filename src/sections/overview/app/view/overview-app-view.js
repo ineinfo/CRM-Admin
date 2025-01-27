@@ -8,7 +8,7 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { SeoIllustration } from 'src/assets/illustrations';
-import { _appAuthors, _appRelated, _appFeatured, _appInvoices, _appInstalled } from 'src/_mock';
+import { _appAuthors, _appRelated, _appFeatured, _appInvoices, _appInstalled, _topUsers } from 'src/_mock';
 import { useSettingsContext } from 'src/components/settings';
 import { Alert, alpha, Box, Card, CardContent, CardHeader, List, ListItem, Paper, Snackbar, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, Typography } from '@mui/material';
 import { useGetEvents } from 'src/api/calendar';
@@ -27,6 +27,8 @@ import { endpoints } from 'src/utils/axios';
 import { enqueueSnackbar } from 'notistack';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import { CalendarView } from 'src/sections/calendar/view';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -43,8 +45,12 @@ export default function OverviewAppView() {
   const [tabIndex, setTabIndex] = useState(0);
   const [openFollowups, setOpenFollowups] = useState([]);  // Track open state for each follow-up
   const [pastEvents, setPastEvents] = useState([]);
+  const [topUsers, setTopUsers] = useState([]);
   // const [open, setOpen] = useState(true);
   // const today = dayjs().format("YYYY-MM-DD");
+
+  const user1 = useAuthContext();
+  console.log("user1", user1.user);
 
 
   useEffect(() => {
@@ -136,10 +142,6 @@ export default function OverviewAppView() {
     setFutureData(futureDataFiltered);
   }, [followupData]);
 
-  console.log("Nikhil1", todayData);
-  console.log("Nikhil2", previousData);
-  console.log("Nikhil3", futureData);
-
   // const todaysFollowups = followupData.filter((item) =>
   //   dayjs(item.followup_date).isSame(today, "date")
   // );
@@ -164,6 +166,11 @@ export default function OverviewAppView() {
     setTodaysEvents(upcomingEvents);
     setPastEvents(completedEvents);
   }, [events]);
+
+  useEffect(() => {
+    // Simulate API call to fetch top users
+    setTopUsers(_topUsers);
+  }, []);
 
   const allData = [...todayData, ...previousData, ...futureData];
 
@@ -215,6 +222,10 @@ export default function OverviewAppView() {
 
           />
 
+        </Grid>
+
+        <Grid xs={12} md={6} lg={24}>
+          <CalendarView />
         </Grid>
 
         {/* 
@@ -337,9 +348,9 @@ export default function OverviewAppView() {
           />
         </Grid>
 
-        <Grid xs={12} md={6} lg={5}>
+        <Grid xs={12} md={6} lg={8}>
           <AppAreaInstalled
-            title="Area Installed"
+            title="Sales Graph"
             subheader="(+43%) than last year"
             chart={{
               categories: [
@@ -348,17 +359,24 @@ export default function OverviewAppView() {
               ],
               series: [
                 {
-                  year: '2019',
+                  year: '2023',
                   data: [
-                    { name: 'Asia', data: [10, 41, 35, 51, 49, 62, 69, 91, 148, 35, 51, 49] },
-                    { name: 'America', data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 13, 56, 77] },
+                    { name: 'AED', data: [10, 41, 35, 51, 49, 62, 69, 91, 148, 35, 51, 49] },
+                    { name: 'GBP', data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 13, 56, 77] },
                   ],
                 },
                 {
-                  year: '2020',
+                  year: '2024',
                   data: [
-                    { name: 'Asia', data: [51, 35, 41, 10, 91, 69, 62, 148, 91, 69, 62, 49] },
-                    { name: 'America', data: [56, 13, 34, 10, 77, 99, 88, 45, 77, 99, 88, 77] },
+                    { name: 'AED', data: [51, 35, 41, 10, 91, 69, 62, 148, 91, 69, 62, 49] },
+                    { name: 'GBP', data: [56, 13, 34, 10, 77, 99, 88, 45, 77, 99, 88, 77] },
+                  ],
+                },
+                {
+                  year: '2025',
+                  data: [
+                    { name: 'AED', data: [51,] },
+                    { name: 'GBP', data: [56,] },
                   ],
                 },
               ],
@@ -366,7 +384,7 @@ export default function OverviewAppView() {
           />
         </Grid>
 
-        <Grid xs={12} md={3}>
+        {/* <Grid xs={12} md={3}>
           <Card sx={{ bgcolor: alpha(theme.palette.primary.main, 0.2), borderRadius: 2 }}>
             <CardHeader
               title="Event Reminder"
@@ -405,7 +423,7 @@ export default function OverviewAppView() {
               </List>
             </CardContent>
           </Card>
-        </Grid>
+        </Grid> */}
 
         <Grid xs={12} lg={8}>
           <AppNewInvoice
@@ -422,18 +440,18 @@ export default function OverviewAppView() {
         </Grid>
 
         <Grid xs={12} md={6} lg={4}>
-          <AppTopRelated title="Top Related Applications" list={_appRelated} />
+          <AppTopRelated title="Top Users" list={topUsers} />
         </Grid>
-
+        {/* 
         <Grid xs={12} md={6} lg={4}>
           <AppTopInstalledCountries title="Top Installed Countries" list={_appInstalled} />
         </Grid>
 
         <Grid xs={12} md={6} lg={4}>
           <AppTopAuthors title="Top Authors" list={_appAuthors} />
-        </Grid>
+        </Grid> */}
 
-        <Grid xs={12} md={6} lg={4}>
+        {/* <Grid xs={12} md={6} lg={4}>
           <Stack spacing={3}>
             <AppWidget
               title="Conversion"
@@ -454,7 +472,8 @@ export default function OverviewAppView() {
               }}
             />
           </Stack>
-        </Grid>
+        </Grid> */}
+
       </Grid>
 
       <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
@@ -505,7 +524,7 @@ export default function OverviewAppView() {
               </Card>
             </Snackbar>
           ))}
-      </Box>;
+      </Box>
 
 
     </Container >

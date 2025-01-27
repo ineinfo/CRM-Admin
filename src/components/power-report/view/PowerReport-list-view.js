@@ -74,6 +74,8 @@ const defaultFilters = {
     property_status: 0,
     finance: 0,
     location: "",
+    stateId: "",
+    cityId: "",
     note: "",
     range_min: 0,
     range_max: 20000,
@@ -174,7 +176,12 @@ export default function PowerReportListView() {
     }, [enqueueSnackbar]);
 
     const handleResetFilters = useCallback(() => {
-        setFilters(defaultFilters);
+        setFilters({
+            ...defaultFilters,
+            location: '',
+            stateId: '',
+            cityId: '',
+        });
     }, []);
 
     const handleDeleteRow = useCallback(
@@ -432,10 +439,13 @@ function applyFilter({ inputData, comparator, filters }) {
         property_status,
         finance,
         location,
+        stateId,
+        cityId,
     } = filters;
 
     const stabilizedThis = inputData.map((el, index) => [el, index]);
-    console.log("Data nedded", inputData);
+    console.log("Data nedded", location, stateId, cityId);
+    console.log("Data nedded1", inputData);
 
     stabilizedThis.sort((a, b) => {
         const order = comparator(a[0], b[0]);
@@ -491,10 +501,19 @@ function applyFilter({ inputData, comparator, filters }) {
         inputData = inputData.filter((user) => finance.includes(user.finance));
     }
 
-    // Filter by  Country
+    // Filter by Country
     if (location.length) {
         inputData = inputData.filter((user) => location.includes(user.location));
+    }
 
+    // Filter by State
+    if (stateId.length) {
+        inputData = inputData.filter((user) => stateId.includes(user.state_id));
+    }
+
+    // Filter by City
+    if (cityId.length) {
+        inputData = inputData.filter((user) => cityId.includes(user.city_id));
     }
 
     // Filter by number of bedrooms

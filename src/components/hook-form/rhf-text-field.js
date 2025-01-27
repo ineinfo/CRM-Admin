@@ -67,7 +67,7 @@ export default function RHFTextField({ name, helperText, type, placeholder, ...o
       onChange={(event) => {
         const rawValue = event.target.value;
         const numericValue = rawValue.replace(/\D/g, ''); // Remove non-numeric characters
-        if (numericValue.length <= 15) {
+        if (numericValue.length <= 5000) {
           // Limit the input to 15 characters
           field.onChange(numericValue);
         }

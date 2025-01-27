@@ -25,6 +25,7 @@ const Template4 = ({ onClose, data, currency }) => {
     const [pdfUrl, setPdfUrl] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [progress, setProgress] = useState(0);
 
     const formattedAmenities = amenities
         .filter(amenity => data?.amenities?.includes(amenity.id))
@@ -110,6 +111,7 @@ const Template4 = ({ onClose, data, currency }) => {
     const handleGeneratePdf = () => {
         setIsModalOpen(true);
         setLoading(true);
+        setProgress(0); // Reset progress
         // onClose()
         setTimeout(async () => {
             const customWidth = 210; // in mm
@@ -605,12 +607,15 @@ const Template4 = ({ onClose, data, currency }) => {
                 currentY58 += 10;
             });
 
+            const updateProgress = (value) => {
+                setProgress(value);
+            };
 
-
-
-
-
-
+            // Simulate progress updates
+            for (let i = 1; i <= 100; i++) {
+                await new Promise(resolve => setTimeout(resolve, 30)); // Simulate delay
+                updateProgress(i);
+            }
 
             pdf.addPage();
 
@@ -744,12 +749,7 @@ const Template4 = ({ onClose, data, currency }) => {
 
             addBorders(pdf, pageWidth, pageHeight);
 
-
-
-
             pdf.addPage();
-
-
 
             const locationXPos = 20;
             const locationYPos = 40;
@@ -1119,17 +1119,9 @@ const Template4 = ({ onClose, data, currency }) => {
                 }
             });
 
-
-
-
-
             addBorders(pdf, pageWidth, pageHeight);
 
-
             pdf.addPage();
-
-
-
 
             const boxWidth = 130;
             const boxHeight = 100;
@@ -1149,72 +1141,7 @@ const Template4 = ({ onClose, data, currency }) => {
 
             pdf.setFillColor(237, 237, 237);
 
-
-
-
-            // const displayWidth1 = imageWidth; // Displayed image width in the PDF
-            // const displayHeight1 = imageHeight; // Displayed image height in the PDF
-            // const radius1 = 5; // Corner radius1 for rounded rectangle
-
-            // // Set canvas resolution based on device pixel ratio for higher quality
-            // const resolutionMultiplier1 = 3; // Scale up for higher quality
-            // const canvas1 = document.createElement("canvas1");
-            // canvas1.width = displayWidth1 * resolutionMultiplier1;
-            // canvas1.height = displayHeight1 * resolutionMultiplier1;
-            // const ctx1 = canvas.getContext("2d");
-            // ctx1.scale(resolutionMultiplier1, resolutionMultiplier1);
-
-            // // Draw rounded rectangle
-            // ctx1.beginPath();
-            // ctx1.moveTo(radius1, 0);
-            // ctx1.lineTo(displayWidth1 - radius1, 0);
-            // ctx1.quadraticCurveTo(displayWidth1, 0, displayWidth1, radius1);
-            // ctx1.lineTo(displayWidth1, displayHeight1 - radius1);
-            // ctx1.quadraticCurveTo(displayWidth1, displayHeight1, displayWidth1 - radius1, displayHeight1);
-            // ctx1.lineTo(radius1, displayHeight1);
-            // ctx1.quadraticCurveTo(0, displayHeight1, 0, displayHeight1 - radius1);
-            // ctx1.lineTo(0, radius1);
-            // ctx1.quadraticCurveTo(0, 0, radius1, 0);
-            // ctx1.closePath();
-            // ctx1.clip();
-
-            // // Draw the image inside the rounded rectangle
-            // const img1 = new Image();
-            // img1.src = profile.src; // Pass the source of the logo as a prop
-            // await new Promise((resolve) => (img1.onload = resolve)); // Wait for the image to load
-            // ctx1.drawImage(img1, 0, 0, displayWidth1, displayHeight1);
-
-            // // Convert the canvas1 to a high-quality base64 image
-            // const roundedImage1 = canvas.toDataURL(profile, 1.0); // Quality factor set to 1.0
-
-            // // Add the high-quality image to the PDF
-            // // pdf.addImage(roundedImage, "JPEG", x, y, displayWidth1, displayHeight1);
-
-            // pdf.addImage(
-            //     roundedImage1,
-            //     "JPEG",
-            //     imageXPos - 5,
-            //     imageYPos - 3,
-            //     displayWidth1,
-            //     displayHeight1
-            // );
-
-
-
             await addRoundedImageToPdf(pdf, logo1, imageXPos - 4, imageYPos - 4, imageWidth + 2, imageHeight + 2, 5);
-
-
-            // pdf.addImage(
-            //     profile.src,
-            //     "JPEG",
-            //     imageXPos - 5,
-            //     imageYPos - 3,
-            //     imageWidth,
-            //     imageHeight,
-            //     10,
-            //     10,
-            //     "F"
-            // );
 
             const textXPos = imageXPos + imageWidth + 30;
             const lineSpacing = 7;
@@ -1243,10 +1170,6 @@ const Template4 = ({ onClose, data, currency }) => {
             pdf.text("you on your next property investment.", leftTextXPos, imageYPos + 75);
 
             addBorders(pdf, pageWidth, pageHeight);
-
-
-
-
 
             const blob = pdf.output("blob");
             const url = URL.createObjectURL(blob);
@@ -1284,10 +1207,9 @@ const Template4 = ({ onClose, data, currency }) => {
                         <div className="modal-body">
                             {loading ? (
                                 <div className="loading-overlay">
-                                    <div className="loading-spinner">
-                                        {/* Use a spinner or a loading message */}
-                                        <div className="spinner"></div>
-                                        <p>Generating PDF...</p>
+                                    <div className="progress-bar-container">
+                                        <div className="progress-bar" style={{ width: `${progress}%` }}></div>
+                                        <p>{progress}%</p>
                                     </div>
                                 </div>
                             ) : (
@@ -1306,23 +1228,6 @@ const Template4 = ({ onClose, data, currency }) => {
                 </div>
             )}
         </div>
-        // <div className="template1-container">
-        //     {loading && (
-        //         <div className="loading-overlay">
-        //             <div className="loading-spinner">
-        //                 {/* Use a spinner or a loading message */}
-        //                 <div className="spinner"></div>
-        //                 <p>Generating PDF...</p>
-        //             </div>
-        //         </div>
-        //     )}
-        //     <button className="generate-btn" onClick={() => {
-        //         setLoading(true)
-        //         handleDownload()
-        //     }} disabled={loading}>
-        //         {loading ? "Wait" : "Template 3"}
-        //     </button>
-        // </div>
     );
 };
 

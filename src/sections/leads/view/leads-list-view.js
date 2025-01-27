@@ -14,7 +14,6 @@ import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
 
 import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
 
 import { useBoolean } from 'src/hooks/use-boolean';
@@ -49,6 +48,8 @@ import UserTableToolbar from '../leads-table-toolbar';
 import UserTableFiltersResult from '../leads-table-filters-result';
 import UserTableRow from '../leads-table-row';
 import Invoice from '../Invoice';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { UsegetRoles } from 'src/api/roles';
 
 // ----------------------------------------------------------------------
 
@@ -81,9 +82,23 @@ const defaultFilters = {
 export default function UserListView() {
   const { enqueueSnackbar } = useSnackbar();
   const table = useTable();
-
   const { user } = useAuthContext();
   const Token = user?.accessToken;
+  const [show, setShow] = useState(false);
+  const { products: roles } = UsegetRoles();
+
+  const fetchRoles = (data) => {
+    const userRole = data.find(role => role.id === user.role_id);
+    if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+      setShow(true);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchRoles(roles);
+    }
+  }, [user, roles]);
 
   const CountryApi = useCountryData();
   const CountryList = CountryApi.data?.data;
@@ -91,6 +106,7 @@ export default function UserListView() {
   const settings = useSettingsContext();
 
   const router = useRouter();
+  const searchParams = useSearchParams(); // Move this to the top level
 
   const confirm = useBoolean();
 
@@ -144,6 +160,16 @@ export default function UserListView() {
           });
         }
 
+        // Filter data based on lead_type and route query parameter
+        const type = searchParams.get('type');
+        console.log('typeeeeeeeeeee', type);
+
+        if (type === 'buyer') {
+          fetchedData = fetchedData.filter(item => item.lead_type === 1);
+        } else if (type === 'seller') {
+          fetchedData = fetchedData.filter(item => item.lead_type === 2);
+        }
+
         setTableData(fetchedData);
       } catch (err) {
         console.log(err);
@@ -152,22 +178,7 @@ export default function UserListView() {
     };
 
     fetchData();
-  }, [enqueueSnackbar, CountryList]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(endpoints.leads.list); // Update with your API endpoint
-        console.log('required_response', response.data.data);
-
-        setTableData(response.data.data);
-      } catch (err) {
-        console.log(err);
-        enqueueSnackbar('Failed to load data', { variant: 'error' });
-      }
-    };
-    fetchData();
-  }, [enqueueSnackbar]);
+  }, [enqueueSnackbar, CountryList, searchParams]);
 
   const handleResetFilters = useCallback(() => {
     setFilters(defaultFilters);
@@ -244,14 +255,16 @@ export default function UserListView() {
             { name: 'List' },
           ]}
           action={
-            <Button
-              component={RouterLink}
-              href={paths.dashboard.leads.new}
-              variant="contained"
-              startIcon={<Iconify icon="mingcute:add-line" />}
-            >
-              Create
-            </Button>
+            show && (
+              <Button
+                component={RouterLink}
+                href={paths.dashboard.leads.new}
+                variant="contained"
+                startIcon={<Iconify icon="mingcute:add-line" />}
+              >
+                Create
+              </Button>
+            )
           }
           sx={{
             mb: { xs: 3, md: 5 },

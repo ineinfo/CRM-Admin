@@ -20,7 +20,7 @@ export default function AppAreaInstalled({ title, subheader, chart, ...other }) 
   const {
     colors = [
       [theme.palette.primary.light, theme.palette.primary.main],
-      [theme.palette.warning.light, theme.palette.warning.main],
+      [theme.palette.info.light, theme.palette.info.main],
     ],
     categories,
     series,
@@ -29,7 +29,7 @@ export default function AppAreaInstalled({ title, subheader, chart, ...other }) 
 
   const popover = usePopover();
 
-  const [seriesData, setSeriesData] = useState('2019');
+  const [seriesData, setSeriesData] = useState('2025');
 
   const chartOptions = useChart({
     colors: colors.map((colr) => colr[1]),

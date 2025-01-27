@@ -73,22 +73,22 @@ export default function ProductNewEditForm({ currentProduct }) {
   })
 
   const renderDetails = (
-      <Grid xs={12} md={12}>
-        <Card>
-          <Stack spacing={3} sx={{ p: 3 }}>
-            <RHFTextField name="role_name" label="Role Name" />
-            <RHFTextField name="description" label="Description" multiline rows={4} />
-          </Stack>
-        </Card>
-      </Grid>
+    <Grid xs={12} md={12}>
+      <Card>
+        <Stack spacing={3} sx={{ p: 3 }}>
+          <RHFTextField name="role_name" label="Role Name" />
+          <RHFTextField name="description" label="Description" multiline rows={4} />
+        </Stack>
+      </Card>
+    </Grid>
   );
 
   const renderActions = (
-      <Grid xs={12} md={12} sx={{ display: 'flex', alignItems: 'left' }}>
-        <LoadingButton type="submit" variant="contained" size="large" loading={isSubmitting}>
-          {!currentProduct ? 'Create Role' : 'Save Changes'}
-        </LoadingButton>
-      </Grid>
+    <Grid xs={12} md={12} sx={{ display: 'flex', alignItems: 'left' }}>
+      <LoadingButton type="submit" variant="contained" size="large" loading={isSubmitting}>
+        {!currentProduct ? 'Create Role' : 'Save Changes'}
+      </LoadingButton>
+    </Grid>
   );
 
   return (

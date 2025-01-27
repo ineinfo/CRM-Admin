@@ -142,7 +142,9 @@ export function useNavData() {
                 path: [paths.dashboard.leads.root, paths.dashboard.followup.new, paths.dashboard.followup.root],
                 icon: ICONS.leads,
                 children: [
-                  { title: t('list'), path: paths.dashboard.leads.list },
+                  // { title: t('list'), path: paths.dashboard.leads.list },
+                  { title: t('Buyer'), path: paths.dashboard.leads.buyer },
+                  { title: t('Seller'), path: paths.dashboard.leads.seller },
                   { title: t('create new lead'), path: paths.dashboard.leads.new },
                 ],
               },
@@ -160,7 +162,7 @@ export function useNavData() {
                 path: [paths.dashboard.propertypage.main],
                 icon: ICONS.job,
                 children: [
-                  { title: t('list'), path: paths.dashboard.propertypage.root },
+                  { title: t('all developers'), path: paths.dashboard.propertypage.root },
                   { title: t('create new developer'), path: paths.dashboard.propertypage.new },
                 ],
               },
@@ -272,7 +274,9 @@ export function useNavData() {
                 path: [paths.dashboard.leads.root, paths.dashboard.followup.new, paths.dashboard.followup.root],
                 icon: ICONS.leads,
                 children: [
-                  { title: t('list'), path: paths.dashboard.leads.list },
+                  // { title: t('list'), path: paths.dashboard.leads.list },
+                  { title: t('Buyer'), path: paths.dashboard.leads.buyer },
+                  { title: t('Seller'), path: paths.dashboard.leads.seller },
                   { title: t('create new lead'), path: paths.dashboard.leads.new },
                 ],
               },
@@ -290,7 +294,7 @@ export function useNavData() {
                 path: [paths.dashboard.propertypage.main],
                 icon: ICONS.job,
                 children: [
-                  { title: t('list'), path: paths.dashboard.propertypage.root },
+                  { title: t('all developers'), path: paths.dashboard.propertypage.root },
                   { title: t('create new developer'), path: paths.dashboard.propertypage.new },
                 ],
               },

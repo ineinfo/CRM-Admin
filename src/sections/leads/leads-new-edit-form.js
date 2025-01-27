@@ -149,6 +149,10 @@ export default function PropertyForm({ currentLead }) {
     // council_tax_band: Yup.number().required('Council Tax Band is required'),
     // note: Yup.string(),
     lead_type: Yup.number().positive().required('Lead is required'),
+    range_size: Yup.array()
+      .of(Yup.number().required('Range is required').positive())
+      .min(2, 'Range is required')
+      .required('Range is required'),
   });
 
   const { user } = useAuthContext();
@@ -807,7 +811,7 @@ export default function PropertyForm({ currentLead }) {
                 </FormControl>
               )}
 
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!methods.formState.errors.range_size}>
                 <Controller
                   name="range_size"
                   control={control}
@@ -834,7 +838,7 @@ export default function PropertyForm({ currentLead }) {
                         <TextField
                           label="Min"
                           type="number"
-                          value={field.value[0]}
+                          value={field.value[0] === 0 ? '' : field.value[0]}
                           onChange={(e) => {
                             let min = e.target.value.replace(/^0+/, '') || '0';
                             min = parseInt(min, 10);
@@ -844,11 +848,21 @@ export default function PropertyForm({ currentLead }) {
                             setValue('range_min', min);
                           }}
                           inputProps={{ min: 0, max: 20000 }}
+                          onFocus={(e) => {
+                            if (e.target.value === '0') {
+                              e.target.value = '';
+                            }
+                          }}
+                          onBlur={(e) => {
+                            if (e.target.value === '') {
+                              e.target.value = '0';
+                            }
+                          }}
                         />
                         <TextField
                           label="Max"
                           type="number"
-                          value={field.value[1]}
+                          value={field.value[1] === 0 ? '' : field.value[1]}
                           onChange={(e) => {
                             let max = e.target.value.replace(/^0+/, '') || '0';
                             max = parseInt(max, 10);
@@ -858,8 +872,21 @@ export default function PropertyForm({ currentLead }) {
                             setValue('range_max', max);
                           }}
                           inputProps={{ min: 0, max: 20000 }}
+                          onFocus={(e) => {
+                            if (e.target.value === '0') {
+                              e.target.value = '';
+                            }
+                          }}
+                          onBlur={(e) => {
+                            if (e.target.value === '') {
+                              e.target.value = '0';
+                            }
+                          }}
                         />
                       </Box>
+                      {methods.formState.errors.range_size && (
+                        <FormHelperText error>{methods.formState.errors.range_size.message}</FormHelperText>
+                      )}
                     </>
                   )}
                 />

@@ -23,6 +23,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { endpoints } from 'src/utils/axios';
 import dayjs from 'dayjs';
+import Link from 'next/link';
 
 // ----------------------------------------------------------------------
 
@@ -87,6 +88,7 @@ export default function AppWelcome({ title, description, action, img, ...other }
 
   const renderTable = (data) => {
     const paginatedData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+    console.log("paginatedData", paginatedData);
 
     return (
       <TableContainer
@@ -101,7 +103,7 @@ export default function AppWelcome({ title, description, action, img, ...other }
         <Table>
           <TableHead
             sx={{
-              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+              backgroundColor: alpha(theme.palette.primary.dark, 0.1),
             }}
           >
             <TableRow>
@@ -109,7 +111,7 @@ export default function AppWelcome({ title, description, action, img, ...other }
                 align="left"
                 sx={{
                   fontWeight: 'bold',
-                  color: theme.palette.primary.main,
+                  color: theme.palette.primary.dark,
                   backgroundColor: '#f9f9f9',
                 }}
               >
@@ -120,7 +122,7 @@ export default function AppWelcome({ title, description, action, img, ...other }
                 align="left"
                 sx={{
                   fontWeight: 'bold',
-                  color: theme.palette.primary.main,
+                  color: theme.palette.primary.dark,
                   backgroundColor: '#f9f9f9',
                 }}
               >
@@ -131,7 +133,7 @@ export default function AppWelcome({ title, description, action, img, ...other }
                 align="left"
                 sx={{
                   fontWeight: 'bold',
-                  color: theme.palette.primary.main,
+                  color: theme.palette.primary.dark,
                   backgroundColor: '#f9f9f9',
                 }}
               >
@@ -149,9 +151,9 @@ export default function AppWelcome({ title, description, action, img, ...other }
                   },
                 }}
               >
-                <TableCell align="left" sx={{ color: '#333' }}>
+                <Link href={`followup/?id=${item.lead_id}`}><TableCell align="left" sx={{ color: '#333' }}>
                   {`${item.lead_first_name} ${item.lead_last_name}`}
-                </TableCell>
+                </TableCell></Link>
                 <TableCell align="left" sx={{ color: '#333' }}>
                   {dayjs(item.followup_date).format('DD-MM-YYYY')}
                 </TableCell>
@@ -185,14 +187,14 @@ export default function AppWelcome({ title, description, action, img, ...other }
       sx={{
         ...bgGradient({
           direction: '135deg',
-          startColor: alpha(theme.palette.primary.light, 0.2),
-          endColor: alpha(theme.palette.primary.main, 0.2),
+          startColor: alpha("#212b36", 0.8),
+          endColor: alpha("#212b36", 0.8),
         }),
         height: { md: 1 },
         borderRadius: 2,
         position: 'relative',
-        color: 'primary.darker',
-        backgroundColor: 'common.white',
+        color: 'primary',
+        // backgroundColor: 'common.white',
         width: "100%",
         // minHeight: '100vh', 
       }}
@@ -246,8 +248,8 @@ export default function AppWelcome({ title, description, action, img, ...other }
         >
           <Tab label={`Today (${todayData.length})`} />
           <Tab label={`Upcoming (${futureData.length})`} />
-          <Tab label={`Completed (${previousData.length})`} />
-          <Tab label={`All (${allData.length})`} />
+          {/* <Tab label={`Completed (${previousData.length})`} />
+          <Tab label={`All (${allData.length})`} /> */}
         </Tabs>
 
 

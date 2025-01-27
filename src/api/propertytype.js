@@ -199,21 +199,73 @@ export function useCountryData() {
 }
 
 // State Data
-export const UseStateData = async (id = '101') => {
-  try {
-    const response = await axios.get(`${STATE_ROUTE}/${id}`);
-    return response.data || [];
-  } catch (err) {
-    return err;
-  }
-};
+export function useStateData(countryId) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchStateData = async () => {
+      try {
+        const response = await axios.get(`${STATE_ROUTE}/${countryId}`);
+        setData(response.data);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (countryId) {
+      fetchStateData();
+    }
+  }, [countryId]);
+
+  const memoizedValue = useMemo(
+    () => ({
+      data,
+      loading,
+      error,
+      empty: !loading && !data?.length,
+    }),
+    [data, loading, error]
+  );
+
+  return memoizedValue;
+}
 
 // City Data
-export const UseCityData = async (id = '4025') => {
-  try {
-    const response = await axios.get(`${CITY_ROUTE}/${id}`);
-    return response.data || [];
-  } catch (err) {
-    return err;
-  }
-};
+export function useCityData(stateId) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCityData = async () => {
+      try {
+        const response = await axios.get(`${CITY_ROUTE}/${stateId}`);
+        setData(response.data);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (stateId) {
+      fetchCityData();
+    }
+  }, [stateId]);
+
+  const memoizedValue = useMemo(
+    () => ({
+      data,
+      loading,
+      error,
+      empty: !loading && !data?.length,
+    }),
+    [data, loading, error]
+  );
+
+  return memoizedValue;
+}
