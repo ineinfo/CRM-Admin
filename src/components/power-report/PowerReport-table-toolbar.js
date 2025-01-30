@@ -60,6 +60,16 @@ export default function UserTableToolbar({ filters, onFilters }) {
         }
     }, [getCities.data]);
 
+    useEffect(() => {
+        if (!filters.location) {
+            setSelectedCountry('');
+            setCurrency('');
+            setSelectedState('');
+            setStates([]);
+            setCities([]);
+        }
+    }, [filters.location]);
+
     console.log("Filter", filters);
 
     // Mapping property type options from property types data
@@ -143,15 +153,11 @@ export default function UserTableToolbar({ filters, onFilters }) {
         (event) => {
             const selectedCountry = event.target.value;
             const selectedCountryData = CountryOption.find((country) => country.id === selectedCountry);
-            onFilters('location', selectedCountryData.name);
-            console.log("Selected Country", selectedCountryData);
-
-            if (selectedCountryData) {
-                setCurrency(selectedCountryData.currency);
-                setSelectedCountry(selectedCountryData.id);
-                setSelectedState('');
-                setCities([]);
-            }
+            onFilters('location', selectedCountryData ? selectedCountryData.name : '');
+            setCurrency(selectedCountryData ? selectedCountryData.currency : '');
+            setSelectedCountry(selectedCountryData ? selectedCountryData.id : '');
+            setSelectedState('');
+            setCities([]);
         },
         [onFilters, CountryOption]
     );

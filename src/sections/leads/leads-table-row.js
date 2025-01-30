@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
@@ -20,19 +20,34 @@ import { alpha, Link } from '@mui/material';
 import OfferModal from './OfferModal';
 import PropertyDetailsModal from './PropertyDetailsModal'; // Adjust the path as needed
 import { useAuthContext } from 'src/auth/hooks';
+import { UsegetRoles } from 'src/api/roles';
 
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, onArchiveRow }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [matchedData, setMatchedData] = useState([]);
   const [selectedData, setSelectedData] = useState([]);
+  const [show, setShow] = useState(false);
+  const { products: roles } = UsegetRoles();
+
   const confirm = useBoolean();
   const confirmArchive = useBoolean();
   const popover = usePopover();
   const invoiceRef = useRef();
   const { user } = useAuthContext()
-  // console.log("Nehal", user?.editable);
-  const show = user?.editable
+  const fetchRoles = (data) => {
+    const userRole = data.find(role => role.id === user.role_id);
+    if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+      setShow(true);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchRoles(roles);
+    }
+  }, [user, roles]);
+
 
   const triggerDownload = () => {
     if (invoiceRef.current) {

@@ -444,8 +444,6 @@ function applyFilter({ inputData, comparator, filters }) {
     } = filters;
 
     const stabilizedThis = inputData.map((el, index) => [el, index]);
-    console.log("Data nedded", location, stateId, cityId);
-    console.log("Data nedded1", inputData);
 
     stabilizedThis.sort((a, b) => {
         const order = comparator(a[0], b[0]);
@@ -501,19 +499,15 @@ function applyFilter({ inputData, comparator, filters }) {
         inputData = inputData.filter((user) => finance.includes(user.finance));
     }
 
-    // Filter by Country
-    if (location.length) {
-        inputData = inputData.filter((user) => location.includes(user.location));
+    // Filter by Country, State, and City
+    if (location) {
+        inputData = inputData.filter((user) => user.location === location);
     }
-
-    // Filter by State
-    if (stateId.length) {
-        inputData = inputData.filter((user) => stateId.includes(user.state_id));
+    if (stateId) {
+        inputData = inputData.filter((user) => user.state_id === stateId);
     }
-
-    // Filter by City
-    if (cityId.length) {
-        inputData = inputData.filter((user) => cityId.includes(user.city_id));
+    if (cityId) {
+        inputData = inputData.filter((user) => user.city_id === cityId);
     }
 
     // Filter by number of bedrooms

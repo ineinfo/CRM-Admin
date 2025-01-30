@@ -33,7 +33,7 @@ import { useAuthContext } from 'src/auth/hooks';
 // ----------------------------------------------------------------------
 
 export default function OverviewAppView() {
-  const { user } = useMockedUser();
+  // const { user } = useMockedUser();
   const theme = useTheme();
   const { events } = useGetEvents();
   const settings = useSettingsContext();
@@ -49,8 +49,8 @@ export default function OverviewAppView() {
   // const [open, setOpen] = useState(true);
   // const today = dayjs().format("YYYY-MM-DD");
 
-  const user1 = useAuthContext();
-  console.log("user1", user1.user);
+  const { user } = useAuthContext();
+  console.log("user1", user);
 
 
   useEffect(() => {
@@ -211,7 +211,7 @@ export default function OverviewAppView() {
       <Grid container spacing={3}>
         <Grid xs={24} md={12}>
           <AppWelcome
-            title={`Welcome back, ${user?.displayName} 👋 `}
+            title={`Welcome back, ${user?.first_name} 👋 `}
             description="If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything."
 
             action={

@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -22,6 +22,7 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import dayjs from 'dayjs';
 import DownloadDetailsModal from './DownloadDetailsModal';
 import { useAuthContext } from 'src/auth/hooks';
+import { UsegetRoles } from 'src/api/roles';
 
 
 // ----------------------------------------------------------------------
@@ -45,7 +46,22 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
   const popover = usePopover();
 
   const { user } = useAuthContext()
-  const show = user?.editable
+  const [show, setShow] = useState(false);
+  const { products: roles } = UsegetRoles();
+
+  const fetchRoles = (data) => {
+    const userRole = data.find(role => role.id === user.role_id);
+    if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+      setShow(true);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchRoles(roles);
+    }
+  }, [user, roles]);
+
 
   function formatPrice(price) {
     if (price >= 1_000_000_000) {
@@ -64,7 +80,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
     <>
       <TableRow hover selected={selected}>
         <TableCell padding="checkbox">
-          <Checkbox checked={selected} onClick={onSelectRow} />
+          {show ? <Checkbox checked={selected} onChange={onSelectRow} /> : ''}
         </TableCell>
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
           <Link

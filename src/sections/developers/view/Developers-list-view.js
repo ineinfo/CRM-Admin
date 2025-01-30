@@ -45,6 +45,8 @@ import { useCountryData, UsegetPropertiesType } from 'src/api/propertytype';
 import UserTableRow from '../Developers-table-row';
 import UserTableToolbar from '../Developers-table-toolbar';
 import UserTableFiltersResult from '../Developers-table-filters-result';
+import { useAuthContext } from 'src/auth/hooks';
+import { UsegetRoles } from 'src/api/roles';
 
 // ----------------------------------------------------------------------
 
@@ -91,6 +93,23 @@ export default function UserListView() {
   const [tableData, setTableData] = useState([]);
 
   const [filters, setFilters] = useState(defaultFilters);
+  const { user } = useAuthContext();
+  const [show, setShow] = useState(false);
+  const { products: roles } = UsegetRoles();
+
+  const fetchRoles = (data) => {
+    const userRole = data.find(role => role.id === user.role_id);
+    if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+      setShow(true);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchRoles(roles);
+    }
+  }, [user, roles]);
+
 
   const dataFiltered = applyFilter({
     inputData: tableData,
@@ -213,14 +232,16 @@ export default function UserListView() {
             { name: 'List' },
           ]}
           action={
-            <Button
-              component={RouterLink}
-              href={paths.dashboard.propertypage.new}
-              variant="contained"
-              startIcon={<Iconify icon="mingcute:add-line" />}
-            >
-              Create
-            </Button>
+            show && (
+              <Button
+                component={RouterLink}
+                href={paths.dashboard.propertypage.new}
+                variant="contained"
+                startIcon={<Iconify icon="mingcute:add-line" />}
+              >
+                Create
+              </Button>
+            )
           }
           sx={{
             mb: { xs: 3, md: 5 },

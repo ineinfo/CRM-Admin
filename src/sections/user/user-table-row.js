@@ -15,25 +15,41 @@ import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import { useAuthContext } from 'src/auth/hooks';
+import { UsegetRoles } from 'src/api/roles';
+import { useEffect, useState } from 'react';
 
 // ----------------------------------------------------------------------
 
 const DEFAULT_AVATAR_URL = '/logo/logo_single.png';
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
   const { first_name, last_name, avatarurl, email, role_name, mobile_number } = row;
+  const [show, setShow] = useState(false);
+  const { products: roles } = UsegetRoles();
 
   const confirm = useBoolean();
 
   const popover = usePopover();
   const { user } = useAuthContext()
-  const show = user?.editable
-  console.log('User:', user);
+
+  const fetchRoles = (data) => {
+    const userRole = data.find(role => role.id === user.role_id);
+    if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+      setShow(true);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchRoles(roles);
+    }
+  }, [user, roles]);
+
 
   return (
     <>
       <TableRow hover selected={selected}>
         <TableCell padding="checkbox">
-          <Checkbox checked={selected} onClick={onSelectRow} />
+          {show ? <Checkbox checked={selected} onChange={onSelectRow} /> : ''}
         </TableCell>
 
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
