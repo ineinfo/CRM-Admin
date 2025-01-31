@@ -63,6 +63,18 @@ const TABLE_HEAD = [
   { id: '', label: '', width: 0 },
 ];
 
+const TABLE_HEAD_Custom = [
+  { id: 'developer_name', label: 'Developer name', width: 130 },
+  { id: 'starting_price', label: 'Starting Price', width: 100 },
+  { id: 'parking', label: 'Parking', width: 50 },
+  { id: 'phone_number', label: 'Contact No', width: 80 },
+  { id: 'handover_date', label: 'Handover Date', width: 100 },
+  { id: 'furnished', label: 'Furnished', width: 80 },
+  { id: 'email', label: 'Email', width: 50, align: 'center' },
+  // { id: 'sqft_starting_size', label: 'Sqft', width: 100 },
+  { id: '', label: '', width: 0 },
+];
+
 const defaultFilters = {
   name: '',
   role: [],
@@ -282,15 +294,15 @@ export default function UserListView() {
                 <TableHeadCustom
                   order={table.order}
                   orderBy={table.orderBy}
-                  headLabel={TABLE_HEAD}
+                  headLabel={show ? TABLE_HEAD : TABLE_HEAD_Custom}
                   rowCount={dataFiltered.length}
                   numSelected={table.selected.length}
                   onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
+                  onSelectAllRows={show ? ((checked) =>
                     table.onSelectAllRows(
                       checked,
                       dataFiltered.map((row) => row.id)
-                    )
+                    )) : false
                   }
                 />
                 <TableBody>

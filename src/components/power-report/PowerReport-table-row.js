@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
@@ -21,17 +21,33 @@ import PropertyDetailsModal from 'src/sections/leads/PropertyDetailsModal';
 import OfferModal from 'src/sections/leads/OfferModal';
 import { useAuthContext } from 'src/auth/hooks';
 import DetailsModal from './Detail-modal';
+import { UsegetRoles } from 'src/api/roles';
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow, onUnarchiveRow }) {
     const [modalOpen, setModalOpen] = useState(false);
     const [matchedData, setMatchedData] = useState([]);
     const [selectedData, setSelectedData] = useState([]);
+    const [show, setShow] = useState(false);
+    const { products: roles } = UsegetRoles();
     const confirm = useBoolean();
     const confirmArchive = useBoolean();
     const popover = usePopover();
     const invoiceRef = useRef();
 
-    const { user } = useAuthContext();
+    const { user } = useAuthContext()
+    const fetchRoles = (data) => {
+        const userRole = data.find(role => role.id === user.role_id);
+        // if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+        if (userRole && userRole.role_name === 'Super Admin') {
+            setShow(true);
+        }
+    };
+
+    useEffect(() => {
+        if (user) {
+            fetchRoles(roles);
+        }
+    }, [user, roles]);
     // console.log("nedded",user.accessToken);
     const token = user?.accessToken;
 
@@ -105,9 +121,11 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
                 }}
 
             >
-                <TableCell padding="checkbox">
-                    <Checkbox checked={selected} onClick={onSelectRow} />
-                </TableCell>
+                {show ? (
+                    <TableCell padding="checkbox">
+                        <Checkbox checked={selected} onClick={onSelectRow} />
+                    </TableCell>
+                ) : ""}
                 <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
 
                     {/* <Link color="inherit" sx={{ cursor: "pointer" }} onClick={() => {
@@ -139,12 +157,14 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
                     </Button>
                 </TableCell>
 
-                <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                    <Button variant="outlined" color="inherit" onClick={() => { handleDetail(id, token) }}>
-                        Detail
+                {show && (
+                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                        <Button variant="outlined" color="inherit" onClick={() => { handleDetail(id, token) }}>
+                            Detail
 
-                    </Button>
-                </TableCell>
+                        </Button>
+                    </TableCell>
+                )}
 
 
             </TableRow >

@@ -48,6 +48,7 @@ import { useAuthContext } from 'src/auth/hooks';
 import UserTableFiltersResult from 'src/sections/leads/leads-table-filters-result';
 import UserTableToolbar from '../PowerReport-table-toolbar';
 import UserTableRow from '../PowerReport-table-row';
+import { UsegetRoles } from 'src/api/roles';
 
 // ----------------------------------------------------------------------
 
@@ -59,6 +60,17 @@ const TABLE_HEAD = [
     { id: 'email', label: 'Email', width: 100 },
     { id: 'Followup_date', label: 'Followup date', width: 30 },
     { id: 'detail', label: 'Detail', width: 30 },
+    // { id: '', width: 50 },
+    // { id: '', width: 50 },
+    // { id: '', width: 50 },
+];
+
+const TABLE_HEAD_Custom = [
+    { id: 'customer_name', label: 'Name', width: 120 },
+    { id: 'customer_mobile', label: 'Phone', width: 120 },
+    { id: 'handover_date', label: 'Move in date', width: 50 },
+    { id: 'email', label: 'Email', width: 100 },
+    { id: 'Followup_date', label: 'Followup date', width: 30 },
     // { id: '', width: 50 },
     // { id: '', width: 50 },
     // { id: '', width: 50 },
@@ -89,8 +101,23 @@ const defaultFilters = {
 export default function PowerReportListView() {
     const { enqueueSnackbar } = useSnackbar();
     const table = useTable();
+    const [show, setShow] = useState(false);
+    const { products: roles } = UsegetRoles();
 
-    const { user } = useAuthContext();
+    const { user } = useAuthContext()
+    const fetchRoles = (data) => {
+        const userRole = data.find(role => role.id === user.role_id);
+        // if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+        if (userRole && userRole.role_name === 'Super Admin') {
+            setShow(true);
+        }
+    };
+
+    useEffect(() => {
+        if (user) {
+            fetchRoles(roles);
+        }
+    }, [user, roles]);
     const Token = user?.accessToken;
 
     const CountryApi = useCountryData();
@@ -346,16 +373,17 @@ export default function PowerReportListView() {
                                 <TableHeadCustom
                                     order={table.order}
                                     orderBy={table.orderBy}
-                                    headLabel={TABLE_HEAD}
+                                    headLabel={show ? TABLE_HEAD : TABLE_HEAD_Custom}
                                     rowCount={dataFiltered.length}
                                     numSelected={table.selected.length}
                                     onSort={table.onSort}
-                                    onSelectAllRows={(checked) =>
-                                        table.onSelectAllRows(
-                                            checked,
-                                            dataFiltered.map((row) => row.id)
-                                        )
-                                    }
+                                    onSelectAllRows={show ? (
+                                        (checked) =>
+                                            table.onSelectAllRows(
+                                                checked,
+                                                dataFiltered.map((row) => row.id)
+                                            )
+                                    ) : false}
                                 />
                                 <TableBody>
                                     {dataFiltered

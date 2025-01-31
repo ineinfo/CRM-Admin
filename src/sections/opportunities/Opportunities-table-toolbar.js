@@ -14,7 +14,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-import { UseCityData, useCountryData, UsegetPropertiesType, UsegetPropertySatatus, UseStateData } from 'src/api/propertytype'; // Assuming this fetches the property type data
+import { useCityData, useCountryData, UsegetFinance, UsegetPropertiesType, UsegetPropertySatatus, useStateData } from 'src/api/propertytype'; // Assuming this fetches the property type data
 import { UsegetAmenities } from 'src/api/amenities'; // Assuming this fetches the amenities data
 import { Slider } from '@mui/material';
 
@@ -24,11 +24,7 @@ export default function UserTableToolbar({ filters, onFilters }) {
   const popover = usePopover();
   const getCountries = useCountryData();
   const [countries, setCountries] = useState([]);
-  const [states, setStates] = useState([]);
-  const [cities, setCities] = useState([]);
-  const [countryId, setCountryId] = useState(null);
-  const [stateId, setStateId] = useState(null);
-
+  const [currency, setCurrency] = useState();
 
   // Fetch property types
   const { products: propertyTypes } = UsegetPropertiesType();
@@ -36,7 +32,15 @@ export default function UserTableToolbar({ filters, onFilters }) {
   // Fetch amenities
   const { products: amenities } = UsegetAmenities();
   const { propertyStatus: propertyStatuses } = UsegetPropertySatatus();
+  const { finance: finances } = UsegetFinance();
 
+  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedState, setSelectedState] = useState('');
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  const getStates = useStateData(selectedCountry);
+  const getCities = useCityData(selectedState);
 
   useEffect(() => {
     if (getCountries.data) {
@@ -45,26 +49,26 @@ export default function UserTableToolbar({ filters, onFilters }) {
   }, [getCountries.data]);
 
   useEffect(() => {
-    if (countryId) {
-
-      const filteredCountry = countries.filter((country) => country.name === countryId);
-      console.log("Countryyryr", filteredCountry[0].id);
-
-      const c_id = filteredCountry[0].id || 0
-      UseStateData(c_id).then((response) => setStates(response.data));
-    } else {
-      setStates([]);
+    if (getStates.data) {
+      setStates(getStates.data.data);
     }
-  }, [countryId]);
+  }, [getStates.data]);
 
-  // Fetch cities when stateId changes
   useEffect(() => {
-    if (stateId) {
-      UseCityData(stateId).then((response) => setCities(response.data));
-    } else {
+    if (getCities.data) {
+      setCities(getCities.data.data);
+    }
+  }, [getCities.data]);
+
+  useEffect(() => {
+    if (!filters.location) {
+      setSelectedCountry('');
+      setCurrency('');
+      setSelectedState('');
+      setStates([]);
       setCities([]);
     }
-  }, [stateId]);
+  }, [filters.location]);
 
   console.log("Filter", filters);
 
@@ -85,21 +89,20 @@ export default function UserTableToolbar({ filters, onFilters }) {
     name: type.title,
   }));
 
-  const countryOptions = countries.map((type) => ({
+  const CountryOption = countries.map((type) => ({
     id: type.id,
     name: type.name,
+    currency: type.currency,
   }));
 
-  const stateOptions = states?.map((type) => ({
-    id: type.id,
-    name: type.name,
-  }));
-  console.log("States", states);
 
-  const cityOptions = cities?.map((type) => ({
-    id: type.id,
-    name: type.name,
-  }));
+  const FinancesOption = finances.length > 0 && finances[0]
+    ? Object.entries(finances[0]).map(([key, value]) => ({
+      id: key,
+      name: value,
+    }))
+    : [];
+
 
   // Generate a list of bedroom numbers (1 to 10)
   const bedroomOptions = Array.from({ length: 10 }, (_, i) => i + 1);
@@ -126,7 +129,7 @@ export default function UserTableToolbar({ filters, onFilters }) {
       const selectedBedrooms = Array.isArray(event.target.value)
         ? event.target.value
         : event.target.value.split(',');
-      onFilters('no_of_bedrooms', selectedBedrooms);
+      onFilters('no_of_bathrooms', selectedBedrooms);
     },
     [onFilters]
   );
@@ -146,25 +149,36 @@ export default function UserTableToolbar({ filters, onFilters }) {
     onFilters('range_max', newValue[1]); // Save range_max value
   };
 
-  const handleCountryChange = (event) => {
-    const selectedCountryId = event.target.value;
-    setCountryId(selectedCountryId);
-    setStates([])
-    onFilters('location', selectedCountryId);
-    setStateId(null); // Reset state and city when country changes
-    setCities([]);
-  };
+  const handleFilterCountry = useCallback(
+    (event) => {
+      const selectedCountry = event.target.value;
+      const selectedCountryData = CountryOption.find((country) => country.id === selectedCountry);
+      onFilters('location', selectedCountryData ? selectedCountryData.name : '');
+      setCurrency(selectedCountryData ? selectedCountryData.currency : '');
+      setSelectedCountry(selectedCountryData ? selectedCountryData.id : '');
+      setSelectedState('');
+      setCities([]);
+    },
+    [onFilters, CountryOption]
+  );
 
-  const handleStateChange = (event) => {
-    const selectedStateId = event.target.value;
-    setStateId(selectedStateId);
-    onFilters('state', selectedStateId);
-  };
+  const handleFilterState = useCallback(
+    (event) => {
+      const selectedState = event.target.value;
+      onFilters('stateId', selectedState);
+      setSelectedState(selectedState);
+      setCities([]);
+    },
+    [onFilters]
+  );
 
-  const handleCityChange = (event) => {
-    const selectedCityId = event.target.value;
-    onFilters('city', selectedCityId);
-  };
+  const handleFilterCity = useCallback(
+    (event) => {
+      const selectedCity = event.target.value;
+      onFilters('cityId', selectedCity);
+    },
+    [onFilters]
+  );
 
   return (
     <>
@@ -180,113 +194,9 @@ export default function UserTableToolbar({ filters, onFilters }) {
           pr: { xs: 2.5, md: 1 },
         }}
       >
-        {/* <FormControl
-          sx={{
-            flexShrink: 0,
-            width: { xs: 1, md: 200 },
-          }}
-        >
-          <InputLabel>Property Type</InputLabel>
-          <Select
-            multiple
-            value={filters.property_type || []}
-            onChange={handleFilterPropertyType}
-            input={<OutlinedInput label="Property Type" />}
-            renderValue={(selected) =>
-              selected
-                .map(
-                  (value) => propertyTypeOptions.find((type) => type.id === value)?.name || value
-                )
-                .join(', ')
-            }
-            MenuProps={{
-              PaperProps: {
-                sx: { maxHeight: 240 },
-              },
-            }}
-          >
-            {propertyTypeOptions.map((option) => (
-              <MenuItem key={option.id} value={option.id}>
-                <Checkbox
-                  disableRipple
-                  size="small"
-                  checked={filters.property_type.includes(option.id)}
-                />
-                {option.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
 
-        <FormControl
-          sx={{
-            flexShrink: 0,
-            width: { xs: 1, md: 200 },
-          }}
-        >
-          <InputLabel>Bedrooms</InputLabel>
-          <Select
-            multiple
-            value={filters.no_of_bedrooms || []}
-            onChange={handleFilterBedrooms}
-            input={<OutlinedInput label="Bedrooms" />}
-            renderValue={(selected) => selected.join(', ')}
-            MenuProps={{
-              PaperProps: {
-                sx: { maxHeight: 240 },
-              },
-            }}
-          >
-            {bedroomOptions.map((number) => (
-              <MenuItem key={number} value={number}>
-                <Checkbox
-                  disableRipple
-                  size="small"
-                  checked={filters.no_of_bedrooms?.includes(number)}
-                />
-                {number}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
 
-        <FormControl
-          sx={{
-            flexShrink: 0,
-            width: { xs: 1, md: 200 },
-          }}
-        >
-          <InputLabel>Amenities</InputLabel>
-          <Select
-            multiple
-            value={filters.amenities || []}
-            onChange={handleFilterAmenities}
-            input={<OutlinedInput label="Amenities" />}
-            renderValue={(selected) =>
-              selected
-                .map(
-                  (value) => amenityOptions.find((amenity) => amenity.id === value)?.name || value
-                )
-                .join(', ')
-            }
-            MenuProps={{
-              PaperProps: {
-                sx: { maxHeight: 240 },
-              },
-            }}
-          >
-            {amenityOptions.map((option) => (
-              <MenuItem key={option.id} value={option.id}>
-                <Checkbox
-                  disableRipple
-                  size="small"
-                  checked={filters.amenities?.includes(option.id)}
-                />
-                {option.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl> */}
+
 
         <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
           <TextField
@@ -304,62 +214,72 @@ export default function UserTableToolbar({ filters, onFilters }) {
           />
 
 
+          <FormControl
+            sx={{
+              flexShrink: 0,
+              width: { xs: 1, md: 200 },
+            }}
+          >
+            <InputLabel>Country</InputLabel>
+            <Select
+              value={selectedCountry || ''}
+              onChange={handleFilterCountry}
+              input={<OutlinedInput label="Country" />}
+            >
+              {CountryOption.map((option) => (
+                <MenuItem key={option.id} value={option.id}>
+                  {option.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl
+            sx={{
+              flexShrink: 0,
+              width: { xs: 1, md: 200 },
+            }}
+            disabled={!selectedCountry}
+          >
+            <InputLabel>State</InputLabel>
+            <Select
+              value={selectedState || ''}
+              onChange={handleFilterState}
+              input={<OutlinedInput label="State" />}
+            >
+              {states.map((option) => (
+                <MenuItem key={option.id} value={option.id}>
+                  {option.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl
+            sx={{
+              flexShrink: 0,
+              width: { xs: 1, md: 200 },
+            }}
+            disabled={!selectedState}
+          >
+            <InputLabel>City</InputLabel>
+            <Select
+              value={filters.cityId || ''}
+              onChange={handleFilterCity}
+              input={<OutlinedInput label="City" />}
+            >
+              {cities.map((option) => (
+                <MenuItem key={option.id} value={option.id}>
+                  {option.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* <IconButton onClick={popover.onOpen}>
+            <Iconify icon="eva:more-vertical-fill" />
+          </IconButton> */}
         </Stack>
-
-        <FormControl sx={{ flexShrink: 0, width: { xs: 1, md: 200 } }}>
-          <InputLabel>Country</InputLabel>
-          <Select
-            value={filters.location || ''}
-            onChange={handleCountryChange}
-            input={<OutlinedInput label="Country" />}
-          >
-            {countryOptions.map((option) => (
-              <MenuItem key={option.id} value={option.name}>
-                {option.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* State Dropdown */}
-        <FormControl sx={{ flexShrink: 0, width: { xs: 1, md: 200 } }} disabled={!countryId}>
-          <InputLabel>State</InputLabel>
-          <Select
-            value={filters.state || ''}
-            onChange={handleStateChange}
-            input={<OutlinedInput label="State" />}
-          >
-            {stateOptions?.length > 0 ? stateOptions?.map((option) => (
-              <MenuItem key={option.id} value={option.id}>
-                {option.name}
-              </MenuItem>
-            )) : <MenuItem disabled>
-              No States Available
-            </MenuItem>}
-          </Select>
-        </FormControl>
-
-        {/* City Dropdown */}
-        <FormControl sx={{ flexShrink: 0, width: { xs: 1, md: 200 } }} disabled={!stateId}>
-          <InputLabel>City</InputLabel>
-          <Select
-            value={filters.city || ''}
-            onChange={handleCityChange}
-            input={<OutlinedInput label="City" />}
-          >
-            {cityOptions?.length > 0 ? cityOptions.map((option) => (
-              <MenuItem key={option.id} value={option.id}>
-                {option.name}
-              </MenuItem>
-            )) : <MenuItem disabled>
-              No Cities Available
-            </MenuItem>}
-          </Select>
-        </FormControl>
-
-        <IconButton onClick={popover.onOpen}>
-          <Iconify icon="eva:more-vertical-fill" />
-        </IconButton>
       </Stack>
 
       <CustomPopover
@@ -384,90 +304,7 @@ export default function UserTableToolbar({ filters, onFilters }) {
         </MenuItem>
       </CustomPopover>
 
-      {/* <Stack
-        spacing={2}
-        alignItems={{ xs: 'flex-end', md: 'center' }}
-        direction={{
-          xs: 'column',
-          md: 'row',
-        }}
-        sx={{
-          p: 2.5,
-          pr: { xs: 2.5, md: 1 },
-        }}
-      >
-        <FormControl
-          sx={{
-            flexShrink: 0,
-            width: { xs: 1, md: 300 },
-            p: 2,
-          }}
-        >
-          <InputLabel shrink>Price Range</InputLabel>
-          <Slider
-            value={[filters.range_min || 0, filters.range_max || 20000]}
-            onChange={handleRangeChange}
-            valueLabelDisplay="auto"
-            min={0}
-            max={20000}
-          // marks={marks} // Optional for better UX
-          />
-        </FormControl>
 
-        <FormControl
-          sx={{
-            flexShrink: 0,
-            width: { xs: 1, md: 200 },
-          }}
-        >
-          <InputLabel>Parking</InputLabel>
-          <Select
-            value={filters.parking || ''}
-            onChange={(event) => onFilters('parking', event.target.value)}
-            input={<OutlinedInput label="Parking" />}
-          >
-            <MenuItem value="yes">Yes</MenuItem>
-            <MenuItem value="no">No</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControl
-          sx={{
-            flexShrink: 0,
-            width: { xs: 1, md: 200 },
-          }}
-        >
-          <InputLabel>Account Type</InputLabel>
-          <Select
-            value={filters.account_type || ''}
-            onChange={(event) => onFilters('account_type', event.target.value)}
-            input={<OutlinedInput label="account_type" />}
-          >
-            <MenuItem value="freehold">Freehold</MenuItem>
-            <MenuItem value="leasehold">Leasehold</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControl
-          sx={{
-            flexShrink: 0,
-            width: { xs: 1, md: 200 },
-          }}
-        >
-          <InputLabel>Property Status</InputLabel>
-          <Select
-            value={filters.property_status || ''}
-            onChange={(event) => onFilters('property_status', event.target.value)}
-            input={<OutlinedInput label="Property Status" />}
-          >
-            {propertyStatusesOption.map((option) => (
-              <MenuItem key={option.id} value={option.id}>
-                {option.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Stack> */}
     </>
   );
 }

@@ -37,7 +37,8 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
   const { user } = useAuthContext()
   const fetchRoles = (data) => {
     const userRole = data.find(role => role.id === user.role_id);
-    if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+    // if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+    if (userRole && userRole.role_name === 'Super Admin') {
       setShow(true);
     }
   };
@@ -132,9 +133,11 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         }}
 
       >
-        <TableCell padding="checkbox">
-          <Checkbox checked={selected} onClick={onSelectRow} />
-        </TableCell>
+        {show && (
+          <TableCell padding="checkbox">
+            <Checkbox checked={selected} onClick={onSelectRow} />
+          </TableCell>
+        )}
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
 
           <Link color="inherit" sx={{ cursor: "pointer" }} onClick={() => {

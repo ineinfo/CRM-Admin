@@ -43,11 +43,12 @@ import { UsegetRoles } from 'src/api/roles';
 import UserTableRow from '../user-table-row';
 import UserTableToolbar from '../user-table-toolbar';
 import UserTableFiltersResult from '../user-table-filters-result';
+import { useAuthContext } from 'src/auth/hooks';
 
 // --------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Name', width: 180 },
+  { id: 'name', label: 'Name', width: 180, align: 'center' },
   { id: 'role_id', label: 'Role', width: 180 },
   { id: 'mobile_number', label: 'Phone', width: 180 },
   { id: '', width: 88 },
@@ -70,9 +71,24 @@ export default function UserListView() {
 
   const [tableData, setTableData] = useState([]);
   const [filters, setFilters] = useState(defaultFilters);
-  const [loading, setLoading] = useState(false); // Loading state
-
+  const [loading, setLoading] = useState(false);
+  const [show, setShow] = useState(false);
   const { products: roles, isLoading: rolesLoading } = UsegetRoles(); // Fetch roles
+
+  const { user } = useAuthContext()
+  const fetchRoles = (data) => {
+    const userRole = data.find(role => role.id === user.role_id);
+    // if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+    if (userRole && userRole.role_name === 'Super Admin') {
+      setShow(true);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchRoles(roles);
+    }
+  }, [user, roles]);
 
   const dataFiltered = useMemo(
     () =>
@@ -84,6 +100,9 @@ export default function UserListView() {
       }),
     [tableData, table.order, table.orderBy, filters, roles]
   );
+
+
+
 
   const dataInPage = dataFiltered.slice(
     table.page * table.rowsPerPage,
@@ -167,14 +186,16 @@ export default function UserListView() {
             { name: 'List' },
           ]}
           action={
-            <Button
-              component={RouterLink}
-              href={paths.dashboard.user.new}
-              variant="contained"
-              startIcon={<Iconify icon="mingcute:add-line" />}
-            >
-              Create
-            </Button>
+            show && (
+              <Button
+                component={RouterLink}
+                href={paths.dashboard.user.new}
+                variant="contained"
+                startIcon={<Iconify icon="mingcute:add-line" />}
+              >
+                Create
+              </Button>
+            )
           }
           sx={{
             mb: { xs: 3, md: 5 },
@@ -223,11 +244,11 @@ export default function UserListView() {
                   rowCount={dataFiltered.length}
                   numSelected={table.selected.length}
                   onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
+                  onSelectAllRows={show ? ((checked) =>
                     table.onSelectAllRows(
                       checked,
                       dataFiltered.map((row) => row.id)
-                    )
+                    )) : false
                   }
                 />
 

@@ -45,6 +45,8 @@ import { useCountryData, UsegetPropertiesType } from 'src/api/propertytype';
 import UserTableRow from '../Opportunities-table-row';
 import UserTableToolbar from '../Opportunities-table-toolbar';
 import UserTableFiltersResult from '../Opportunities-table-filters-result';
+import { UsegetRoles } from 'src/api/roles';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -85,7 +87,9 @@ export default function UserListView() {
   const CountryApi = useCountryData();
   const CountryList = CountryApi.data?.data;
   const settings = useSettingsContext();
-
+  const { user } = useAuthContext();
+  const [show, setShow] = useState(false);
+  const { products: roles } = UsegetRoles();
   const router = useRouter();
 
   const confirm = useBoolean();
@@ -93,6 +97,19 @@ export default function UserListView() {
   const [tableData, setTableData] = useState([]);
 
   const [filters, setFilters] = useState(defaultFilters);
+
+  const fetchRoles = (data) => {
+    const userRole = data.find(role => role.id === user.role_id);
+    if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+      setShow(true);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchRoles(roles);
+    }
+  }, [user, roles]);
 
   const dataFiltered = applyFilter({
     inputData: tableData,
@@ -218,14 +235,16 @@ export default function UserListView() {
             { name: 'List' },
           ]}
           action={
-            <Button
-              component={RouterLink}
-              href={paths.dashboard.opportunity.new}
-              variant="contained"
-              startIcon={<Iconify icon="mingcute:add-line" />}
-            >
-              Create
-            </Button>
+            show && (
+              <Button
+                component={RouterLink}
+                href={paths.dashboard.opportunity.new}
+                variant="contained"
+                startIcon={<Iconify icon="mingcute:add-line" />}
+              >
+                Create
+              </Button>
+            )
           }
           sx={{
             mb: { xs: 3, md: 5 },
@@ -270,11 +289,13 @@ export default function UserListView() {
                   rowCount={dataFiltered.length}
                   numSelected={table.selected.length}
                   onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      dataFiltered.map((row) => row.id)
-                    )
+                  onSelectAllRows={show ? (
+                    (checked) =>
+                      table.onSelectAllRows(
+                        checked,
+                        dataFiltered.map((row) => row.id)
+                      )
+                  ) : false
                   }
                 />
                 <TableBody>
@@ -354,7 +375,6 @@ function applyFilter({ inputData, comparator, filters }) {
     account_type,
     property_status,
     location, state, city
-
   } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
@@ -384,60 +404,6 @@ function applyFilter({ inputData, comparator, filters }) {
         user.email?.toLowerCase().includes(name.toLowerCase());
     });
   }
-
-  // // Filter by status
-  // if (status !== 'all') {
-  //   inputData = inputData.filter((user) => user.status === status);
-  // }
-
-  // // Filter by role
-  // if (role.length) {
-  //   inputData = inputData.filter((user) => role.includes(user.role));
-  // }
-
-  // // Filter by property type
-  // if (property_type.length) {
-  //   inputData = inputData.filter((user) =>
-  //     user.property_type.some((type) => property_type.includes(type))
-  //   );
-  // }
-
-  // // Filter by number of bedrooms
-  // if (no_of_bedrooms.length) {
-  //   inputData = inputData.filter((user) =>
-  //     user.no_of_bedrooms.some((type) => no_of_bedrooms.includes(type))
-  //   );
-  // }
-
-  // // Filter by amenities
-  // if (amenities.length) {
-  //   inputData = inputData.filter((user) => user.amenities.some((type) => amenities.includes(type)));
-  // }
-
-  // // **Correct filtering for range_min and range_max**
-  // if (range_min !== undefined && range_min !== null) {
-  //   inputData = inputData.filter((user) => user.range_min >= range_min);
-  // }
-
-  // if (range_max !== undefined && range_max !== null) {
-  //   inputData = inputData.filter((user) => user.range_max <= range_max);
-  // }
-
-  // if (parking) {
-  //   inputData = inputData.filter((user) =>
-  //     user.parking?.toLowerCase().includes(parking.toLowerCase())
-  //   );
-  // }
-
-  // if (account_type) {
-  //   inputData = inputData.filter((user) =>
-  //     user.account_type?.toLowerCase().includes(account_type.toLowerCase())
-  //   );
-  // }
-
-  // if (property_status) {
-  //   inputData = inputData.filter((user) => user.property_status === property_status);
-  // }
 
   // Filter by Country
   if (location) {

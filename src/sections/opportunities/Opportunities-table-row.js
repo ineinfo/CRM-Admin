@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { Link } from '@mui/material';
 import { useAuthContext } from 'src/auth/hooks';
+import { UsegetRoles } from 'src/api/roles';
 
 // ----------------------------------------------------------------------
 
@@ -39,9 +40,22 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
   const { products: propertyTypes, productsLoading: propertyTypesLoading } = UsegetPropertiesType();
   // State to manage "see more / see less" for each row
   const [expandedRows, setExpandedRows] = useState({});
-  const { user } = useAuthContext()
+  const { user } = useAuthContext();
+  const [show, setShow] = useState(false);
+  const { products: roles } = UsegetRoles();
   // console.log("Nehal", user?.editable);
-  const show = user?.editable
+  const fetchRoles = (data) => {
+    const userRole = data.find(role => role.id === user.role_id);
+    if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+      setShow(true);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchRoles(roles);
+    }
+  }, [user, roles]);
   // Toggle function for "see more / see less"
   const toggleExpand = (rowId) => {
     setExpandedRows((prevExpandedRows) => ({
@@ -58,9 +72,11 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         selected={selected}
 
       >
-        <TableCell padding="checkbox">
-          <Checkbox checked={selected} onClick={onSelectRow} />
-        </TableCell>
+        {show && (
+          <TableCell padding="checkbox">
+            <Checkbox checked={selected} onClick={onSelectRow} />
+          </TableCell>
+        )}
         <TableCell sx={{ display: 'flex', alignItems: 'center', }}>
           <Link color="inherit" sx={{ cursor: "pointer", minHeight: "100%" }} onClick={() => {
             onEditRow();

@@ -72,10 +72,23 @@ export default function ProductListView() {
   const [filters, setFilters] = useState(defaultFilters);
   const [selectedRowIds, setSelectedRowIds] = useState([]);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [show, setShow] = useState(false);
+  const { products: roles } = UsegetRoles();
   const [columnVisibilityModel, setColumnVisibilityModel] = useState(HIDE_COLUMNS);
   const { user } = useAuthContext()
-  // console.log("Nehal", user?.editable);
-  const show = user?.editable
+  const fetchRoles = (data) => {
+    const userRole = data.find(role => role.id === user.role_id);
+    // if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+    if (userRole && userRole.role_name === 'Super Admin') {
+      setShow(true);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchRoles(roles);
+    }
+  }, [user, roles]);
   useEffect(() => {
     if (products.length) {
       setTableData(products);
@@ -231,14 +244,16 @@ export default function ProductListView() {
             { name: 'List' },
           ]}
           action={
-            <Button
-              component={RouterLink}
-              href={paths.dashboard.roles.new}
-              variant="contained"
-              startIcon={<Iconify icon="mingcute:add-line" />}
-            >
-              Create
-            </Button>
+            show && (
+              <Button
+                component={RouterLink}
+                href={paths.dashboard.roles.new}
+                variant="contained"
+                startIcon={<Iconify icon="mingcute:add-line" />}
+              >
+                Create
+              </Button>
+            )
           }
           sx={{
             mb: {
@@ -257,7 +272,7 @@ export default function ProductListView() {
           }}
         >
           <DataGrid
-            checkboxSelection
+            checkboxSelection={show ? true : false}
             disableRowSelectionOnClick
             rows={dataFiltered}
             columns={columns}

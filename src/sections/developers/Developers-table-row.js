@@ -51,7 +51,8 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
   const fetchRoles = (data) => {
     const userRole = data.find(role => role.id === user.role_id);
-    if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+    // if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+    if (userRole && userRole.role_name === 'Super Admin') {
       setShow(true);
     }
   };
@@ -79,9 +80,11 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
   return (
     <>
       <TableRow hover selected={selected}>
-        <TableCell padding="checkbox">
-          {show ? <Checkbox checked={selected} onChange={onSelectRow} /> : ''}
-        </TableCell>
+        {show ?
+          <TableCell padding="checkbox">
+            <Checkbox checked={selected} onChange={onSelectRow} />
+          </TableCell>
+          : ''}
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
           <Link
             color="inherit"
@@ -127,11 +130,13 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           </div>
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{email}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          <Button variant="contained" color="secondary" onClick={handleModalOpen}>
-            <Iconify icon="eva:download-fill" />
-          </Button>
-        </TableCell>
+        {show ? (
+          <TableCell sx={{ whiteSpace: 'nowrap' }}>
+            <Button variant="contained" color="secondary" onClick={handleModalOpen}>
+              <Iconify icon="eva:download-fill" />
+            </Button>
+          </TableCell>
+        ) : ''}
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
           <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />
