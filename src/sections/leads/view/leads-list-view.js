@@ -85,12 +85,17 @@ export default function UserListView() {
   const { user } = useAuthContext();
   const Token = user?.accessToken;
   const [show, setShow] = useState(false);
+  const [agent, setAgent] = useState(false);
+
   const { products: roles } = UsegetRoles();
 
   const fetchRoles = (data) => {
     const userRole = data.find(role => role.id === user.role_id);
-    if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+    if (userRole && userRole.role_name === 'Super Admin') {
       setShow(true);
+    }
+    if (userRole.role_name === 'Colleagues and Agents') {
+      setAgent(true);
     }
   };
 
@@ -255,7 +260,7 @@ export default function UserListView() {
             { name: 'List' },
           ]}
           action={
-            show && (
+            show || agent && (
               <Button
                 component={RouterLink}
                 href={paths.dashboard.leads.new}
@@ -365,7 +370,7 @@ export default function UserListView() {
                   rowCount={dataFiltered.length}
                   numSelected={table.selected.length}
                   onSort={table.onSort}
-                  onSelectAllRows={show ? (
+                  onSelectAllRows={show || agent ? (
                     (checked) =>
                       table.onSelectAllRows(
                         checked,

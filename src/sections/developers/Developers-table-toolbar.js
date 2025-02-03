@@ -231,9 +231,9 @@ export default function UserTableToolbar({ filters, onFilters }) {
             }}
           />
 
-          <IconButton onClick={popover.onOpen}>
+          {/* <IconButton onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />
-          </IconButton>
+          </IconButton> */}
         </Stack>
       </Stack>
 
@@ -285,7 +285,7 @@ export default function UserTableToolbar({ filters, onFilters }) {
             valueLabelDisplay="auto"
             min={0}
             max={20000}
-            // marks={marks} // Optional for better UX
+          // marks={marks} // Optional for better UX
           />
         </FormControl>
 

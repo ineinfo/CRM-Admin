@@ -48,6 +48,9 @@ import UserTableFiltersResult from '../Developers-table-filters-result';
 import { useAuthContext } from 'src/auth/hooks';
 import { UsegetRoles } from 'src/api/roles';
 
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
@@ -107,12 +110,16 @@ export default function UserListView() {
   const [filters, setFilters] = useState(defaultFilters);
   const { user } = useAuthContext();
   const [show, setShow] = useState(false);
+  const [agent, setAgent] = useState(false);
   const { products: roles } = UsegetRoles();
 
   const fetchRoles = (data) => {
     const userRole = data.find(role => role.id === user.role_id);
-    if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+    if (userRole && userRole.role_name === 'Super Admin') {
       setShow(true);
+    }
+    if (userRole.role_name === 'Colleagues and Agents') {
+      setAgent(true);
     }
   };
 
@@ -233,6 +240,27 @@ export default function UserListView() {
     [router]
   );
 
+  const handleDownloadPDF = async () => {
+    try {
+      const response = await axios.get(endpoints.propertypage.list);
+      const data = response.data.data;
+
+      const doc = new jsPDF();
+      const tableColumn = Object.keys(data[0]);
+      const tableRows = data.map(item => Object.values(item));
+
+      doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+      });
+
+      doc.save('table_data.pdf');
+    } catch (err) {
+      console.log(err);
+      enqueueSnackbar('Failed to download PDF', { variant: 'error' });
+    }
+  };
+
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -244,16 +272,26 @@ export default function UserListView() {
             { name: 'List' },
           ]}
           action={
-            show && (
+            <>
+              {show || agent ? (
+                <Button
+                  component={RouterLink}
+                  href={paths.dashboard.propertypage.new}
+                  variant="contained"
+                  startIcon={<Iconify icon="mingcute:add-line" />}
+                >
+                  Create
+                </Button>
+              ) : ""}
               <Button
-                component={RouterLink}
-                href={paths.dashboard.propertypage.new}
                 variant="contained"
-                startIcon={<Iconify icon="mingcute:add-line" />}
+                startIcon={<Iconify icon="mdi:file-pdf-box" />}
+                onClick={handleDownloadPDF}
+                sx={{ ml: 2 }}
               >
-                Create
+                Download PDF
               </Button>
-            )
+            </>
           }
           sx={{
             mb: { xs: 3, md: 5 },
@@ -294,7 +332,7 @@ export default function UserListView() {
                 <TableHeadCustom
                   order={table.order}
                   orderBy={table.orderBy}
-                  headLabel={show ? TABLE_HEAD : TABLE_HEAD_Custom}
+                  headLabel={show || agent ? TABLE_HEAD : TABLE_HEAD_Custom}
                   rowCount={dataFiltered.length}
                   numSelected={table.selected.length}
                   onSort={table.onSort}

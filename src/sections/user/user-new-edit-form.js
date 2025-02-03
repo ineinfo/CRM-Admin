@@ -36,7 +36,7 @@ export default function UserNewEditForm({ currentUser }) {
   const router = useRouter();
   const { products: roles } = UsegetRoles();
   const { enqueueSnackbar } = useSnackbar();
-  // const password = useBoolean(); // Commenting out since we are removing the password field
+  const password = useBoolean(); // Commenting out since we are removing the password field
 
   const [selectedRoleDescription, setSelectedRoleDescription] = useState('');
 
@@ -45,7 +45,7 @@ export default function UserNewEditForm({ currentUser }) {
     last_name: Yup.string().required('Last Name is required'),
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
     mobile_number: Yup.string().required('Mobile Number is required'),
-    // password: currentUser ? '' : Yup.string().required('Password is required'), // Commenting out the password validation
+    password: currentUser ? '' : Yup.string().required('Password is required'), // Commenting out the password validation
     avatarurl: Yup.mixed(),
   });
 
@@ -56,7 +56,7 @@ export default function UserNewEditForm({ currentUser }) {
       role_id: currentUser?.role_id || '',
       email: currentUser?.email || '',
       mobile_number: currentUser?.mobile_number || '',
-      // password: currentUser?.password || '', // Commenting out the password default value
+      password: currentUser?.password || '', // Commenting out the password default value
       avatarurl: currentUser?.avatarurl || DEFAULT_AVATAR_URL,
     }),
     [currentUser]
@@ -207,7 +207,7 @@ export default function UserNewEditForm({ currentUser }) {
 
 
               {/* Commenting out the Password field */}
-              {/* <RHFTextField
+              <RHFTextField
                 name="password"
                 label="Password"
                 type={password.value ? 'text' : 'password'}
@@ -220,7 +220,7 @@ export default function UserNewEditForm({ currentUser }) {
                     </InputAdornment>
                   ),
                 }}
-              /> */}
+              />
             </Box>
 
 

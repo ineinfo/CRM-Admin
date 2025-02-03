@@ -33,7 +33,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
   const fetchRoles = (data) => {
     const userRole = data.find(role => role.id === user.role_id);
-    if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+    if (userRole && userRole.role_name === 'Super Admin') {
       setShow(true);
     }
   };
@@ -70,11 +70,13 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{role_name}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{mobile_number}</TableCell>
 
-        <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
-          <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
-            <Iconify icon="eva:more-vertical-fill" />
-          </IconButton>
-        </TableCell>
+        {show ? (
+          <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
+            <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
+              <Iconify icon="eva:more-vertical-fill" />
+            </IconButton>
+          </TableCell>
+        ) : ''}
       </TableRow>
       <CustomPopover
         open={popover.open}

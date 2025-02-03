@@ -29,6 +29,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import { CalendarView } from 'src/sections/calendar/view';
 import { useAuthContext } from 'src/auth/hooks';
+import { UsegetRoles } from 'src/api/roles';
 
 // ----------------------------------------------------------------------
 
@@ -46,11 +47,29 @@ export default function OverviewAppView() {
   const [openFollowups, setOpenFollowups] = useState([]);  // Track open state for each follow-up
   const [pastEvents, setPastEvents] = useState([]);
   const [topUsers, setTopUsers] = useState([]);
+  const [show, setShow] = useState(false);
+  const [agent, setAgent] = useState(false);
+  const { products: roles } = UsegetRoles();
   // const [open, setOpen] = useState(true);
   // const today = dayjs().format("YYYY-MM-DD");
 
-  const { user } = useAuthContext();
-  console.log("user1", user);
+  const { user } = useAuthContext()
+  const fetchRoles = (data) => {
+    const userRole = data.find(role => role.id === user.role_id);
+    // if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+    if (userRole && userRole.role_name === 'Super Admin') {
+      setShow(true);
+    }
+    if (userRole && userRole.role_name === 'Colleagues and Agents') {
+      setShow(true);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchRoles(roles);
+    }
+  }, [user, roles]);
 
 
   useEffect(() => {
@@ -333,56 +352,77 @@ export default function OverviewAppView() {
           />
         </Grid> */}
 
-        <Grid xs={12} md={6} lg={4}>
-          <AppCurrentDownload
-            title="Total Sales"
-            chart={{
-              series: [
-                { label: 'Sale 1', value: 2500 },
-                { label: 'Sale 2', value: 2500 },
-                { label: 'Sale 3', value: 2500 },
-                { label: 'Sale 4', value: 3000 },
-              ],
-            }}
-            targetValue={10000}  // Set your target value here
-          />
-        </Grid>
+        {show && (
+          <Grid xs={12} md={6} lg={4}>
+            <AppCurrentDownload
+              title="Total Sales"
+              chart={{
+                series: [
+                  { label: 'GBP', value: 2500 },
+                  { label: 'AED', value: 2500 },
+                  { label: 'EURO', value: 2500 },
+                  { label: 'INR', value: 3000 },
+                ],
+              }}
+              targetValue={10000}  // Set your target value here
+            />
+          </Grid>
+        )}
 
-        <Grid xs={12} md={6} lg={8}>
-          <AppAreaInstalled
-            title="Sales Graph"
-            subheader="(+43%) than last year"
-            chart={{
-              categories: [
-                'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-              ],
-              series: [
-                {
-                  year: '2023',
-                  data: [
-                    { name: 'AED', data: [10, 41, 35, 51, 49, 62, 69, 91, 148, 35, 51, 49] },
-                    { name: 'GBP', data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 13, 56, 77] },
-                  ],
-                },
-                {
-                  year: '2024',
-                  data: [
-                    { name: 'AED', data: [51, 35, 41, 10, 91, 69, 62, 148, 91, 69, 62, 49] },
-                    { name: 'GBP', data: [56, 13, 34, 10, 77, 99, 88, 45, 77, 99, 88, 77] },
-                  ],
-                },
-                {
-                  year: '2025',
-                  data: [
-                    { name: 'AED', data: [51,] },
-                    { name: 'GBP', data: [56,] },
-                  ],
-                },
-              ],
-            }}
-          />
-        </Grid>
+        {agent && (
+          <Grid xs={12} md={6} lg={4}>
+            <AppCurrentDownload
+              title="Total Sales"
+              chart={{
+                series: [
+                  { label: 'Sale 1', value: 2500 },
+                  { label: 'Sale 2', value: 2500 },
+                  { label: 'Sale 3', value: 2500 },
+                  { label: 'Sale 4', value: 3000 },
+                ],
+              }}
+              targetValue={10000}  // Set your target value here
+            />
+          </Grid>
+        )}
+
+        {show && (
+          <Grid xs={12} md={6} lg={8}>
+            <AppAreaInstalled
+              title="Sales Graph"
+              subheader="(+43%) than last year"
+              chart={{
+                categories: [
+                  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+                ],
+                series: [
+                  {
+                    year: '2023',
+                    data: [
+                      { name: 'AED', data: [10, 41, 35, 51, 49, 62, 69, 91, 148, 35, 51, 49] },
+                      { name: 'GBP', data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 13, 56, 77] },
+                    ],
+                  },
+                  {
+                    year: '2024',
+                    data: [
+                      { name: 'AED', data: [51, 35, 41, 10, 91, 69, 62, 148, 91, 69, 62, 49] },
+                      { name: 'GBP', data: [56, 13, 34, 10, 77, 99, 88, 45, 77, 99, 88, 77] },
+                    ],
+                  },
+                  {
+                    year: '2025',
+                    data: [
+                      { name: 'AED', data: [51,] },
+                      { name: 'GBP', data: [56,] },
+                    ],
+                  },
+                ],
+              }}
+            />
+          </Grid>
+        )}
 
         {/* <Grid xs={12} md={3}>
           <Card sx={{ bgcolor: alpha(theme.palette.primary.main, 0.2), borderRadius: 2 }}>
@@ -425,19 +465,21 @@ export default function OverviewAppView() {
           </Card>
         </Grid> */}
 
-        <Grid xs={12} lg={8}>
-          <AppNewInvoice
-            title="New Invoice"
-            tableData={_appInvoices}
-            tableLabels={[
-              { id: 'id', label: 'Invoice ID' },
-              { id: 'category', label: 'Category' },
-              { id: 'price', label: 'Price' },
-              { id: 'status', label: 'Status' },
-              { id: '' },
-            ]}
-          />
-        </Grid>
+        {agent && (
+          <Grid xs={12} lg={8}>
+            <AppNewInvoice
+              title="New Invoice"
+              tableData={_appInvoices}
+              tableLabels={[
+                { id: 'id', label: 'Invoice ID' },
+                { id: 'category', label: 'Category' },
+                { id: 'price', label: 'Price' },
+                { id: 'status', label: 'Status' },
+                { id: '' },
+              ]}
+            />
+          </Grid>
+        )}
 
         <Grid xs={12} md={6} lg={4}>
           <AppTopRelated title="Top Users" list={topUsers} />

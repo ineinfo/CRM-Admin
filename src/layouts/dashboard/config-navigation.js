@@ -58,7 +58,7 @@ export function useNavData() {
 
   const fetchRoles = (data) => {
     const userRole = data.find(role => role.id === user.role_id);
-    if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
+    if (userRole && userRole.role_name === 'Super Admin') {
       setShow(true);
     }
   };
@@ -89,7 +89,7 @@ export function useNavData() {
         {
           subheader: t('management'),
           items: [
-            {
+            show && {
               title: t('Admin Centre'),
               icon: ICONS.label,
               path: [
@@ -205,10 +205,10 @@ export function useNavData() {
             //   path: [paths.dashboard.menu],
             //   icon: ICONS.propertylogo,
             // },
-          ],
+          ].filter(Boolean), // Filter out false values
         },
       ],
-    [t]
+    [t, show]
   );
 
   return data;

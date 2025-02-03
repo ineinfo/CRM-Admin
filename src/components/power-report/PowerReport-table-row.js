@@ -28,6 +28,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
     const [matchedData, setMatchedData] = useState([]);
     const [selectedData, setSelectedData] = useState([]);
     const [show, setShow] = useState(false);
+    const [agent, setAgent] = useState(false);
     const { products: roles } = UsegetRoles();
     const confirm = useBoolean();
     const confirmArchive = useBoolean();
@@ -40,6 +41,10 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         // if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
         if (userRole && userRole.role_name === 'Super Admin') {
             setShow(true);
+        }
+
+        if (userRole.role_name === 'Colleagues and Agents') {
+            setAgent(true);
         }
     };
 
@@ -157,7 +162,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
                     </Button>
                 </TableCell>
 
-                {show && (
+                {show || agent && (
                     <TableCell sx={{ whiteSpace: 'nowrap' }}>
                         <Button variant="outlined" color="inherit" onClick={() => { handleDetail(id, token) }}>
                             Detail

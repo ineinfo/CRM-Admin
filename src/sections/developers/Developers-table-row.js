@@ -47,6 +47,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
   const { user } = useAuthContext()
   const [show, setShow] = useState(false);
+  const [agent, setAgent] = useState(false);
   const { products: roles } = UsegetRoles();
 
   const fetchRoles = (data) => {
@@ -54,6 +55,9 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
     // if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
     if (userRole && userRole.role_name === 'Super Admin') {
       setShow(true);
+    }
+    if (userRole.role_name === 'Colleagues and Agents') {
+      setAgent(true);
     }
   };
 
@@ -130,18 +134,24 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           </div>
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{email}</TableCell>
-        {show ? (
+        {show || agent ? (
           <TableCell sx={{ whiteSpace: 'nowrap' }}>
             <Button variant="contained" color="secondary" onClick={handleModalOpen}>
               <Iconify icon="eva:download-fill" />
             </Button>
           </TableCell>
+
         ) : ''}
-        <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
-          <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
-            <Iconify icon="eva:more-vertical-fill" />
-          </IconButton>
-        </TableCell>
+
+        {show || agent ? (
+          <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
+            <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
+              <Iconify icon="eva:more-vertical-fill" />
+            </IconButton>
+          </TableCell>
+
+        ) : ''}
+
       </TableRow>
       <CustomPopover
         open={popover.open}

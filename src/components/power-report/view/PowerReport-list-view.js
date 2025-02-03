@@ -101,6 +101,8 @@ const defaultFilters = {
 export default function PowerReportListView() {
     const { enqueueSnackbar } = useSnackbar();
     const table = useTable();
+    const [agent, setAgent] = useState(false);
+
     const [show, setShow] = useState(false);
     const { products: roles } = UsegetRoles();
 
@@ -110,6 +112,10 @@ export default function PowerReportListView() {
         // if (userRole && userRole.role_name === 'Super Admin' || userRole.role_name === 'Colleagues and Agents') {
         if (userRole && userRole.role_name === 'Super Admin') {
             setShow(true);
+        }
+
+        if (userRole.role_name === 'Colleagues and Agents') {
+            setAgent(true);
         }
     };
 
@@ -373,7 +379,7 @@ export default function PowerReportListView() {
                                 <TableHeadCustom
                                     order={table.order}
                                     orderBy={table.orderBy}
-                                    headLabel={show ? TABLE_HEAD : TABLE_HEAD_Custom}
+                                    headLabel={show || agent ? TABLE_HEAD : TABLE_HEAD_Custom}
                                     rowCount={dataFiltered.length}
                                     numSelected={table.selected.length}
                                     onSort={table.onSort}
